@@ -28,6 +28,7 @@ export interface ScanHistoryItem {
   brand: string;
   imageUrl?: string;
   scanDate: string;
+  categories?: string;
 }
 
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';

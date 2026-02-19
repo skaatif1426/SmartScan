@@ -33,8 +33,9 @@ export default function ProductDetailsClient({ product: productData }: { product
             productName: product.product_name,
             brand: product.brands,
             imageUrl: product.image_front_url,
+            categories: product.categories,
         });
-    }, [addScanToHistory, product.product_name, product.brands, product.image_front_url, productData.code]);
+    }, [addScanToHistory, product.product_name, product.brands, product.image_front_url, productData.code, product.categories]);
     
     const isVeg = !product.ingredients_text_with_allergens?.toLowerCase().includes('beef') && !product.ingredients_text_with_allergens?.toLowerCase().includes('chicken'); // Simple check
     const matchesDiet = (settings.isVeg && isVeg) || (settings.isNonVeg && !isVeg) || (!settings.isVeg && !settings.isNonVeg);

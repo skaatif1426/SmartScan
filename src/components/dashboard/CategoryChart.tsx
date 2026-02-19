@@ -7,14 +7,13 @@ import { ScanHistoryItem } from '@/lib/types';
 
 export default function CategoryChart({ history }: { history: ScanHistoryItem[] }) {
   const chartData = useMemo(() => {
-    // This part is a placeholder as categories are not fetched from API in this version.
-    // A real implementation would parse the 'categories' string from the product data.
     const categoryCounts: { [key: string]: number } = {};
-    const mockCategories = ['Snacks', 'Beverages', 'Dairy', 'Bakery', 'Sauces'];
     
-    history.forEach((_, index) => {
-        const category = mockCategories[index % mockCategories.length];
-        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+    history.forEach((item) => {
+        const categories = item.categories?.split(',').map(c => c.trim()).filter(Boolean);
+        // Use the first category as the primary one, or 'Uncategorized' as a fallback.
+        const primaryCategory = categories?.[0] || 'Uncategorized';
+        categoryCounts[primaryCategory] = (categoryCounts[primaryCategory] || 0) + 1;
     });
 
     return Object.entries(categoryCounts)
