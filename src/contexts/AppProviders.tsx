@@ -73,10 +73,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
         advancedUiMode: settings.advancedUiMode,
         aiChatEnabled: settings.aiChatEnabled,
         aiInsightsEnabled: settings.aiInsightsEnabled,
+        aiVerbosity: settings.aiVerbosity,
+        healthGoal: settings.healthGoal,
+        dataRetention: settings.dataRetention,
     },
     savePreferences,
     isSettingsLoaded: isLoaded,
-  }), [settings.isVeg, settings.isNonVeg, settings.allergies, settings.advancedUiMode, settings.aiChatEnabled, settings.aiInsightsEnabled, savePreferences, isLoaded]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }), [settings, savePreferences, isLoaded]);
 
   return (
     <LanguageContext.Provider value={languageValue}>

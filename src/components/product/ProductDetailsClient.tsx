@@ -54,7 +54,7 @@ export default function ProductDetailsClient({ product: productData }: { product
     return (
         <div className="p-4 md:p-6 space-y-4">
             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-8 duration-500">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0" aria-label="Go back">
                     <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <h1 className="text-xl font-bold truncate">{product.product_name}</h1>

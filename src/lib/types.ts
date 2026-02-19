@@ -36,6 +36,10 @@ export interface ScanHistoryItem {
 }
 
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
+export type AiVerbosity = 'concise' | 'detailed';
+export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain';
+export type DataRetention = '30d' | '90d' | 'forever';
+
 
 export interface UserSettings {
   language: Language;
@@ -45,6 +49,9 @@ export interface UserSettings {
   advancedUiMode: boolean;
   aiChatEnabled: boolean;
   aiInsightsEnabled: boolean;
+  aiVerbosity: AiVerbosity;
+  healthGoal: HealthGoal;
+  dataRetention: DataRetention;
 }
 
 // New AI Output Schema

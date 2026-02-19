@@ -13,6 +13,9 @@ const defaultSettings: UserSettings = {
   advancedUiMode: false,
   aiChatEnabled: true,
   aiInsightsEnabled: true,
+  aiVerbosity: 'concise',
+  healthGoal: 'general',
+  dataRetention: 'forever',
 };
 
 export function useUserSettings() {

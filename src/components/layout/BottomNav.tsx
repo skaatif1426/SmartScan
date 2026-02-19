@@ -22,17 +22,19 @@ export default function BottomNav() {
       <div className="flex justify-around items-center h-full max-w-lg mx-auto p-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
+          const label = t(item.labelKey);
           return (
             <Link
               key={item.href}
               href={item.href}
+              aria-label={label}
               className={cn(
                 'flex items-center justify-center p-2 rounded-full transition-all duration-300 ease-in-out h-11',
                  isActive ? 'bg-primary text-primary-foreground shadow-lg gap-2 px-3' : 'text-muted-foreground w-11 hover:bg-muted/50'
               )}
             >
               <item.icon className="h-5 w-5 shrink-0" />
-              {isActive && <span className="text-sm font-medium whitespace-nowrap">{t(item.labelKey)}</span>}
+              {isActive && <span className="text-sm font-medium whitespace-nowrap" aria-hidden="true">{label}</span>}
             </Link>
           );
         })}
