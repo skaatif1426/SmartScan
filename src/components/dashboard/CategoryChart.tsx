@@ -1,11 +1,13 @@
 'use client';
 
 import { useMemo } from 'react';
-import { Bar, BarChart, XAxis, YAxis, Tooltip } from 'recharts';
+import { Bar, BarChart, XAxis, YAxis, Tooltip, LabelList } from 'recharts';
 import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
 import { ScanHistoryItem } from '@/lib/types';
+import { useSettings } from '@/contexts/SettingsContext';
 
 export default function CategoryChart({ history }: { history: ScanHistoryItem[] }) {
+  const { t } = useSettings();
   const chartData = useMemo(() => {
     const categoryCounts: { [key: string]: number } = {};
     
@@ -27,25 +29,36 @@ export default function CategoryChart({ history }: { history: ScanHistoryItem[] 
       return <p className="text-muted-foreground text-center py-8">Scan items to see category data.</p>;
   }
 
+  const chartConfig = {
+    count: {
+      label: t('totalScans'),
+      color: 'hsl(var(--primary))',
+    },
+  };
+
   return (
-    <ChartContainer config={{
-        count: {
-            label: 'Scans',
-            color: 'hsl(var(--primary))',
-        },
-    }} className="min-h-[200px] w-full">
-      <BarChart accessibilityLayer data={chartData} layout="vertical" margin={{ left: 10, right: 10 }}>
+    <ChartContainer config={chartConfig} className="min-h-[250px] w-full">
+      <BarChart 
+        accessibilityLayer 
+        data={chartData} 
+        layout="vertical" 
+        margin={{ left: 0, right: 40, top: 10, bottom: 10 }}
+      >
         <XAxis type="number" hide />
         <YAxis 
             dataKey="name" 
             type="category" 
             tickLine={false} 
             axisLine={false} 
-            tickMargin={10}
-            width={120}
+            tickMargin={8}
+            width={130}
+            tick={{ fill: 'hsl(var(--muted-foreground))', fontSize: 12 }}
+            tickFormatter={(value) => value.length > 18 ? `${value.substring(0, 18)}...` : value}
             />
-        <Tooltip cursor={false} content={<ChartTooltipContent />} />
-        <Bar dataKey="count" fill="var(--color-count)" radius={4} />
+        <Tooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+        <Bar dataKey="count" layout="vertical" fill="var(--color-count)" radius={8} background={{ fill: 'hsl(var(--muted))', radius: 8 }}>
+            <LabelList dataKey="count" position="right" offset={8} className="fill-foreground font-semibold" fontSize={14} />
+        </Bar>
       </BarChart>
     </ChartContainer>
   );
