@@ -2,7 +2,8 @@
 
 import { useEffect } from 'react';
 import Image from 'next/image';
-import { Utensils, Wheat, Beef, Sparkles, MessageCircle, Info, Hash } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Utensils, Wheat, Beef, Sparkles, MessageCircle, Info, Hash, ChevronLeft } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,6 +12,7 @@ import { useScanHistory } from '@/hooks/useScanHistory';
 import NutritionInsight from './NutritionInsight';
 import ProductChatbot from './ProductChatbot';
 import { useSettings } from '@/contexts/SettingsContext';
+import { Button } from '@/components/ui/button';
 
 const NutritionValue = ({ label, value, unit }: { label: string; value?: number; unit: string }) => {
     if (value === undefined || value === null) return null;
@@ -23,6 +25,7 @@ const NutritionValue = ({ label, value, unit }: { label: string; value?: number;
 };
 
 export default function ProductDetailsClient({ product: productData }: { product: Product }) {
+    const router = useRouter();
     const { addScanToHistory } = useScanHistory();
     const { product } = productData;
     const { settings } = useSettings();
@@ -43,6 +46,13 @@ export default function ProductDetailsClient({ product: productData }: { product
 
     return (
         <div className="p-4 md:p-6 space-y-4">
+            <div className="flex items-center gap-2">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0">
+                    <ChevronLeft className="h-6 w-6" />
+                </Button>
+                <h1 className="text-xl font-bold truncate">{product.product_name}</h1>
+            </div>
+
             <Card>
                 <CardHeader className="p-0 relative h-64">
                     <Image
@@ -54,8 +64,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     />
                 </CardHeader>
                 <CardContent className="pt-6">
-                    <h1 className="text-2xl font-bold">{product.product_name}</h1>
-                    <p className="text-muted-foreground">{product.brands}</p>
+                    <p className="text-muted-foreground text-lg">{product.brands}</p>
                     <div className="flex flex-wrap gap-2 mt-2">
                         {product.nutriscore_grade && <Badge variant="outline">Nutri-Score: {product.nutriscore_grade.toUpperCase()}</Badge>}
                         {product.nova_group && <Badge variant="outline">NOVA: {product.nova_group}</Badge>}
