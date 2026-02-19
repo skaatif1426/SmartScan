@@ -1,3 +1,28 @@
 {
-  "placeholderImages": []
+  "placeholderImages": [
+    {
+      "id": "achievement-1",
+      "description": "First Scan Bronze Trophy",
+      "imageUrl": "https://images.unsplash.com/photo-1640532125447-5f0c4fb69ebb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw5fHxicm9uemUlMjB0cm9waHl8ZW58MHx8fHwxNzcxNDk2NzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "bronze trophy"
+    },
+    {
+      "id": "achievement-10",
+      "description": "10 Scans Silver Trophy",
+      "imageUrl": "https://images.unsplash.com/photo-1580831800257-f83135932664?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw4fHxzaWx2ZXIlMjB0cm9waHl8ZW58MHx8fHwxNzcxNDk2NzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "silver trophy"
+    },
+    {
+      "id": "achievement-50",
+      "description": "50 Scans Gold Trophy",
+      "imageUrl": "https://images.unsplash.com/photo-1578269174936-2709b6aeb913?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHwxfHxnb2xkJTIwdHJvcGh5fGVufDB8fHx8MTc3MTQzNTgxMXww&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "gold trophy"
+    },
+    {
+      "id": "achievement-streak-3",
+      "description": "3-Day Scan Streak Flame",
+      "imageUrl": "https://images.unsplash.com/photo-1768609956976-bbeb04a4042e?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3NDE5ODJ8MHwxfHNlYXJjaHw0fHxmbGFtZSUyMGljb258ZW58MHx8fHwxNzcxNDk2NzUzfDA&ixlib=rb-4.1.0&q=80&w=1080",
+      "imageHint": "flame icon"
+    }
+  ]
 }
