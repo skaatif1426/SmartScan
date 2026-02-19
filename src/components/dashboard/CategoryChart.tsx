@@ -42,7 +42,7 @@ export default function CategoryChart({ history }: { history: ScanHistoryItem[] 
             tickLine={false} 
             axisLine={false} 
             tickMargin={10}
-            width={80}
+            width={120}
             />
         <Tooltip cursor={false} content={<ChartTooltipContent />} />
         <Bar dataKey="count" fill="var(--color-count)" radius={4} />

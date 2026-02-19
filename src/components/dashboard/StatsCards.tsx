@@ -49,7 +49,7 @@ export default function StatsCards({ history }: { history: ScanHistoryItem[] }) 
 
     return (
         <div className="grid gap-4 md:grid-cols-2">
-            <Card className="animate-in fade-in slide-in-from-left-4 duration-500 delay-100">
+            <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{t('totalScans')}</CardTitle>
                     <Scan className="h-4 w-4 text-muted-foreground" />
@@ -58,7 +58,7 @@ export default function StatsCards({ history }: { history: ScanHistoryItem[] }) 
                     <div className="text-2xl font-bold">{totalScans}</div>
                 </CardContent>
             </Card>
-            <Card className="animate-in fade-in slide-in-from-right-4 duration-500 delay-100">
+            <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{t('scanStreak')}</CardTitle>
                     <Flame className="h-4 w-4 text-muted-foreground" />
