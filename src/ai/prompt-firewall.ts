@@ -1,4 +1,3 @@
-'use server';
 
 const INJECTION_PHRASES = [
   'ignore the above instructions',
