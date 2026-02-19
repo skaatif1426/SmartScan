@@ -39,10 +39,10 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
                 fps: 10,
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
                     const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-                    const qrboxSize = Math.floor(minEdge * 0.8);
-                    return { width: qrboxSize, height: qrboxSize / 2 };
+                    const qrboxWidth = Math.floor(minEdge * 0.9);
+                    return { width: qrboxWidth, height: qrboxWidth / 2 };
                 },
-                aspectRatio: 1.0,
+                aspectRatio: 16/9,
                 formatsToSupport: [
                     Html5QrcodeSupportedFormats.EAN_13,
                     Html5QrcodeSupportedFormats.EAN_8,
@@ -74,7 +74,7 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
     };
   }, [onScanSuccess, onScanFailure, onCameraPermissionError]);
 
-  return <div id={qrcodeRegionId} className="w-full h-auto aspect-square rounded-2xl overflow-hidden border bg-muted" >
+  return <div id={qrcodeRegionId} className="w-full h-auto aspect-video rounded-2xl overflow-hidden border bg-muted" >
     <Skeleton className="w-full h-full" />
   </div>;
 };

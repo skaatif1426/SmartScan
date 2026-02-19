@@ -13,6 +13,7 @@ import NutritionInsight from './NutritionInsight';
 import ProductChatbot from './ProductChatbot';
 import { useSettings } from '@/contexts/SettingsContext';
 import { Button } from '@/components/ui/button';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 
 const NutritionValue = ({ label, value, unit }: { label: string; value?: number; unit: string }) => {
     if (value === undefined || value === null) return null;
@@ -83,30 +84,36 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
-                    <p className="text-sm text-muted-foreground">per 100g serving</p>
-                </CardHeader>
-                <CardContent>
-                    <NutritionValue label="Energy (kcal)" value={product.nutriments?.['energy-kcal_100g']} unit="kcal" />
-                    <NutritionValue label="Fat" value={product.nutriments?.fat_100g} unit="g" />
-                    <NutritionValue label="Saturated Fat" value={product.nutriments?.['saturated-fat_100g']} unit="g" />
-                    <NutritionValue label="Carbohydrates" value={product.nutriments?.carbohydrates_100g} unit="g" />
-                    <NutritionValue label="Sugars" value={product.nutriments?.sugars_100g} unit="g" />
-                    <NutritionValue label="Proteins" value={product.nutriments?.proteins_100g} unit="g" />
-                    <NutritionValue label="Salt" value={product.nutriments?.salt_100g} unit="g" />
-                </CardContent>
-            </Card>
+            <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="nutrition-facts">
+                <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                    <AccordionItem value="nutrition-facts" className="border-none">
+                        <AccordionTrigger className="p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-6 pt-0 pb-6">
+                             <p className="text-sm text-muted-foreground pb-4">per 100g serving</p>
+                            <NutritionValue label="Energy (kcal)" value={product.nutriments?.['energy-kcal_100g']} unit="kcal" />
+                            <NutritionValue label="Fat" value={product.nutriments?.fat_100g} unit="g" />
+                            <NutritionValue label="Saturated Fat" value={product.nutriments?.['saturated-fat_100g']} unit="g" />
+                            <NutritionValue label="Carbohydrates" value={product.nutriments?.carbohydrates_100g} unit="g" />
+                            <NutritionValue label="Sugars" value={product.nutriments?.sugars_100g} unit="g" />
+                            <NutritionValue label="Proteins" value={product.nutriments?.proteins_100g} unit="g" />
+                            <NutritionValue label="Salt" value={product.nutriments?.salt_100g} unit="g" />
+                        </AccordionContent>
+                    </AccordionItem>
+                </Card>
 
-            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
-                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <p className="text-sm text-muted-foreground">{product.ingredients_text_with_allergens || 'Not available'}</p>
-                </CardContent>
-            </Card>
+                <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                    <AccordionItem value="ingredients" className="border-none">
+                         <AccordionTrigger className="p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-6 pt-0 pb-6">
+                            <p className="text-sm text-muted-foreground">{product.ingredients_text_with_allergens || 'Not available'}</p>
+                        </AccordionContent>
+                    </AccordionItem>
+                </Card>
+            </Accordion>
             
             <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
                 <CardHeader>
