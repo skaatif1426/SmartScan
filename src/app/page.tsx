@@ -75,17 +75,17 @@ export default function ScannerPage() {
       const decodedText = await html5QrCode.scanFile(file, false);
       handleScanSuccess(decodedText);
     } catch (err: unknown) {
-      const errorMessage = typeof err === 'string' ? err : (err as Error)?.message;
+      const isNotFound = (err instanceof Error && err.name === 'NotFoundException') || 
+                         (typeof err === 'string' && (err.includes('NotFoundException') || err.includes('not found')));
       
-      // Only log unexpected errors. "NotFoundException" is expected when no barcode is found.
-      if (errorMessage && !errorMessage.includes('NotFoundException')) {
+      if (!isNotFound) {
         console.error('File Scan Error:', err);
       }
       
       toast({
         variant: 'destructive',
         title: t('scanErrorTitle'),
-        description: (errorMessage && (errorMessage.includes('not found') || errorMessage.includes('NotFoundException'))) ? t('noBarcodeInImage') : t('uploadError'),
+        description: isNotFound ? t('noBarcodeInImage') : t('uploadError'),
       });
     } finally {
       setIsUploading(false);
