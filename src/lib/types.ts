@@ -1,34 +1,38 @@
-export interface Product {
-  code: string;
-  product: {
-    product_name: string;
-    brands: string;
-    image_front_url: string;
-    nutriments: {
-      "energy-kcal_100g"?: number;
-      fat_100g?: number;
-      "saturated-fat_100g"?: number;
-      carbohydrates_100g?: number;
-      sugars_100g?: number;
-      proteins_100g?: number;
-      salt_100g?: number;
-    };
-    ingredients_text_with_allergens: string;
-    nutriscore_grade?: string;
-    nova_group?: number;
-    allergens_tags: string[];
-    categories: string;
-  };
-  status: number;
-}
+import { z } from 'zod';
+
+export const ProductSchema = z.object({
+  code: z.string(),
+  product: z.object({
+    product_name: z.string().default('Unknown Product'),
+    brands: z.string().nullish().default('Unknown Brand'),
+    image_front_url: z.string().url().nullish(),
+    nutriments: z.object({
+      "energy-kcal_100g": z.number().optional(),
+      fat_100g: z.number().optional(),
+      "saturated-fat_100g": z.number().optional(),
+      carbohydrates_100g: z.number().optional(),
+      sugars_100g: z.number().optional(),
+      proteins_100g: z.number().optional(),
+      salt_100g: z.number().optional(),
+    }).passthrough().default({}),
+    ingredients_text_with_allergens: z.string().nullish().default('Not available'),
+    nutriscore_grade: z.string().optional(),
+    nova_group: z.number().optional(),
+    allergens_tags: z.array(z.string()).default([]),
+    categories: z.string().nullish().default(''),
+  }).passthrough(),
+  status: z.number(),
+});
+export type Product = z.infer<typeof ProductSchema>;
+
 
 export interface ScanHistoryItem {
   barcode: string;
   productName: string;
   brand: string;
-  imageUrl?: string;
+  imageUrl?: string | null;
   scanDate: string;
-  categories?: string;
+  categories?: string | null;
 }
 
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';

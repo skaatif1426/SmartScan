@@ -42,9 +42,10 @@ export default function ScannerPage() {
     router.push(`/product/${decodedText}`);
   };
 
-  const handleScanFailure = (error: any) => {
+  const handleScanFailure = (error: unknown) => {
     // Ignore common non-error messages that html5-qrcode throws when no code is found
-    if (typeof error === 'string' && (error.includes('No QR code found') || error.includes('NotFoundException'))) {
+    const errorMessage = typeof error === 'string' ? error : (error as Error)?.message;
+    if (errorMessage && (errorMessage.includes('No QR code found') || errorMessage.includes('NotFoundException'))) {
       return;
     }
     console.error('Scan Error:', error);
@@ -73,12 +74,13 @@ export default function ScannerPage() {
     try {
       const decodedText = await html5QrCode.scanFile(file, false);
       handleScanSuccess(decodedText);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('File Scan Error:', err);
+      const errorMessage = typeof err === 'string' ? err : (err as Error)?.message;
       toast({
         variant: 'destructive',
         title: t('scanErrorTitle'),
-        description: err?.toString().includes('not found') ? t('noBarcodeInImage') : t('uploadError'),
+        description: errorMessage.includes('not found') ? t('noBarcodeInImage') : t('uploadError'),
       });
     } finally {
       setIsUploading(false);

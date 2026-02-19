@@ -1,12 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats, type DecodedTextResult } from 'html5-qrcode';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface QrScannerProps {
-  onScanSuccess: (decodedText: string, decodedResult: any) => void;
-  onScanFailure: (error: any) => void;
+  onScanSuccess: (decodedText: string) => void;
+  onScanFailure: (error: unknown) => void;
   onCameraPermissionError: (error: string) => void;
 }
 
@@ -50,17 +50,18 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
                     Html5QrcodeSupportedFormats.UPC_E,
                 ],
               },
-              onScanSuccess,
+              (decodedText: string, decodedResult: DecodedTextResult) => onScanSuccess(decodedText),
               onScanFailure
             );
         } else {
             onCameraPermissionError('No cameras found.');
         }
-      } catch (err: any) {
-        if (err.name === 'NotAllowedError') {
+      } catch (err: unknown) {
+        const error = err as Error;
+        if (error.name === 'NotAllowedError') {
             onCameraPermissionError('PermissionDenied');
         } else {
-            onCameraPermissionError(err.message || 'Unknown camera error');
+            onCameraPermissionError(error.message || 'Unknown camera error');
         }
       }
     };

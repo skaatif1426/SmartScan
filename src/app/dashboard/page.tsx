@@ -6,28 +6,12 @@ import StatsCards from '@/components/dashboard/StatsCards';
 import Achievements from '@/components/dashboard/Achievements';
 import CategoryChart from '@/components/dashboard/CategoryChart';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useSettings } from '@/contexts/SettingsContext';
 
 export default function DashboardPage() {
-    const { history, isLoaded } = useScanHistory();
+    const { history } = useScanHistory();
     const { t } = useSettings();
 
-    if (!isLoaded) {
-        return (
-            <div className="p-4 md:p-6 space-y-6">
-                <Skeleton className="h-8 w-48 mb-4" />
-                <div className="grid gap-6 md:grid-cols-2">
-                    <Skeleton className="h-28" />
-                    <Skeleton className="h-28" />
-                </div>
-                <div className="space-y-6">
-                    <Skeleton className="h-80" />
-                    <Skeleton className="h-80" />
-                </div>
-            </div>
-        );
-    }
     return (
         <div className="p-4 md:p-6 space-y-6">
             <h1 className="text-3xl font-bold flex items-center gap-2 animate-in fade-in duration-300">

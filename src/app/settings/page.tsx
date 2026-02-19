@@ -12,11 +12,7 @@ import type { Language } from '@/lib/types';
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 
 export default function SettingsPage() {
-  const { settings, saveSettings, t, isSettingsLoaded } = useSettings();
-
-  if (!isSettingsLoaded) {
-    return <div>Loading...</div>; // Or a skeleton loader
-  }
+  const { settings, saveSettings, t } = useSettings();
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);

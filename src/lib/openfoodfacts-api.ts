@@ -1,4 +1,4 @@
-import type { Product } from './types';
+import { Product, ProductSchema } from './types';
 
 const API_URL = 'https://world.openfoodfacts.org/api/v3/product';
 
@@ -10,16 +10,27 @@ export async function fetchProductFromApi(barcode: string): Promise<Product | nu
       throw new Error(`API request failed with status ${response.status}`);
     }
 
-    const data: Product = await response.json();
+    const data: unknown = await response.json();
 
-    if (data.status === 0 || !data.product) {
+    if (!data || typeof data !== 'object' || !('product' in data) || !data.product) {
+        return null;
+    }
+
+    const parsedProduct = ProductSchema.safeParse(data);
+
+    if (!parsedProduct.success) {
+        console.error("Zod validation failed:", parsedProduct.error.flatten());
+        throw new Error('Failed to validate product data from API.');
+    }
+
+    if (parsedProduct.data.status === 0 || !parsedProduct.data.product) {
       return null; // Product not found
     }
 
-    return data;
+    return parsedProduct.data;
   } catch (error) {
     console.error('Error fetching product from OpenFoodFacts:', error);
-    // You might want to re-throw the error or handle it as a specific error type
-    throw new Error('Failed to fetch product data.');
+    // Re-throw the error to be handled by the caller (e.g. Server Action)
+    throw new Error('Failed to fetch or validate product data.');
   }
 }
