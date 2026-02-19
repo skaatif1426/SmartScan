@@ -15,42 +15,46 @@ export default function DashboardPage() {
 
     if (!isLoaded) {
         return (
-            <div className="p-4 md:p-6 space-y-4">
+            <div className="p-4 md:p-6 space-y-6">
                 <Skeleton className="h-8 w-48 mb-4" />
-                <div className="grid gap-4 md:grid-cols-2">
-                    <Skeleton className="h-24" />
-                    <Skeleton className="h-24" />
+                <div className="grid gap-6 md:grid-cols-2">
+                    <Skeleton className="h-28" />
+                    <Skeleton className="h-28" />
                 </div>
-                <Skeleton className="h-64" />
-                <Skeleton className="h-48" />
+                <div className="grid gap-6 lg:grid-cols-5">
+                    <Skeleton className="h-80 lg:col-span-3" />
+                    <Skeleton className="h-80 lg:col-span-2" />
+                </div>
             </div>
         );
     }
     return (
-        <div className="p-4 md:p-6 space-y-4">
+        <div className="p-4 md:p-6 space-y-6">
             <h1 className="text-3xl font-bold flex items-center gap-2">
                 <LayoutGrid className="text-primary" /> {t('dashboardTitle')}
             </h1>
             
             <StatsCards history={history} />
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('scannedCategories')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <CategoryChart history={history} />
-                </CardContent>
-            </Card>
+            <div className="grid gap-6 lg:grid-cols-5">
+                <Card className="lg:col-span-3">
+                    <CardHeader>
+                        <CardTitle>{t('scannedCategories')}</CardTitle>
+                    </CardHeader>
+                    <CardContent className="pl-2">
+                        <CategoryChart history={history} />
+                    </CardContent>
+                </Card>
 
-            <Card>
-                <CardHeader>
-                    <CardTitle>{t('achievements')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Achievements history={history} />
-                </CardContent>
-            </Card>
+                <Card className="lg:col-span-2">
+                    <CardHeader>
+                        <CardTitle>{t('achievements')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Achievements history={history} />
+                    </CardContent>
+                </Card>
+            </div>
         </div>
     );
 }

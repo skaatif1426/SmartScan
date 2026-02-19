@@ -27,7 +27,7 @@ export default function Achievements({ history }: { history: ScanHistoryItem[] }
   }, [history]);
 
   return (
-    <div className="flex flex-wrap gap-4">
+    <div className="flex flex-wrap gap-4 justify-center">
       {allAchievements.map(ach => {
         const isUnlocked = unlockedAchievements.some(unlocked => unlocked.id === ach.id);
         const image = PlaceHolderImages.find(img => img.id === ach.imageId);
@@ -36,10 +36,10 @@ export default function Achievements({ history }: { history: ScanHistoryItem[] }
             <TooltipProvider key={ach.id}>
                 <Tooltip>
                     <TooltipTrigger>
-                        <div className={cn("relative w-20 h-20 rounded-full border-2 flex items-center justify-center transition-all", isUnlocked ? 'border-primary bg-primary/10' : 'border-dashed bg-muted')}>
-                            {image && <Image src={image.imageUrl} alt={ach.name} width={60} height={60} className={cn("rounded-full transition-opacity", isUnlocked ? 'opacity-100' : 'opacity-20 grayscale')}/>}
-                            {!image && <Award className={cn("w-10 h-10", isUnlocked ? 'text-primary' : 'text-muted-foreground')}/>}
-                            {isUnlocked && <CheckCircle className="absolute -bottom-1 -right-1 w-6 h-6 bg-background text-green-500 rounded-full"/>}
+                        <div className={cn("relative w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all", isUnlocked ? 'border-primary bg-primary/10' : 'border-dashed bg-muted')}>
+                            {image && <Image src={image.imageUrl} alt={ach.name} width={48} height={48} className={cn("rounded-full transition-opacity", isUnlocked ? 'opacity-100' : 'opacity-20 grayscale')}/>}
+                            {!image && <Award className={cn("w-8 h-8", isUnlocked ? 'text-primary' : 'text-muted-foreground')}/>}
+                            {isUnlocked && <CheckCircle className="absolute -bottom-1 -right-1 w-5 h-5 bg-background text-green-500 rounded-full"/>}
                         </div>
                     </TooltipTrigger>
                     <TooltipContent>
