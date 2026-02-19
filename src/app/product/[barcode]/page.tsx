@@ -5,7 +5,8 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import ProductDetailsClient from '@/components/product/ProductDetailsClient';
 
 export default async function ProductPage({ params }: { params: { barcode: string } }) {
-  const productData = await getProduct(params.barcode);
+  const { barcode } = params;
+  const productData = await getProduct(barcode);
 
   if (!productData) {
     return (
@@ -19,7 +20,7 @@ export default async function ProductPage({ params }: { params: { barcode: strin
               <AlertCircle className="h-4 w-4" />
               <AlertTitle>Product Not Found</AlertTitle>
               <AlertDescription>
-                We couldn&apos;t find any product with barcode: {params.barcode}. It might be incorrect or not in our database.
+                We couldn&apos;t find any product with barcode: {barcode}. It might be incorrect or not in our database.
               </AlertDescription>
             </Alert>
           </CardContent>
