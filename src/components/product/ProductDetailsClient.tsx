@@ -60,7 +60,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                         src={product.image_front_url || 'https://picsum.photos/seed/product/600/400'}
                         alt={product.product_name}
                         fill
-                        className="object-contain rounded-t-lg"
+                        className="object-contain rounded-t-lg bg-white"
                         data-ai-hint="product image"
                     />
                 </CardHeader>
@@ -80,7 +80,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Nutrition AI Insight</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <NutritionInsight product={product} />
+                    <NutritionInsight product={product} barcode={productData.code} />
                 </CardContent>
             </Card>
 

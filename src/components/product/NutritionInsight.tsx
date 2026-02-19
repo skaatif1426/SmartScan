@@ -3,18 +3,51 @@
 import { useState, useEffect } from 'react';
 import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import type { Product } from '@/lib/types';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Label } from '@/components/ui/label';
+import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
 import { useSettings } from '@/contexts/SettingsContext';
 
-export default function NutritionInsight({ product }: { product: Product['product'] }) {
-  const [insight, setInsight] = useState<string | null>(null);
+const CACHE_KEY = 'nutriscan-ai-cache';
+const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+
+interface CacheItem {
+  timestamp: number;
+  data: NutritionInsightOutput;
+}
+
+function getCacheKey(barcode: string, language: string, preferences: Partial<UserSettings>): string {
+    const prefsString = `${preferences.isVeg}-${preferences.isNonVeg}-${preferences.allergies?.join(',')}`;
+    return `${barcode}-${language}-${prefsString}`;
+}
+
+export default function NutritionInsight({ product, barcode }: { product: Product['product'], barcode: string }) {
+  const [insight, setInsight] = useState<NutritionInsightOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { t } = useSettings();
+  const { settings, t } = useSettings();
 
   useEffect(() => {
     const fetchInsight = async () => {
       setIsLoading(true);
+
+      const cacheKey = getCacheKey(barcode, settings.language, { isVeg: settings.isVeg, isNonVeg: settings.isNonVeg, allergies: settings.allergies });
+      try {
+        const cached = localStorage.getItem(CACHE_KEY);
+        if (cached) {
+            const cache: { [key: string]: CacheItem } = JSON.parse(cached);
+            const item = cache[cacheKey];
+            if (item && (Date.now() - item.timestamp < CACHE_TTL)) {
+                setInsight(item.data);
+                setIsLoading(false);
+                return;
+            }
+        }
+      } catch (e) {
+          console.warn("Failed to read AI cache", e);
+      }
+
       const insightData = {
         productName: product.product_name,
         ingredientsText: product.ingredients_text_with_allergens,
@@ -32,25 +65,76 @@ export default function NutritionInsight({ product }: { product: Product['produc
         },
       };
       const result = await getAINutritionInsight(insightData);
-      setInsight(result);
+      
+      if (result) {
+        setInsight(result);
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            const cache = cached ? JSON.parse(cached) : {};
+            cache[cacheKey] = { timestamp: Date.now(), data: result };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        } catch (e) {
+            console.warn("Failed to write to AI cache", e);
+        }
+      }
+      
       setIsLoading(false);
     };
 
     fetchInsight();
-  }, [product]);
+  }, [product, barcode, settings]);
 
   if (isLoading) {
-    return <div className='space-y-2'>
+    return <div className='space-y-4'>
+        <Skeleton className="h-4 w-1/3 mb-1" />
+        <Skeleton className="h-2 w-full" />
+        <Skeleton className="h-4 w-1/4 mt-3" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-3/4" />
     </div>;
   }
 
+  if (!insight) {
+    return (
+        <Alert variant="destructive">
+            <AlertTitle>Error</AlertTitle>
+            <AlertDescription>
+                {t('generatingInsightError')}
+            </AlertDescription>
+        </Alert>
+    );
+  }
+
+  const getHealthScoreColor = (score: number) => {
+    if (score >= 75) return 'bg-green-500';
+    if (score >= 50) return 'bg-yellow-500';
+    return 'bg-red-500';
+  };
+
   return (
-    <Alert className="bg-primary/10 border-primary/20">
-      <AlertDescription className="text-primary-foreground font-medium text-primary">
-        {insight || t('generatingInsight')}
-      </AlertDescription>
-    </Alert>
+    <div className="space-y-4">
+        <div>
+            <Label className="text-sm font-medium">Health Score: {insight.healthScore}/100</Label>
+            <Progress value={insight.healthScore} className="h-2" indicatorClassName={getHealthScoreColor(insight.healthScore)} />
+        </div>
+        <div>
+             <Label className="text-sm font-medium">Summary</Label>
+             <p className="text-sm text-muted-foreground">{insight.summary}</p>
+        </div>
+        <div>
+            <Label className="text-sm font-medium">Recommendation</Label>
+            <p className="text-sm text-muted-foreground">{insight.recommendation}</p>
+        </div>
+        {insight.risks.length > 0 && (
+            <div>
+                 <Label className="text-sm font-medium">Potential Risks</Label>
+                 <div className="flex flex-wrap gap-2 mt-1">
+                    {insight.risks.map((risk, i) => (
+                        <Badge key={i} variant="destructive">{risk}</Badge>
+                    ))}
+                 </div>
+            </div>
+        )}
+    </div>
   );
 }

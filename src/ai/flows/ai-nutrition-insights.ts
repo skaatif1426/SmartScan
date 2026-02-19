@@ -2,13 +2,14 @@
 /**
  * @fileOverview This file implements a Genkit flow for generating AI-powered nutrition insights.
  *
- * - generateNutritionInsights - A function that generates a concise nutrition insight for a given product.
+ * - generateNutritionInsights - A function that generates a structured nutrition insight for a given product.
  * - NutritionInsightInput - The input type for the generateNutritionInsights function.
  * - NutritionInsightOutput - The return type for the generateNutritionInsights function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
+import { NutritionInsightOutput, NutritionInsightOutputSchema } from '@/lib/types';
 
 const NutritionFactsSchema = z.object({
   energy_kcal_100g: z.number().optional().describe('Energy in kcal per 100g.'),
@@ -29,11 +30,6 @@ const NutritionInsightInputSchema = z.object({
   nutritionFacts: NutritionFactsSchema.optional().describe('Detailed nutritional values per 100g.'),
 });
 export type NutritionInsightInput = z.infer<typeof NutritionInsightInputSchema>;
-
-const NutritionInsightOutputSchema = z.object({
-  insight: z.string().describe('A concise (1-2 lines), simple, non-medical nutrition insight with warnings.'),
-});
-export type NutritionInsightOutput = z.infer<typeof NutritionInsightOutputSchema>;
 
 // Tool for checking nutrition warnings based on thresholds
 const checkNutritionWarnings = ai.defineTool(
@@ -71,15 +67,15 @@ const checkNutritionWarnings = ai.defineTool(
     }
 
     if (input.allergens && input.allergens.length > 0) {
-      warnings.push(`Contains common allergens: ${input.allergens.join(', ')}`);
+      warnings.push(`Contains allergens: ${input.allergens.join(', ')}`);
     }
 
     if (input.nutriscoreGrade && ['D', 'E'].includes(input.nutriscoreGrade.toUpperCase())) {
-      warnings.push(`Nutri-score grade ${input.nutriscoreGrade} suggests it's not the healthiest choice.`);
+      warnings.push(`Poor Nutri-score: ${input.nutriscoreGrade}`);
     }
-
+    
     if (input.novaGroup !== undefined && input.novaGroup >= 3) {
-      warnings.push('Highly processed food (NOVA group 3 or 4).');
+      warnings.push(input.novaGroup === 4 ? 'Ultra-processed food (NOVA 4)' : 'Processed food (NOVA 3)');
     }
 
     return { warnings };
@@ -91,24 +87,26 @@ const nutritionInsightPrompt = ai.definePrompt({
   input: { schema: NutritionInsightInputSchema },
   output: { schema: NutritionInsightOutputSchema },
   tools: [checkNutritionWarnings],
-  prompt: `You are an AI nutrition assistant. Provide a concise (1-2 lines), simple, and non-medical nutrition insight for the product. Highlight key nutritional aspects and use the 'checkNutritionWarnings' tool to identify and incorporate any relevant warnings.
+  prompt: `You are an expert AI nutrition analyst. Your task is to provide a structured, non-medical nutritional analysis of the provided food product.
 
-Product Name: {{{productName}}}
-Ingredients: {{{ingredientsText}}}
-Nutri-score: {{{nutriscoreGrade}}}
-NOVA Group: {{{novaGroup}}}
-Allergens: {{{allergens}}}
-Nutrition Facts (per 100g):
-Energy: {{{nutritionFacts.energy_kcal_100g}}} kcal
-Fat: {{{nutritionFacts.fat_100g}}}g
-Saturated Fat: {{{nutritionFacts.saturated_fat_100g}}}g
-Carbohydrates: {{{nutritionFacts.carbohydrates_100g}}}g
-Sugars: {{{nutritionFacts.sugars_100g}}}g
-Proteins: {{{nutritionFacts.proteins_100g}}}g
-Salt: {{{nutritionFacts.salt_100g}}}g
+Analyze all the information below. Use the 'checkNutritionWarnings' tool to identify potential health risks. Based on your full analysis, generate a health score from 0-100, where 100 is exceptionally healthy.
 
-Use the provided product information to generate a helpful and brief insight. If the 'checkNutritionWarnings' tool suggests warnings, include them naturally in your response.
+Then, you MUST provide the output in the requested JSON format containing: 'summary', 'healthScore', 'risks', and 'recommendation'.
 
+Product Information:
+- Name: {{{productName}}}
+- Ingredients: {{{ingredientsText}}}
+- Nutri-score: {{{nutriscoreGrade}}}
+- NOVA Group: {{{novaGroup}}}
+- Allergens: {{{allergens}}}
+- Nutrition Facts (per 100g):
+  - Energy: {{{nutritionFacts.energy_kcal_100g}}} kcal
+  - Fat: {{{nutritionFacts.fat_100g}}}g
+  - Saturated Fat: {{{nutritionFacts.saturated_fat_100g}}}g
+  - Carbohydrates: {{{nutritionFacts.carbohydrates_100g}}}g
+  - Sugars: {{{nutritionFacts.sugars_100g}}}g
+  - Proteins: {{{nutritionFacts.proteins_100g}}}g
+  - Salt: {{{nutritionFacts.salt_100g}}}g
 `,
 });
 
@@ -120,7 +118,10 @@ const generateNutritionInsightsFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await nutritionInsightPrompt(input);
-    return output!;
+    if (!output) {
+        throw new Error('AI failed to generate a structured response.');
+    }
+    return output;
   }
 );
 

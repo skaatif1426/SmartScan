@@ -94,7 +94,7 @@ export const translations: Translations = {
   cameraPermissionErrorDescription: {
     English: 'To scan barcodes, please allow camera access in your browser settings.',
     Hindi: 'बारकोड स्कैन करने के लिए, कृपया अपने ब्राउज़र सेटिंग्स में कैमरा एक्सेस की अनुमति दें।',
-    Marathi: 'बारकोड स्कॅन करण्यासाठी, कृपया तुमच्या ब्राउझर सेटिंग्जमध्ये कॅमेरा प्रवेशास अनुमती द्या.',
+    Marathi: 'बारकोड स्कॅन करण्यासाठी, कृपया तुमच्या ब्राउझर सेटिंग्जमध्ये कॅमेरा प्रवेशास अनुमती द्या।',
     Hinglish: 'Scan karne ke liye, browser settings me camera access allow karo.',
   },
   retry: {
@@ -151,6 +151,12 @@ export const translations: Translations = {
     Hindi: 'अंतर्दृष्टि उत्पन्न हो रही है...',
     Marathi: 'अंतर्दृष्टी तयार होत आहे...',
     Hinglish: 'Insight generate ho raha hai...',
+  },
+  generatingInsightError: {
+    English: 'Could not generate AI insight. Please try again later.',
+    Hindi: 'AI अंतर्दृष्टि उत्पन्न नहीं हो सकी। कृपया बाद में पुनः प्रयास करें।',
+    Marathi: 'AI अंतर्दृष्टी तयार करता आली नाही. कृपया नंतर पुन्हा प्रयत्न करा.',
+    Hinglish: 'AI insight generate nahi ho saka. Please try again later.',
   },
   nutritionFacts: {
     English: 'Nutrition Facts',

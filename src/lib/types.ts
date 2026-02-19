@@ -44,3 +44,12 @@ export interface UserSettings {
   allergies: string[];
   advancedUiMode: boolean; // For the "J9s"-like feature
 }
+
+// New AI Output Schema
+export const NutritionInsightOutputSchema = z.object({
+  summary: z.string().describe("A one-line, easy-to-understand summary of the product's nutritional profile."),
+  healthScore: z.number().min(0).max(100).describe('An overall health score from 0 (unhealthy) to 100 (very healthy), based on all available data.'),
+  risks: z.array(z.string()).describe('A list of potential health risks or warnings (e.g., "High in sugar", "Contains allergens").'),
+  recommendation: z.string().describe('A short recommendation for consumption (e.g., "Good for a quick snack", "Enjoy in moderation").')
+});
+export type NutritionInsightOutput = z.infer<typeof NutritionInsightOutputSchema>;

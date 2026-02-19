@@ -19,6 +19,7 @@ export default function ProductChatbot({ productData }: { productData: string })
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [isDebouncing, setIsDebouncing] = useState(false);
   const { settings, t } = useSettings();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -30,7 +31,10 @@ export default function ProductChatbot({ productData }: { productData: string })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading) return;
+    if (!input.trim() || isLoading || isDebouncing) return;
+
+    setIsDebouncing(true);
+    setTimeout(() => setIsDebouncing(false), 3000);
 
     const userMessage: Message = { sender: 'user', text: input };
     setMessages((prev) => [...prev, userMessage]);
@@ -98,7 +102,7 @@ export default function ProductChatbot({ productData }: { productData: string })
           placeholder={t('chatbotPlaceholder')}
           disabled={isLoading}
         />
-        <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
+        <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isDebouncing}>
           <Send className="h-4 w-4" />
         </Button>
       </form>
