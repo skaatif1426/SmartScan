@@ -40,8 +40,8 @@ export default function ScannerPage() {
   };
 
   const handleScanFailure = (error: any) => {
-    // Ignore common non-error messages
-    if (typeof error === 'string' && error.includes('No QR code found')) {
+    // Ignore common non-error messages that html5-qrcode throws when no code is found
+    if (typeof error === 'string' && (error.includes('No QR code found') || error.includes('NotFoundException'))) {
       return;
     }
     console.error('Scan Error:', error);
