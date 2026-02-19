@@ -7,7 +7,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
 import { CameraOff, ScanLine, FileImage, Loader2 } from 'lucide-react';
-import { Html5Qrcode, type DecodedTextResult } from 'html5-qrcode';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +16,9 @@ import { CameraPermissionGuide } from '@/components/scanner/CameraPermissionGuid
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/AppProviders';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useAnalytics } from '@/hooks/useAnalytics';
+import { Html5Qrcode } from 'html5-qrcode';
+
 
 const QrScanner = dynamic(() => import('@/components/scanner/QrScanner'), {
   loading: () => <Skeleton className="w-full h-auto aspect-video rounded-2xl" />,
@@ -34,6 +36,7 @@ export default function ScannerPage() {
   const [cameraError, setCameraError] = useState<Error | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const { t } = useLanguage();
+  const { trackError } = useAnalytics();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -53,10 +56,12 @@ export default function ScannerPage() {
         // This is expected when no barcode is in the frame, so we can ignore it.
         return;
     }
+    trackError();
     console.error('Scan Error:', error);
   };
   
   const handleCameraPermission = (error: Error) => {
+    trackError();
     setCameraError(error);
     setShowScanner(false);
   }
@@ -75,6 +80,7 @@ export default function ScannerPage() {
       const decodedText = await html5QrCode.scanFile(file, false);
       handleScanSuccess(decodedText);
     } catch (err: unknown) {
+      trackError();
       const isNotFound = err instanceof Error && err.name === 'NotFoundException';
       
       if (!isNotFound) {

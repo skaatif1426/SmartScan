@@ -42,7 +42,9 @@ export interface UserSettings {
   isVeg: boolean;
   isNonVeg: boolean;
   allergies: string[];
-  advancedUiMode: boolean; // For the "J9s"-like feature
+  advancedUiMode: boolean;
+  aiChatEnabled: boolean;
+  aiInsightsEnabled: boolean;
 }
 
 // New AI Output Schema

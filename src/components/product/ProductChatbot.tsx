@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/AppProviders';
 import { getAIChatResponse } from '@/lib/actions';
 import { useAiUsage } from '@/hooks/useAiUsage';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -22,6 +23,7 @@ export default function ProductChatbot({ productData }: { productData: string })
   const [isLoading, setIsLoading] = useState(false);
   const { language, t } = useLanguage();
   const { incrementAiCallCount } = useAiUsage();
+  const { trackError } = useAnalytics();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,6 +52,7 @@ export default function ProductChatbot({ productData }: { productData: string })
         const botMessage: Message = { sender: 'bot', text: response };
         setMessages((prev) => [...prev, botMessage]);
     } catch (error) {
+        trackError();
         const errorMessage: Message = { sender: 'bot', text: "Sorry, I couldn't get a response. Please try again." };
         setMessages((prev) => [...prev, errorMessage]);
     } finally {

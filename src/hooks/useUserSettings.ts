@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import type { UserSettings, Language } from '@/lib/types';
+import type { UserSettings } from '@/lib/types';
 
 const SETTINGS_KEY = 'nutriscan-settings';
 
@@ -11,6 +11,8 @@ const defaultSettings: UserSettings = {
   isNonVeg: false,
   allergies: [],
   advancedUiMode: false,
+  aiChatEnabled: true,
+  aiInsightsEnabled: true,
 };
 
 export function useUserSettings() {
@@ -21,10 +23,14 @@ export function useUserSettings() {
     try {
       const item = window.localStorage.getItem(SETTINGS_KEY);
       if (item) {
-        setSettings(JSON.parse(item));
+        // Merge with defaults to ensure new settings are present for returning users
+        setSettings({ ...defaultSettings, ...JSON.parse(item) });
+      } else {
+        setSettings(defaultSettings);
       }
     } catch (error) {
       console.warn('Error reading user settings from localStorage', error);
+      setSettings(defaultSettings);
     }
     setIsLoaded(true);
   }, []);

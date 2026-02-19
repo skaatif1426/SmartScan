@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
+import { useAnalytics } from '@/hooks/useAnalytics';
 
 const CACHE_KEY = 'nutriscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -127,6 +128,7 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
   const { language, t } = useLanguage();
   const { preferences } = usePreferences();
   const { incrementAiCallCount } = useAiUsage();
+  const { trackError } = useAnalytics();
 
   const fetchInsight = useCallback(async () => {
     setIsLoading(true);
@@ -185,12 +187,13 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
           throw new Error("AI response was empty.");
       }
     } catch (e) {
+        trackError();
         console.error("AI Insight fetch failed", e);
         setAiError(t('generatingInsightError'));
     } finally {
       setIsLoading(false);
     }
-  }, [product, barcode, language, preferences, t, incrementAiCallCount]);
+  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError]);
 
 
   useEffect(() => {

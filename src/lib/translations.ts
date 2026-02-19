@@ -294,10 +294,10 @@ export const translations: Translations = {
     Hinglish: 'Advanced UI Mode',
   },
   advancedUiModeDescription: {
-    English: 'Show extra details on the dashboard and settings.',
-    Hindi: 'डैशबोर्ड और सेटिंग्स पर अतिरिक्त विवरण दिखाएं।',
-    Marathi: 'डॅशबोर्ड आणि सेटिंग्जवर अतिरिक्त तपशील दर्शवा।',
-    Hinglish: 'Dashboard aur settings pe extra details dikhao.',
+    English: 'Show extra details and analytics.',
+    Hindi: 'अतिरिक्त विवरण और विश्लेषण दिखाएं।',
+    Marathi: 'अतिरिक्त तपशील आणि विश्लेषण दर्शवा।',
+    Hinglish: 'Extra details aur analytics dikhao.',
   },
   aiUsage: {
     English: 'AI Usage',
@@ -306,10 +306,10 @@ export const translations: Translations = {
     Hinglish: 'AI Usage',
   },
   aiApiCalls: {
-    English: 'Total AI API Calls',
-    Hindi: 'कुल एआई एपीआई कॉल्स',
-    Marathi: 'एकूण एआय एपीआय कॉल्स',
-    Hinglish: 'Total AI API Calls',
+    English: 'AI Calls',
+    Hindi: 'एआई कॉल्स',
+    Marathi: 'एआय कॉल्स',
+    Hinglish: 'AI Calls',
   },
   aiUsageDescription: {
     English: 'Tracks the number of calls made to the AI model.',
@@ -322,5 +322,41 @@ export const translations: Translations = {
     Hindi: 'रीसेट',
     Marathi: 'रीसेट',
     Hinglish: 'Reset',
+  },
+  aiChat: {
+    English: 'AI Chat',
+    Hindi: 'एआई चैट',
+    Marathi: 'एआय चॅट',
+    Hinglish: 'AI Chat',
+  },
+  aiInsights: {
+    English: 'AI Insights',
+    Hindi: 'एआई अंतर्दृष्टि',
+    Marathi: 'एआय अंतर्दृष्टी',
+    Hinglish: 'AI Insights',
+  },
+  analytics: {
+    English: 'Analytics',
+    Hindi: 'विश्लेषण',
+    Marathi: 'विश्लेषण',
+    Hinglish: 'Analytics',
+  },
+  analyticsDescription: {
+    English: 'Client-side usage statistics.',
+    Hindi: 'क्लाइंट-साइड उपयोग के आँकड़े।',
+    Marathi: 'क्लाइंट-साइड वापर आकडेवारी.',
+    Hinglish: 'Client-side usage statistics.',
+  },
+  resetErrors: {
+    English: 'Reset Errors',
+    Hindi: 'त्रुटियां रीसेट करें',
+    Marathi: 'त्रुटी रीसेट करा',
+    Hinglish: 'Errors Reset Karo',
+  },
+  errorsTracked: {
+    English: 'Errors',
+    Hindi: 'त्रुटियां',
+    Marathi: 'त्रुटी',
+    Hinglish: 'Errors',
   },
 };

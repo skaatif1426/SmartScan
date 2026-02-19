@@ -11,7 +11,13 @@ export async function getProduct(barcode: string): Promise<Product | null> {
     const product = await fetchProductFromApi(barcode);
     return product;
   } catch (error: unknown) {
-    console.error('Action error: getProduct', error);
+    console.error(JSON.stringify({
+        level: 'error',
+        action: 'getProduct',
+        message: 'Failed to fetch product from API',
+        barcode,
+        error: error instanceof Error ? error.message : String(error),
+    }, null, 2));
     return null;
   }
 }
@@ -21,7 +27,13 @@ export async function getAINutritionInsight(productData: NutritionInsightInput):
     const insight = await generateNutritionInsights(productData);
     return insight;
   } catch (error: unknown) {
-    console.error('Action error: getAINutritionInsight', error);
+    console.error(JSON.stringify({
+        level: 'error',
+        action: 'getAINutritionInsight',
+        message: 'AI insight generation failed',
+        productName: productData.productName,
+        error: error instanceof Error ? error.message : String(error),
+    }, null, 2));
     return null;
   }
 }
@@ -35,7 +47,14 @@ export async function getAIChatResponse(chatData: MultilingualProductChatbotInpu
     const response = await multilingualProductChatbot(sanitizedInput);
     return response.answer;
   } catch (error: unknown) {
-    console.error('Action error: getAIChatResponse', error);
+    console.error(JSON.stringify({
+        level: 'error',
+        action: 'getAIChatResponse',
+        message: 'AI chat response failed',
+        userQuestion: chatData.userQuestion,
+        language: chatData.language,
+        error: error instanceof Error ? error.message : String(error),
+    }, null, 2));
      if (error instanceof Error && error.message.includes('malicious')) {
         return "Your question seems to contain inappropriate content. Please rephrase.";
     }

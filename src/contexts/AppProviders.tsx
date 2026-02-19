@@ -71,10 +71,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
         isNonVeg: settings.isNonVeg,
         allergies: settings.allergies,
         advancedUiMode: settings.advancedUiMode,
+        aiChatEnabled: settings.aiChatEnabled,
+        aiInsightsEnabled: settings.aiInsightsEnabled,
     },
     savePreferences,
     isSettingsLoaded: isLoaded,
-  }), [settings.isVeg, settings.isNonVeg, settings.allergies, settings.advancedUiMode, savePreferences, isLoaded]);
+  }), [settings.isVeg, settings.isNonVeg, settings.allergies, settings.advancedUiMode, settings.aiChatEnabled, settings.aiInsightsEnabled, savePreferences, isLoaded]);
 
   return (
     <LanguageContext.Provider value={languageValue}>

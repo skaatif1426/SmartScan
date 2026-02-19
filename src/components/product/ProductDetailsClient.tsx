@@ -81,14 +81,16 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Nutrition AI Insight</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <NutritionInsight product={product} barcode={productData.code} />
-                </CardContent>
-            </Card>
+            {preferences.aiInsightsEnabled && (
+                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Nutrition AI Insight</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <NutritionInsight product={product} barcode={productData.code} />
+                    </CardContent>
+                </Card>
+            )}
 
             <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="nutrition-facts">
                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
@@ -121,14 +123,16 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </Card>
             </Accordion>
             
-            <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <ProductChatbot productData={JSON.stringify(product, null, 2)} />
-                </CardContent>
-            </Card>
+            {preferences.aiChatEnabled && (
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <ProductChatbot productData={JSON.stringify(product, null, 2)} />
+                    </CardContent>
+                </Card>
+            )}
         </div>
     );
 }
