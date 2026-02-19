@@ -1,12 +1,15 @@
 'use client';
 
-import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
+import { useAiUsage } from '@/hooks/useAiUsage';
 import type { Language } from '@/lib/types';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
@@ -14,6 +17,7 @@ const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 export default function SettingsPage() {
   const { language, setLanguage, t } = useLanguage();
   const { preferences, savePreferences } = usePreferences();
+  const { usage, resetAiCallCount, isLoaded: isAiUsageLoaded } = useAiUsage();
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
@@ -90,7 +94,7 @@ export default function SettingsPage() {
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><Zap /> {t('advancedSettings')}</CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="space-y-6">
             <div className="flex items-center justify-between">
                 <div>
                     <Label htmlFor="advanced-ui-switch">{t('advancedUiMode')}</Label>
@@ -102,6 +106,22 @@ export default function SettingsPage() {
                     onCheckedChange={(checked) => savePreferences({ advancedUiMode: checked })}
                 />
             </div>
+             {preferences.advancedUiMode && (
+                <div className="border-t pt-6">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <Label htmlFor="ai-usage-stats" className="flex items-center gap-2"><BrainCircuit /> {t('aiUsage')}</Label>
+                            <p className="text-sm text-muted-foreground">{t('aiUsageDescription')}</p>
+                        </div>
+                        <Button variant="ghost" size="sm" onClick={resetAiCallCount}>{t('reset')}</Button>
+                    </div>
+                    {isAiUsageLoaded ? (
+                        <div className="mt-2 text-lg font-semibold">{usage.callCount} <span className="text-sm text-muted-foreground font-normal">{t('aiApiCalls')}</span></div>
+                    ) : (
+                        <Skeleton className="h-7 w-32 mt-2" />
+                    )}
+                </div>
+            )}
         </CardContent>
       </Card>
     </div>

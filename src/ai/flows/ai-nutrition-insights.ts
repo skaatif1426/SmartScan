@@ -113,7 +113,7 @@ const checkNutritionAndScore = ai.defineTool(
 );
 
 const nutritionInsightPrompt = ai.definePrompt({
-  name: 'nutritionInsightPrompt',
+  name: 'nutritionInsightPrompt_v1',
   input: { schema: NutritionInsightInputSchema },
   output: { schema: NutritionInsightOutputSchema },
   tools: [checkNutritionAndScore],

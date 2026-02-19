@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { AlertCircle, Sparkles } from 'lucide-react';
 import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,6 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
+import { useAiUsage } from '@/hooks/useAiUsage';
 
 const CACHE_KEY = 'nutriscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -125,73 +126,76 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
   const [aiError, setAiError] = useState<string | null>(null);
   const { language, t } = useLanguage();
   const { preferences } = usePreferences();
+  const { incrementAiCallCount } = useAiUsage();
+
+  const fetchInsight = useCallback(async () => {
+    setIsLoading(true);
+    setAiError(null);
+    
+    const local = calculateLocalAnalysis(product);
+    setLocalAnalysis(local);
+
+    const cacheKey = getCacheKey(barcode, language, preferences);
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (cached) {
+          const cache: { [key: string]: CacheItem } = JSON.parse(cached);
+          const item = cache[cacheKey];
+          if (item && (Date.now() - item.timestamp < CACHE_TTL)) {
+              setAiInsight(item.data);
+              setIsLoading(false);
+              return;
+          }
+      }
+    } catch (e) {
+        console.warn("Failed to read AI cache", e);
+    }
+
+    try {
+      incrementAiCallCount();
+      const insightData = {
+        productName: product.product_name,
+        ingredientsText: product.ingredients_text_with_allergens,
+        nutriscoreGrade: product.nutriscore_grade,
+        novaGroup: product.nova_group,
+        allergens: product.allergens_tags,
+        nutritionFacts: {
+          energy_kcal_100g: product.nutriments?.['energy-kcal_100g'],
+          fat_100g: product.nutriments?.fat_100g,
+          saturated_fat_100g: product.nutriments?.['saturated-fat_100g'],
+          carbohydrates_100g: product.nutriments?.carbohydrates_100g,
+          sugars_100g: product.nutriments?.sugars_100g,
+          proteins_100g: product.nutriments?.proteins_100g,
+          salt_100g: product.nutriments?.salt_100g,
+        },
+      };
+      const result = await getAINutritionInsight(insightData);
+      
+      if (result) {
+        setAiInsight(result);
+        try {
+            const cached = localStorage.getItem(CACHE_KEY);
+            const cache = cached ? JSON.parse(cached) : {};
+            cache[cacheKey] = { timestamp: Date.now(), data: result };
+            localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
+        } catch (e) {
+            console.warn("Failed to write to AI cache", e);
+        }
+      } else {
+          throw new Error("AI response was empty.");
+      }
+    } catch (e) {
+        console.error("AI Insight fetch failed", e);
+        setAiError(t('generatingInsightError'));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [product, barcode, language, preferences, t, incrementAiCallCount]);
+
 
   useEffect(() => {
-    const fetchInsight = async () => {
-      setIsLoading(true);
-      setAiError(null);
-      
-      const local = calculateLocalAnalysis(product);
-      setLocalAnalysis(local);
-
-      const cacheKey = getCacheKey(barcode, language, preferences);
-      try {
-        const cached = localStorage.getItem(CACHE_KEY);
-        if (cached) {
-            const cache: { [key: string]: CacheItem } = JSON.parse(cached);
-            const item = cache[cacheKey];
-            if (item && (Date.now() - item.timestamp < CACHE_TTL)) {
-                setAiInsight(item.data);
-                setIsLoading(false);
-                return;
-            }
-        }
-      } catch (e) {
-          console.warn("Failed to read AI cache", e);
-      }
-
-      try {
-        const insightData = {
-          productName: product.product_name,
-          ingredientsText: product.ingredients_text_with_allergens,
-          nutriscoreGrade: product.nutriscore_grade,
-          novaGroup: product.nova_group,
-          allergens: product.allergens_tags,
-          nutritionFacts: {
-            energy_kcal_100g: product.nutriments?.['energy-kcal_100g'],
-            fat_100g: product.nutriments?.fat_100g,
-            saturated_fat_100g: product.nutriments?.['saturated-fat_100g'],
-            carbohydrates_100g: product.nutriments?.carbohydrates_100g,
-            sugars_100g: product.nutriments?.sugars_100g,
-            proteins_100g: product.nutriments?.proteins_100g,
-            salt_100g: product.nutriments?.salt_100g,
-          },
-        };
-        const result = await getAINutritionInsight(insightData);
-        
-        if (result) {
-          setAiInsight(result);
-          try {
-              const cached = localStorage.getItem(CACHE_KEY);
-              const cache = cached ? JSON.parse(cached) : {};
-              cache[cacheKey] = { timestamp: Date.now(), data: result };
-              localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
-          } catch (e) {
-              console.warn("Failed to write to AI cache", e);
-          }
-        } else {
-            throw new Error("AI response was empty.");
-        }
-      } catch (e) {
-          console.error("AI Insight fetch failed", e);
-          setAiError(t('generatingInsightError'));
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchInsight();
-  }, [product, barcode, language, preferences, t]);
+  }, [fetchInsight]);
 
   // Initial loading state before local analysis
   if (!localAnalysis) {

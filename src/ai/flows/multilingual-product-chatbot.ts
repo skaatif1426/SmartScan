@@ -50,7 +50,7 @@ Your advice should be helpful guidance. If you suggest consulting an expert, do 
 Never give direct medical advice or use phrases like "I am an AI". You're a helpful buddy.`;
 
 const prompt = ai.definePrompt({
-  name: 'multilingualProductChatbotPrompt',
+  name: 'multilingualProductChatbotPrompt_v1',
   input: {schema: MultilingualProductChatbotInputSchema},
   output: {schema: MultilingualProductChatbotOutputSchema},
   prompt: `--- SYSTEM INSTRUCTIONS (LOCKED) ---

@@ -294,9 +294,33 @@ export const translations: Translations = {
     Hinglish: 'Advanced UI Mode',
   },
   advancedUiModeDescription: {
-    English: 'Show extra details on the dashboard.',
-    Hindi: 'डैशबोर्ड पर अतिरिक्त विवरण दिखाएं।',
-    Marathi: 'डॅशबोर्डवर अतिरिक्त तपशील दर्शवा।',
-    Hinglish: 'Dashboard pe extra details dikhao.',
+    English: 'Show extra details on the dashboard and settings.',
+    Hindi: 'डैशबोर्ड और सेटिंग्स पर अतिरिक्त विवरण दिखाएं।',
+    Marathi: 'डॅशबोर्ड आणि सेटिंग्जवर अतिरिक्त तपशील दर्शवा।',
+    Hinglish: 'Dashboard aur settings pe extra details dikhao.',
+  },
+  aiUsage: {
+    English: 'AI Usage',
+    Hindi: 'एआई उपयोग',
+    Marathi: 'एआय वापर',
+    Hinglish: 'AI Usage',
+  },
+  aiApiCalls: {
+    English: 'Total AI API Calls',
+    Hindi: 'कुल एआई एपीआई कॉल्स',
+    Marathi: 'एकूण एआय एपीआय कॉल्स',
+    Hinglish: 'Total AI API Calls',
+  },
+  aiUsageDescription: {
+    English: 'Tracks the number of calls made to the AI model.',
+    Hindi: 'एआई मॉडल पर किए गए कॉल्स की संख्या को ट्रैक करता है।',
+    Marathi: 'एआय मॉडेलवर केलेल्या कॉल्सची संख्या ट्रॅक करते।',
+    Hinglish: 'AI model pe kiye gaye calls ko track karta hai.',
+  },
+  reset: {
+    English: 'Reset',
+    Hindi: 'रीसेट',
+    Marathi: 'रीसेट',
+    Hinglish: 'Reset',
   },
 };

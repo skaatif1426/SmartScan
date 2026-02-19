@@ -8,6 +8,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useLanguage } from '@/contexts/AppProviders';
 import { getAIChatResponse } from '@/lib/actions';
+import { useAiUsage } from '@/hooks/useAiUsage';
 import { cn } from '@/lib/utils';
 
 interface Message {
@@ -20,6 +21,7 @@ export default function ProductChatbot({ productData }: { productData: string })
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { language, t } = useLanguage();
+  const { incrementAiCallCount } = useAiUsage();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -38,6 +40,7 @@ export default function ProductChatbot({ productData }: { productData: string })
     setIsLoading(true);
 
     try {
+        incrementAiCallCount();
         const response = await getAIChatResponse({
           productData: productData,
           userQuestion: input,
