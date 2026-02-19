@@ -64,7 +64,7 @@ export default function ScannerPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6">
-      <Card className="w-full max-w-md shadow-lg bg-card/80 backdrop-blur-xl">
+      <Card className="w-full max-w-md shadow-lg bg-card/80 backdrop-blur-xl animate-in zoom-in-95 duration-500 ease-out">
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-2 text-2xl text-center">
             <ScanLine className="w-8 h-8 text-primary" />

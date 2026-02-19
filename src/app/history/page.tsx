@@ -45,7 +45,7 @@ export default function HistoryPage() {
             <ul className="space-y-4">
               {history.map((item) => (
                 <li key={item.barcode}>
-                  <Link href={`/product/${item.barcode}`} className="block p-4 border rounded-lg hover:bg-muted transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg">
+                  <Link href={`/product/${item.barcode}`} className="block p-4 border rounded-lg hover:bg-muted transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]">
                     <div className="flex items-center gap-4">
                       <Image
                         src={item.imageUrl || 'https://picsum.photos/seed/history/100/100'}
