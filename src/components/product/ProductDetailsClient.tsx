@@ -3,6 +3,7 @@
 import { useEffect } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import dynamic from 'next/dynamic';
 import { Utensils, Wheat, Beef, Sparkles, MessageCircle, Info, Hash, ChevronLeft } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
@@ -10,10 +11,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import NutritionInsight from './NutritionInsight';
-import ProductChatbot from './ProductChatbot';
-import { useSettings } from '@/contexts/SettingsContext';
+import { usePreferences } from '@/contexts/AppProviders';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const ProductChatbot = dynamic(() => import('./ProductChatbot'), {
+    loading: () => <Skeleton className="h-96 w-full" />,
+    ssr: false,
+});
 
 const NutritionValue = ({ label, value, unit }: { label: string; value?: number; unit: string }) => {
     if (value === undefined || value === null) return null;
@@ -29,7 +35,7 @@ export default function ProductDetailsClient({ product: productData }: { product
     const router = useRouter();
     const { addScanToHistory } = useScanHistory();
     const { product } = productData;
-    const { settings } = useSettings();
+    const { preferences } = usePreferences();
 
     useEffect(() => {
         addScanToHistory({
@@ -42,8 +48,8 @@ export default function ProductDetailsClient({ product: productData }: { product
     }, [addScanToHistory, product.product_name, product.brands, product.image_front_url, productData.code, product.categories]);
     
     const isVeg = !product.ingredients_text_with_allergens?.toLowerCase().includes('beef') && !product.ingredients_text_with_allergens?.toLowerCase().includes('chicken'); // Simple check
-    const matchesDiet = (settings.isVeg && isVeg) || (settings.isNonVeg && !isVeg) || (!settings.isVeg && !settings.isNonVeg);
-    const hasAllergens = settings.allergies.some(allergy => product.allergens_tags?.some(tag => tag.includes(allergy)));
+    const matchesDiet = (preferences.isVeg && isVeg) || (preferences.isNonVeg && !isVeg) || (!preferences.isVeg && !preferences.isNonVeg);
+    const hasAllergens = preferences.allergies.some(allergy => product.allergens_tags?.some(tag => tag.includes(allergy)));
 
     return (
         <div className="p-4 md:p-6 space-y-4">

@@ -1,16 +1,22 @@
 'use client';
-
+import dynamic from 'next/dynamic';
 import { LayoutGrid } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import StatsCards from '@/components/dashboard/StatsCards';
-import Achievements from '@/components/dashboard/Achievements';
-import CategoryChart from '@/components/dashboard/CategoryChart';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage } from '@/contexts/AppProviders';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const Achievements = dynamic(() => import('@/components/dashboard/Achievements'), { 
+    loading: () => <Skeleton className="h-24 w-full" />,
+});
+const CategoryChart = dynamic(() => import('@/components/dashboard/CategoryChart'), {
+    loading: () => <Skeleton className="h-[250px] w-full" />,
+});
 
 export default function DashboardPage() {
     const { history } = useScanHistory();
-    const { t } = useSettings();
+    const { t } = useLanguage();
 
     return (
         <div className="p-4 md:p-6 space-y-6">

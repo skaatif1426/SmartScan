@@ -7,29 +7,41 @@ import { Skeleton } from '@/components/ui/skeleton';
 interface QrScannerProps {
   onScanSuccess: (decodedText: string) => void;
   onScanFailure: (error: unknown) => void;
-  onCameraPermissionError: (error: string) => void;
+  onCameraPermissionError: (error: Error) => void;
 }
 
 const qrcodeRegionId = 'html5qr-code-full-region';
 
 const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: QrScannerProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
+  const isMounted = useRef(true);
 
   useEffect(() => {
+    isMounted.current = true;
+    
     if (scannerRef.current) {
         return;
     }
 
-    const html5Qrcode = new Html5Qrcode(qrcodeRegionId);
+    const html5Qrcode = new Html5Qrcode(qrcodeRegionId, {
+        verbose: false,
+        formatsToSupport: [
+            Html5QrcodeSupportedFormats.EAN_13,
+            Html5QrcodeSupportedFormats.EAN_8,
+            Html5QrcodeSupportedFormats.UPC_A,
+            Html5QrcodeSupportedFormats.UPC_E,
+        ],
+    });
     scannerRef.current = html5Qrcode;
 
     const startScanner = async () => {
+      if (!isMounted.current) return;
       try {
         const cameras = await Html5Qrcode.getCameras();
         if (cameras && cameras.length) {
             const cameraId = cameras.find(c => c.label.toLowerCase().includes('back'))?.id || cameras[0].id;
-
-            if (scannerRef.current?.getState() === Html5QrcodeScannerState.SCANNING) {
+            
+            if (!isMounted.current || scannerRef.current?.getState() === Html5QrcodeScannerState.SCANNING) {
                 return;
             }
 
@@ -43,25 +55,18 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
                     return { width: qrboxWidth, height: qrboxWidth / 2 };
                 },
                 aspectRatio: 16/9,
-                formatsToSupport: [
-                    Html5QrcodeSupportedFormats.EAN_13,
-                    Html5QrcodeSupportedFormats.EAN_8,
-                    Html5QrcodeSupportedFormats.UPC_A,
-                    Html5QrcodeSupportedFormats.UPC_E,
-                ],
               },
               (decodedText: string, decodedResult: DecodedTextResult) => onScanSuccess(decodedText),
               onScanFailure
             );
         } else {
-            onCameraPermissionError('No cameras found.');
+            onCameraPermissionError(new Error('No cameras found.'));
         }
       } catch (err: unknown) {
-        const error = err as Error;
-        if (error.name === 'NotAllowedError') {
-            onCameraPermissionError('PermissionDenied');
+        if (err instanceof Error) {
+            onCameraPermissionError(err);
         } else {
-            onCameraPermissionError(error.message || 'Unknown camera error');
+            onCameraPermissionError(new Error('Unknown camera error'));
         }
       }
     };
@@ -69,6 +74,7 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
     startScanner();
 
     return () => {
+      isMounted.current = false;
       if (scannerRef.current && scannerRef.current.isScanning) {
         scannerRef.current.stop().catch(err => console.error("Failed to stop scanner", err));
       }

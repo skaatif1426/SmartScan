@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage } from '@/contexts/AppProviders';
 import { getAIChatResponse } from '@/lib/actions';
 import { cn } from '@/lib/utils';
 
@@ -19,8 +19,7 @@ export default function ProductChatbot({ productData }: { productData: string })
   const [messages, setMessages] = useState<Message[]>([]);
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
-  const [isDebouncing, setIsDebouncing] = useState(false);
-  const { settings, t } = useSettings();
+  const { language, t } = useLanguage();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -31,25 +30,28 @@ export default function ProductChatbot({ productData }: { productData: string })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!input.trim() || isLoading || isDebouncing) return;
-
-    setIsDebouncing(true);
-    setTimeout(() => setIsDebouncing(false), 3000);
+    if (!input.trim() || isLoading) return;
 
     const userMessage: Message = { sender: 'user', text: input };
     setMessages((prev) => [...prev, userMessage]);
     setInput('');
     setIsLoading(true);
 
-    const response = await getAIChatResponse({
-      productData: productData,
-      userQuestion: input,
-      language: settings.language,
-    });
+    try {
+        const response = await getAIChatResponse({
+          productData: productData,
+          userQuestion: input,
+          language: language,
+        });
 
-    const botMessage: Message = { sender: 'bot', text: response };
-    setMessages((prev) => [...prev, botMessage]);
-    setIsLoading(false);
+        const botMessage: Message = { sender: 'bot', text: response };
+        setMessages((prev) => [...prev, botMessage]);
+    } catch (error) {
+        const errorMessage: Message = { sender: 'bot', text: "Sorry, I couldn't get a response. Please try again." };
+        setMessages((prev) => [...prev, errorMessage]);
+    } finally {
+        setIsLoading(false);
+    }
   };
 
   return (
@@ -102,7 +104,7 @@ export default function ProductChatbot({ productData }: { productData: string })
           placeholder={t('chatbotPlaceholder')}
           disabled={isLoading}
         />
-        <Button type="submit" size="icon" disabled={isLoading || !input.trim() || isDebouncing}>
+        <Button type="submit" size="icon" disabled={isLoading || !input.trim()}>
           <Send className="h-4 w-4" />
         </Button>
       </form>

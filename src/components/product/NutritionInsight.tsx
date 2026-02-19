@@ -8,7 +8,7 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 
 const CACHE_KEY = 'nutriscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -18,7 +18,7 @@ interface CacheItem {
   data: NutritionInsightOutput;
 }
 
-function getCacheKey(barcode: string, language: string, preferences: Partial<UserSettings>): string {
+function getCacheKey(barcode: string, language: string, preferences: Partial<Omit<UserSettings, 'language'>>): string {
     const prefsString = `${preferences.isVeg}-${preferences.isNonVeg}-${preferences.allergies?.join(',')}`;
     return `${barcode}-${language}-${prefsString}`;
 }
@@ -26,13 +26,14 @@ function getCacheKey(barcode: string, language: string, preferences: Partial<Use
 export default function NutritionInsight({ product, barcode }: { product: Product['product'], barcode: string }) {
   const [insight, setInsight] = useState<NutritionInsightOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const { settings, t } = useSettings();
+  const { language, t } = useLanguage();
+  const { preferences } = usePreferences();
 
   useEffect(() => {
     const fetchInsight = async () => {
       setIsLoading(true);
 
-      const cacheKey = getCacheKey(barcode, settings.language, { isVeg: settings.isVeg, isNonVeg: settings.isNonVeg, allergies: settings.allergies });
+      const cacheKey = getCacheKey(barcode, language, preferences);
       try {
         const cached = localStorage.getItem(CACHE_KEY);
         if (cached) {
@@ -82,7 +83,7 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
     };
 
     fetchInsight();
-  }, [product, barcode, settings]);
+  }, [product, barcode, language, preferences]);
 
   if (isLoading) {
     return <div className='space-y-4'>

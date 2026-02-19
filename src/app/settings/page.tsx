@@ -6,17 +6,18 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import type { Language } from '@/lib/types';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 
 export default function SettingsPage() {
-  const { settings, saveSettings, t } = useSettings();
+  const { language, setLanguage, t } = useLanguage();
+  const { preferences, savePreferences } = usePreferences();
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-    saveSettings({ allergies });
+    savePreferences({ allergies });
   };
 
   return (
@@ -31,8 +32,8 @@ export default function SettingsPage() {
         </CardHeader>
         <CardContent>
           <Select
-            value={settings.language}
-            onValueChange={(value: Language) => saveSettings({ language: value })}
+            value={language}
+            onValueChange={(value: Language) => setLanguage(value)}
           >
             <SelectTrigger>
               <SelectValue placeholder={t('language')} />
@@ -55,16 +56,16 @@ export default function SettingsPage() {
             <Label htmlFor="vegetarian-switch" className="flex items-center gap-2"><Leaf className="text-green-600" /> {t('vegetarian')}</Label>
             <Switch
               id="vegetarian-switch"
-              checked={settings.isVeg}
-              onCheckedChange={(checked) => saveSettings({ isVeg: checked })}
+              checked={preferences.isVeg}
+              onCheckedChange={(checked) => savePreferences({ isVeg: checked })}
             />
           </div>
           <div className="flex items-center justify-between">
             <Label htmlFor="non-vegetarian-switch" className="flex items-center gap-2"><Drumstick className="text-red-600" /> {t('nonVegetarian')}</Label>
             <Switch
               id="non-vegetarian-switch"
-              checked={settings.isNonVeg}
-              onCheckedChange={(checked) => saveSettings({ isNonVeg: checked })}
+              checked={preferences.isNonVeg}
+              onCheckedChange={(checked) => savePreferences({ isNonVeg: checked })}
             />
           </div>
         </CardContent>
@@ -79,8 +80,8 @@ export default function SettingsPage() {
             <Input 
                 id="allergies-input"
                 placeholder={t('allergiesPlaceholder')}
-                defaultValue={settings.allergies.join(', ')}
-                onChange={handleAllergyChange}
+                defaultValue={preferences.allergies.join(', ')}
+                onBlur={handleAllergyChange}
             />
         </CardContent>
       </Card>
@@ -97,8 +98,8 @@ export default function SettingsPage() {
                 </div>
                 <Switch 
                     id="advanced-ui-switch"
-                    checked={settings.advancedUiMode}
-                    onCheckedChange={(checked) => saveSettings({ advancedUiMode: checked })}
+                    checked={preferences.advancedUiMode}
+                    onCheckedChange={(checked) => savePreferences({ advancedUiMode: checked })}
                 />
             </div>
         </CardContent>

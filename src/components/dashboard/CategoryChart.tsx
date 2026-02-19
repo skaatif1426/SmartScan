@@ -1,19 +1,26 @@
 'use client';
 
-import { useMemo } from 'react';
-import { Bar, BarChart, XAxis, YAxis, Tooltip, LabelList } from 'recharts';
-import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import React, { useMemo } from 'react';
+import dynamic from 'next/dynamic';
 import { ScanHistoryItem } from '@/lib/types';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage } from '@/contexts/AppProviders';
+import { ChartContainer, ChartTooltipContent } from '@/components/ui/chart';
+import { Skeleton } from '@/components/ui/skeleton';
 
-export default function CategoryChart({ history }: { history: ScanHistoryItem[] }) {
-  const { t } = useSettings();
+const BarChart = dynamic(() => import('recharts').then(mod => mod.BarChart), { ssr: false, loading: () => <Skeleton className="h-[250px] w-full" /> });
+const Bar = dynamic(() => import('recharts').then(mod => mod.Bar), { ssr: false });
+const XAxis = dynamic(() => import('recharts').then(mod => mod.XAxis), { ssr: false });
+const YAxis = dynamic(() => import('recharts').then(mod => mod.YAxis), { ssr: false });
+const Tooltip = dynamic(() => import('recharts').then(mod => mod.Tooltip), { ssr: false });
+const LabelList = dynamic(() => import('recharts').then(mod => mod.LabelList), { ssr: false });
+
+function CategoryChart({ history }: { history: ScanHistoryItem[] }) {
+  const { t } = useLanguage();
   const chartData = useMemo(() => {
     const categoryCounts: { [key: string]: number } = {};
     
     history.forEach((item) => {
         const categories = item.categories?.split(',').map(c => c.trim()).filter(Boolean);
-        // Use the first category as the primary one, or 'Uncategorized' as a fallback.
         const primaryCategory = categories?.[0] || 'Uncategorized';
         categoryCounts[primaryCategory] = (categoryCounts[primaryCategory] || 0) + 1;
     });
@@ -63,3 +70,5 @@ export default function CategoryChart({ history }: { history: ScanHistoryItem[] 
     </ChartContainer>
   );
 }
+
+export default React.memo(CategoryChart);

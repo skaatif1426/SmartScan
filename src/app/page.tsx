@@ -5,17 +5,23 @@ import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import dynamic from 'next/dynamic';
 import { CameraOff, ScanLine, FileImage, Loader2 } from 'lucide-react';
-import { Html5Qrcode } from 'html5-qrcode';
+import { Html5Qrcode, type DecodedTextResult } from 'html5-qrcode';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormMessage } from '@/components/ui/form';
-import QrScanner from '@/components/scanner/QrScanner';
 import { CameraPermissionGuide } from '@/components/scanner/CameraPermissionGuide';
 import { useToast } from '@/hooks/use-toast';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage } from '@/contexts/AppProviders';
+import { Skeleton } from '@/components/ui/skeleton';
+
+const QrScanner = dynamic(() => import('@/components/scanner/QrScanner'), {
+  loading: () => <Skeleton className="w-full h-auto aspect-video rounded-2xl" />,
+  ssr: false,
+});
 
 const formSchema = z.object({
   barcode: z.string().regex(/^[0-9]+$/, 'Barcode must be numeric.'),
@@ -25,9 +31,9 @@ export default function ScannerPage() {
   const router = useRouter();
   const { toast } = useToast();
   const [showScanner, setShowScanner] = useState(false);
-  const [cameraError, setCameraError] = useState<string | null>(null);
+  const [cameraError, setCameraError] = useState<Error | null>(null);
   const [isUploading, setIsUploading] = useState(false);
-  const { t } = useSettings();
+  const { t } = useLanguage();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -43,21 +49,14 @@ export default function ScannerPage() {
   };
 
   const handleScanFailure = (error: unknown) => {
-    // Ignore common non-error messages that html5-qrcode throws when no code is found
-    const errorMessage = typeof error === 'string' ? error : (error as Error)?.message;
-    if (errorMessage && (errorMessage.includes('No QR code found') || errorMessage.includes('NotFoundException'))) {
-      return;
+    if (error instanceof Error && error.name === 'NotFoundException') {
+        // This is expected when no barcode is in the frame, so we can ignore it.
+        return;
     }
     console.error('Scan Error:', error);
-    toast({
-      variant: 'destructive',
-      title: t('scanErrorTitle'),
-      description: t('scanErrorDescription'),
-    });
-    setShowScanner(false);
   };
   
-  const handleCameraPermission = (error: string) => {
+  const handleCameraPermission = (error: Error) => {
     setCameraError(error);
     setShowScanner(false);
   }
@@ -70,13 +69,13 @@ export default function ScannerPage() {
     const file = event.target.files[0];
     setIsUploading(true);
 
-    const html5QrCode = new Html5Qrcode('reader');
     try {
+      // The library doesn't expose its decoder instance easily, so we create a temporary one.
+      const html5QrCode = new Html5Qrcode('reader');
       const decodedText = await html5QrCode.scanFile(file, false);
       handleScanSuccess(decodedText);
     } catch (err: unknown) {
-      const isNotFound = (err instanceof Error && err.name === 'NotFoundException') || 
-                         (typeof err === 'string' && (err.includes('NotFoundException') || err.includes('not found')));
+      const isNotFound = err instanceof Error && err.name === 'NotFoundException';
       
       if (!isNotFound) {
         console.error('File Scan Error:', err);
@@ -89,7 +88,6 @@ export default function ScannerPage() {
       });
     } finally {
       setIsUploading(false);
-      // Reset file input value to allow re-uploading the same file
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -102,7 +100,7 @@ export default function ScannerPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6">
-      <div id="reader" style={{ display: 'none' }}></div> {/* Dummy element for html5-qrcode */}
+      <div id="reader" style={{ display: 'none' }}></div>
       <Card className="w-full max-w-md shadow-lg bg-card/80 backdrop-blur-xl animate-in zoom-in-95 duration-500 ease-out">
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-2 text-2xl text-center">
@@ -112,7 +110,7 @@ export default function ScannerPage() {
         </CardHeader>
         <CardContent className="space-y-6">
           {cameraError ? (
-            <CameraPermissionGuide errorType={cameraError} onRetry={() => setCameraError(null)} />
+            <CameraPermissionGuide error={cameraError} onRetry={() => { setCameraError(null); setShowScanner(true); }} />
           ) : showScanner ? (
             <div className='space-y-4'>
               <QrScanner

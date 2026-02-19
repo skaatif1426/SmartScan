@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import Image from 'next/image';
 import { Award, CheckCircle } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
@@ -20,7 +20,7 @@ const allAchievements = [
   { id: 'scan-50', name: 'Master Scanner', description: '50 items scanned. Incredible!', minScans: 50, imageId: 'achievement-50' },
 ];
 
-export default function Achievements({ history }: { history: ScanHistoryItem[] }) {
+function Achievements({ history }: { history: ScanHistoryItem[] }) {
   const unlockedAchievements = useMemo(() => {
     const scanCount = history.length;
     return allAchievements.filter(ach => scanCount >= ach.minScans);
@@ -53,3 +53,5 @@ export default function Achievements({ history }: { history: ScanHistoryItem[] }
     </div>
   );
 }
+
+export default React.memo(Achievements);

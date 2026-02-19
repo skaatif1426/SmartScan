@@ -2,7 +2,7 @@
 
 import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { SettingsProvider } from '@/contexts/SettingsContext';
+import { AppProviders } from '@/contexts/AppProviders';
 import BottomNav from './BottomNav';
 import { cn } from '@/lib/utils';
 
@@ -13,13 +13,13 @@ export function AppShell({ children }: { children: ReactNode }) {
   const showNav = pathsWithNav.includes(pathname);
 
   return (
-    <SettingsProvider>
+    <AppProviders>
       <div className="flex flex-col h-svh bg-background">
         <main key={pathname} className={cn('flex-1 overflow-y-auto animate-in fade-in slide-in-from-bottom-8 duration-500 ease-out', showNav ? 'pb-28' : '')}>
             {children}
         </main>
         {showNav && <BottomNav />}
       </div>
-    </SettingsProvider>
+    </AppProviders>
   );
 }

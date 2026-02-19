@@ -1,49 +1,46 @@
 'use client';
 
-import { useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { isSameDay, differenceInCalendarDays } from 'date-fns';
 import { Scan, Flame } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { ScanHistoryItem } from '@/lib/types';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 
 function calculateScanStreak(history: ScanHistoryItem[]): number {
     if (history.length === 0) return 0;
 
     let streak = 0;
-    let lastScanDate = new Date();
+    
+    const uniqueDaysScanned = [...new Set(history.map(scan => new Date(scan.scanDate).setHours(0, 0, 0, 0)))].sort((a, b) => b - a);
 
-    // Check if latest scan is today or yesterday
-    if (!isSameDay(new Date(history[0].scanDate), lastScanDate)) {
-        lastScanDate.setDate(lastScanDate.getDate() - 1);
-        if (!isSameDay(new Date(history[0].scanDate), lastScanDate)) {
-            return 0; // No scans today or yesterday
-        }
+    if (uniqueDaysScanned.length === 0) return 0;
+
+    const today = new Date().setHours(0, 0, 0, 0);
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+
+    if (uniqueDaysScanned[0] !== today && uniqueDaysScanned[0] !== new Date(yesterday).getTime()) {
+        return 0;
     }
     
     streak = 1;
-    lastScanDate = new Date(history[0].scanDate);
-
-    const uniqueDays = history.filter((scan, index, self) => 
-        index === self.findIndex(s => isSameDay(new Date(s.scanDate), new Date(scan.scanDate)))
-    );
-
-    for (let i = 1; i < uniqueDays.length; i++) {
-        const currentDate = new Date(uniqueDays[i].scanDate);
-        if (differenceInCalendarDays(lastScanDate, currentDate) === 1) {
+    for (let i = 1; i < uniqueDaysScanned.length; i++) {
+        const dayDiff = (uniqueDaysScanned[i-1] - uniqueDaysScanned[i]) / (1000 * 3600 * 24);
+        if (dayDiff === 1) {
             streak++;
-            lastScanDate = currentDate;
         } else {
             break;
         }
     }
-
+    
     return streak;
 }
 
 
-export default function StatsCards({ history }: { history: ScanHistoryItem[] }) {
-    const { t, settings } = useSettings();
+function StatsCards({ history }: { history: ScanHistoryItem[] }) {
+    const { t } = useLanguage();
+    const { preferences } = usePreferences();
     const totalScans = history.length;
     const scanStreak = useMemo(() => calculateScanStreak(history), [history]);
 
@@ -65,9 +62,11 @@ export default function StatsCards({ history }: { history: ScanHistoryItem[] }) 
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{scanStreak} <span className="text-sm text-muted-foreground">{t('days')}</span></div>
-                    {settings.advancedUiMode && <p className="text-xs text-muted-foreground">Advanced detail visible!</p>}
+                    {preferences.advancedUiMode && <p className="text-xs text-muted-foreground">Advanced detail visible!</p>}
                 </CardContent>
             </Card>
         </div>
     );
 }
+
+export default React.memo(StatsCards);

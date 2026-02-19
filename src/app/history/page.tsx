@@ -7,11 +7,11 @@ import { History as HistoryIcon, ScanLine } from 'lucide-react';
 
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage } from '@/contexts/AppProviders';
 
 export default function HistoryPage() {
   const { history } = useScanHistory();
-  const { t } = useSettings();
+  const { t } = useLanguage();
 
   return (
     <div className="p-4 md:p-6">

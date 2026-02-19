@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { QrCode, History, LayoutGrid, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useSettings } from '@/contexts/SettingsContext';
+import { useLanguage } from '@/contexts/AppProviders';
 
 const navItems = [
   { href: '/', icon: QrCode, labelKey: 'navScan' },
@@ -15,7 +15,7 @@ const navItems = [
 
 export default function BottomNav() {
   const pathname = usePathname();
-  const { t } = useSettings();
+  const { t } = useLanguage();
 
   return (
     <nav className="fixed bottom-4 inset-x-6 z-50 h-14 bg-card/80 backdrop-blur-xl border rounded-full shadow-2xl animate-in slide-in-from-bottom-8 duration-500 ease-in-out">
