@@ -30,14 +30,16 @@ export default function DashboardPage() {
     }
     return (
         <div className="p-4 md:p-6 space-y-6">
-            <h1 className="text-3xl font-bold flex items-center gap-2">
+            <h1 className="text-3xl font-bold flex items-center gap-2 animate-in fade-in duration-300">
                 <LayoutGrid className="text-primary" /> {t('dashboardTitle')}
             </h1>
             
-            <StatsCards history={history} />
+            <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
+                <StatsCards history={history} />
+            </div>
 
             <div className="grid grid-cols-1 gap-6">
-                <Card>
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
                     <CardHeader>
                         <CardTitle>{t('scannedCategories')}</CardTitle>
                     </CardHeader>
@@ -46,7 +48,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card>
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
                     <CardHeader>
                         <CardTitle>{t('achievements')}</CardTitle>
                     </CardHeader>

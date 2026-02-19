@@ -25,11 +25,11 @@ export default function SettingsPage() {
 
   return (
     <div className="p-4 md:p-6 space-y-4">
-      <h1 className="text-3xl font-bold flex items-center gap-2">
+      <h1 className="text-3xl font-bold flex items-center gap-2 animate-in fade-in duration-300">
         <SettingsIcon className="text-primary" /> {t('settingsTitle')}
       </h1>
       
-      <Card>
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Languages /> {t('language')}</CardTitle>
         </CardHeader>
@@ -50,7 +50,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Leaf /> {t('preferences')}</CardTitle>
         </CardHeader>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
       
-      <Card>
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><ShieldAlert /> {t('allergies')}</CardTitle>
         </CardHeader>
@@ -89,7 +89,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card>
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><Zap /> {t('advancedSettings')}</CardTitle>
         </CardHeader>

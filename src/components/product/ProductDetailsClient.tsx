@@ -47,14 +47,14 @@ export default function ProductDetailsClient({ product: productData }: { product
 
     return (
         <div className="p-4 md:p-6 space-y-4">
-            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300">
+            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-8 duration-500">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0">
                     <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <h1 className="text-xl font-bold truncate">{product.product_name}</h1>
             </div>
 
-            <Card className="animate-in fade-in-50 zoom-in-95 duration-500">
+            <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-100">
                 <CardHeader className="p-0 relative h-64">
                     <Image
                         src={product.image_front_url || 'https://picsum.photos/seed/product/600/400'}
@@ -75,7 +75,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+            <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Nutrition AI Insight</CardTitle>
                 </CardHeader>
@@ -85,7 +85,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Card>
 
             <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="nutrition-facts">
-                <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
                     <AccordionItem value="nutrition-facts" className="border-none">
                         <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
@@ -103,7 +103,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     </AccordionItem>
                 </Card>
 
-                <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
                     <AccordionItem value="ingredients" className="border-none">
                          <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
@@ -115,7 +115,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </Card>
             </Accordion>
             
-            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
+            <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
                 </CardHeader>
