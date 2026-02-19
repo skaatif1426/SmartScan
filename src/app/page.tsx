@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -46,25 +46,25 @@ export default function ScannerPage() {
     },
   });
 
-  const handleScanSuccess = (decodedText: string) => {
+  const handleScanSuccess = useCallback((decodedText: string) => {
     setShowScanner(false);
     router.push(`/product/${decodedText}`);
-  };
+  }, [router]);
 
-  const handleScanFailure = (error: unknown) => {
+  const handleScanFailure = useCallback((error: unknown) => {
     if (error instanceof Error && error.name === 'NotFoundException') {
         // This is expected when no barcode is in the frame, so we can ignore it.
         return;
     }
     trackError();
     console.error('Scan Error:', error);
-  };
+  }, [trackError]);
   
-  const handleCameraPermission = (error: Error) => {
+  const handleCameraPermission = useCallback((error: Error) => {
     trackError();
     setCameraError(error);
     setShowScanner(false);
-  }
+  }, [trackError]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     if (!event.target.files || event.target.files.length === 0) {
