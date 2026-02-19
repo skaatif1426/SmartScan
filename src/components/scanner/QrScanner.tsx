@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
-import { Html5Qrcode, Html5QrcodeScannerState } from 'html5-qrcode';
+import { Html5Qrcode, Html5QrcodeScannerState, Html5QrcodeSupportedFormats } from 'html5-qrcode';
 import { Skeleton } from '@/components/ui/skeleton';
 
 interface QrScannerProps {
@@ -42,7 +42,13 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
                     const qrboxSize = Math.floor(minEdge * 0.8);
                     return { width: qrboxSize, height: qrboxSize / 2 };
                 },
-                aspectRatio: 1.0
+                aspectRatio: 1.0,
+                formatsToSupport: [
+                    Html5QrcodeSupportedFormats.EAN_13,
+                    Html5QrcodeSupportedFormats.EAN_8,
+                    Html5QrcodeSupportedFormats.UPC_A,
+                    Html5QrcodeSupportedFormats.UPC_E,
+                ],
               },
               onScanSuccess,
               onScanFailure
