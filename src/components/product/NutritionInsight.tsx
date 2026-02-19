@@ -22,13 +22,13 @@ export default function NutritionInsight({ product }: { product: Product['produc
         novaGroup: product.nova_group,
         allergens: product.allergens_tags,
         nutritionFacts: {
-          energy_kcal_100g: product.nutriments['energy-kcal_100g'],
-          fat_100g: product.nutriments.fat_100g,
-          saturated_fat_100g: product.nutriments['saturated-fat_100g'],
-          carbohydrates_100g: product.nutriments.carbohydrates_100g,
-          sugars_100g: product.nutriments.sugars_100g,
-          proteins_100g: product.nutriments.proteins_100g,
-          salt_100g: product.nutriments.salt_100g,
+          energy_kcal_100g: product.nutriments?.['energy-kcal_100g'],
+          fat_100g: product.nutriments?.fat_100g,
+          saturated_fat_100g: product.nutriments?.['saturated-fat_100g'],
+          carbohydrates_100g: product.nutriments?.carbohydrates_100g,
+          sugars_100g: product.nutriments?.sugars_100g,
+          proteins_100g: product.nutriments?.proteins_100g,
+          salt_100g: product.nutriments?.salt_100g,
         },
       };
       const result = await getAINutritionInsight(insightData);

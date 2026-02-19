@@ -89,13 +89,13 @@ export default function ProductDetailsClient({ product: productData }: { product
                     <p className="text-sm text-muted-foreground">per 100g serving</p>
                 </CardHeader>
                 <CardContent>
-                    <NutritionValue label="Energy (kcal)" value={product.nutriments['energy-kcal_100g']} unit="kcal" />
-                    <NutritionValue label="Fat" value={product.nutriments.fat_100g} unit="g" />
-                    <NutritionValue label="Saturated Fat" value={product.nutriments['saturated-fat_100g']} unit="g" />
-                    <NutritionValue label="Carbohydrates" value={product.nutriments.carbohydrates_100g} unit="g" />
-                    <NutritionValue label="Sugars" value={product.nutriments.sugars_100g} unit="g" />
-                    <NutritionValue label="Proteins" value={product.nutriments.proteins_100g} unit="g" />
-                    <NutritionValue label="Salt" value={product.nutriments.salt_100g} unit="g" />
+                    <NutritionValue label="Energy (kcal)" value={product.nutriments?.['energy-kcal_100g']} unit="kcal" />
+                    <NutritionValue label="Fat" value={product.nutriments?.fat_100g} unit="g" />
+                    <NutritionValue label="Saturated Fat" value={product.nutriments?.['saturated-fat_100g']} unit="g" />
+                    <NutritionValue label="Carbohydrates" value={product.nutriments?.carbohydrates_100g} unit="g" />
+                    <NutritionValue label="Sugars" value={product.nutriments?.sugars_100g} unit="g" />
+                    <NutritionValue label="Proteins" value={product.nutriments?.proteins_100g} unit="g" />
+                    <NutritionValue label="Salt" value={product.nutriments?.salt_100g} unit="g" />
                 </CardContent>
             </Card>
 
