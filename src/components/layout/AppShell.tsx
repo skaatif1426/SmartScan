@@ -4,6 +4,7 @@ import { ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
 import { SettingsProvider } from '@/contexts/SettingsContext';
 import BottomNav from './BottomNav';
+import { cn } from '@/lib/utils';
 
 const pathsWithNav = ['/', '/history', '/dashboard', '/settings'];
 
@@ -13,8 +14,8 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <SettingsProvider>
-      <div className="flex flex-col h-svh">
-        <main className={`flex-1 overflow-y-auto ${showNav ? 'pb-16' : ''}`}>
+      <div className="flex flex-col h-svh bg-background">
+        <main key={pathname} className={cn('flex-1 overflow-y-auto animate-in fade-in-25 duration-500', showNav ? 'pb-16' : '')}>
             {children}
         </main>
         {showNav && <BottomNav />}

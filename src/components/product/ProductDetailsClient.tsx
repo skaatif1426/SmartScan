@@ -46,14 +46,14 @@ export default function ProductDetailsClient({ product: productData }: { product
 
     return (
         <div className="p-4 md:p-6 space-y-4">
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-4 duration-300">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0">
                     <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <h1 className="text-xl font-bold truncate">{product.product_name}</h1>
             </div>
 
-            <Card>
+            <Card className="animate-in fade-in-50 zoom-in-95 duration-500">
                 <CardHeader className="p-0 relative h-64">
                     <Image
                         src={product.image_front_url || 'https://picsum.photos/seed/product/600/400'}
@@ -74,7 +74,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Nutrition AI Insight</CardTitle>
                 </CardHeader>
@@ -83,7 +83,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-200">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
                     <p className="text-sm text-muted-foreground">per 100g serving</p>
@@ -99,7 +99,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            <Card>
+            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
                  <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
                 </CardHeader>
@@ -108,7 +108,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
             
-            <Card>
+            <Card className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-400">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
                 </CardHeader>
