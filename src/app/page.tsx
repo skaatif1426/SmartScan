@@ -64,7 +64,7 @@ export default function ScannerPage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6">
-      <Card className="w-full max-w-md shadow-lg">
+      <Card className="w-full max-w-md shadow-lg bg-card/80 backdrop-blur-xl">
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-2 text-2xl text-center">
             <ScanLine className="w-8 h-8 text-primary" />
@@ -81,7 +81,7 @@ export default function ScannerPage() {
                 onScanFailure={handleScanFailure}
                 onCameraPermissionError={handleCameraPermission}
               />
-              <Button variant="outline" className="w-full" onClick={() => setShowScanner(false)}>
+              <Button variant="outline" className="w-full rounded-full" onClick={() => setShowScanner(false)}>
                 <CameraOff className="w-4 h-4 mr-2" />
                 {t('stopScanning')}
               </Button>
@@ -89,7 +89,7 @@ export default function ScannerPage() {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">{t('scannerPrompt')}</p>
-              <Button size="lg" className="w-full" onClick={() => setShowScanner(true)}>
+              <Button size="lg" className="w-full rounded-full" onClick={() => setShowScanner(true)}>
                 <ScanLine className="w-5 h-5 mr-2" />
                 {t('startScanning')}
               </Button>
@@ -101,7 +101,7 @@ export default function ScannerPage() {
               <span className="w-full border-t" />
             </div>
             <div className="relative flex justify-center text-xs uppercase">
-              <span className="bg-card px-2 text-muted-foreground">{t('or')}</span>
+              <span className="bg-card/80 px-2 text-muted-foreground">{t('or')}</span>
             </div>
           </div>
 
@@ -119,13 +119,14 @@ export default function ScannerPage() {
                         type="text"
                         inputMode="numeric"
                         pattern="[0-9]*"
+                        className="bg-background/80"
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground">
+              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-full">
                 {t('searchProduct')}
               </Button>
             </form>

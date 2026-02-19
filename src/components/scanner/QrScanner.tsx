@@ -74,7 +74,7 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
     };
   }, [onScanSuccess, onScanFailure, onCameraPermissionError]);
 
-  return <div id={qrcodeRegionId} className="w-full h-auto aspect-square rounded-lg overflow-hidden border bg-muted" >
+  return <div id={qrcodeRegionId} className="w-full h-auto aspect-square rounded-2xl overflow-hidden border bg-muted" >
     <Skeleton className="w-full h-full" />
   </div>;
 };
