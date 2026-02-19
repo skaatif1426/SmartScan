@@ -21,9 +21,9 @@ export default function DashboardPage() {
                     <Skeleton className="h-28" />
                     <Skeleton className="h-28" />
                 </div>
-                <div className="grid gap-6 lg:grid-cols-5">
-                    <Skeleton className="h-80 lg:col-span-3" />
-                    <Skeleton className="h-80 lg:col-span-2" />
+                <div className="space-y-6">
+                    <Skeleton className="h-80" />
+                    <Skeleton className="h-80" />
                 </div>
             </div>
         );
@@ -36,8 +36,8 @@ export default function DashboardPage() {
             
             <StatsCards history={history} />
 
-            <div className="grid gap-6 lg:grid-cols-5">
-                <Card className="lg:col-span-3">
+            <div className="grid grid-cols-1 gap-6">
+                <Card>
                     <CardHeader>
                         <CardTitle>{t('scannedCategories')}</CardTitle>
                     </CardHeader>
@@ -46,7 +46,7 @@ export default function DashboardPage() {
                     </CardContent>
                 </Card>
 
-                <Card className="lg:col-span-2">
+                <Card>
                     <CardHeader>
                         <CardTitle>{t('achievements')}</CardTitle>
                     </CardHeader>
