@@ -1,11 +1,12 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { CameraOff, ScanLine } from 'lucide-react';
+import { CameraOff, ScanLine, FileImage, Loader2 } from 'lucide-react';
+import { Html5Qrcode } from 'html5-qrcode';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -25,7 +26,9 @@ export default function ScannerPage() {
   const { toast } = useToast();
   const [showScanner, setShowScanner] = useState(false);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isUploading, setIsUploading] = useState(false);
   const { t } = useSettings();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -58,12 +61,41 @@ export default function ScannerPage() {
     setShowScanner(false);
   }
 
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (!event.target.files || event.target.files.length === 0) {
+      return;
+    }
+
+    const file = event.target.files[0];
+    setIsUploading(true);
+
+    const html5QrCode = new Html5Qrcode('reader');
+    try {
+      const decodedText = await html5QrCode.scanFile(file, false);
+      handleScanSuccess(decodedText);
+    } catch (err: any) {
+      console.error('File Scan Error:', err);
+      toast({
+        variant: 'destructive',
+        title: t('scanErrorTitle'),
+        description: err?.toString().includes('not found') ? t('noBarcodeInImage') : t('uploadError'),
+      });
+    } finally {
+      setIsUploading(false);
+      // Reset file input value to allow re-uploading the same file
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
+
   function onSubmit(values: z.infer<typeof formSchema>) {
     router.push(`/product/${values.barcode}`);
   }
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6">
+      <div id="reader" style={{ display: 'none' }}></div> {/* Dummy element for html5-qrcode */}
       <Card className="w-full max-w-md shadow-lg bg-card/80 backdrop-blur-xl animate-in zoom-in-95 duration-500 ease-out">
         <CardHeader>
           <CardTitle className="flex items-center justify-center gap-2 text-2xl text-center">
@@ -81,7 +113,7 @@ export default function ScannerPage() {
                 onScanFailure={handleScanFailure}
                 onCameraPermissionError={handleCameraPermission}
               />
-              <Button variant="outline" className="w-full rounded-full" onClick={() => setShowScanner(false)}>
+              <Button variant="outline" className="w-full rounded-full" onClick={() => setShowScanner(false)} disabled={isUploading}>
                 <CameraOff className="w-4 h-4 mr-2" />
                 {t('stopScanning')}
               </Button>
@@ -89,10 +121,32 @@ export default function ScannerPage() {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">{t('scannerPrompt')}</p>
-              <Button size="lg" className="w-full rounded-full" onClick={() => setShowScanner(true)}>
+              <Button size="lg" className="w-full rounded-full" onClick={() => setShowScanner(true)} disabled={isUploading}>
                 <ScanLine className="w-5 h-5 mr-2" />
                 {t('startScanning')}
               </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="w-full rounded-full"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUploading}
+              >
+                {isUploading ? (
+                  <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                  <FileImage className="w-5 h-5 mr-2" />
+                )}
+                {isUploading ? t('uploading') : t('uploadImage')}
+              </Button>
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                className="hidden"
+                accept="image/*"
+                disabled={isUploading}
+              />
             </div>
           )}
 
@@ -120,13 +174,14 @@ export default function ScannerPage() {
                         inputMode="numeric"
                         pattern="[0-9]*"
                         className="bg-background/80"
+                        disabled={isUploading}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-full">
+              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-full" disabled={isUploading}>
                 {t('searchProduct')}
               </Button>
             </form>

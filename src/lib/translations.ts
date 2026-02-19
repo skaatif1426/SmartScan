@@ -40,7 +40,7 @@ export const translations: Translations = {
   scannerPrompt: {
     English: 'Point your camera at a barcode to start.',
     Hindi: 'शुरू करने के लिए अपने कैमरे को बारकोड पर इंगित करें।',
-    Marathi: 'सुरू करण्यासाठी तुमचा कॅमेरा बारकोडवर निर्देशित करा.',
+    Marathi: 'सुरू करण्यासाठी तुमचा कॅमेरा बारकोडवर निर्देशित करा।',
     Hinglish: 'Start karne ke liye camera barcode pe rakho.',
   },
   startScanning: {
@@ -103,6 +103,30 @@ export const translations: Translations = {
     Marathi: 'पुन्हा प्रयत्न करा',
     Hinglish: 'Phir se try karo',
   },
+  uploadImage: {
+    English: 'Upload Image',
+    Hindi: 'छवि अपलोड करें',
+    Marathi: 'प्रतिमा अपलोड करा',
+    Hinglish: 'Image upload karo',
+  },
+  uploading: {
+    English: 'Processing...',
+    Hindi: 'प्रोसेस हो रहा है...',
+    Marathi: 'प्रक्रिया होत आहे...',
+    Hinglish: 'Processing...',
+  },
+  noBarcodeInImage: {
+    English: 'No barcode was found in the uploaded image.',
+    Hindi: 'अपलोड की गई छवि में कोई बारकोड नहीं मिला।',
+    Marathi: 'अपलोड केलेल्या प्रतिमेमध्ये कोणताही बारकोड आढळला नाही।',
+    Hinglish: 'Uploaded image mein barcode nahi mila.',
+  },
+  uploadError: {
+    English: 'Could not read barcode from the image file.',
+    Hindi: 'छवि फ़ाइल से बारकोड नहीं पढ़ा जा सका।',
+    Marathi: 'प्रतिमा फाइलमधून बारकोड वाचता आला नाही।',
+    Hinglish: 'Image file se barcode nahi padha jaa saka.',
+  },
   // Product Page
   productNotFoundTitle: {
     English: 'Product Not Found',
@@ -111,9 +135,9 @@ export const translations: Translations = {
     Hinglish: 'Product nahi mila',
   },
   productNotFoundDescription: {
-    English: 'We couldn\'t find a product with this barcode.',
+    English: "We couldn't find a product with this barcode.",
     Hindi: 'हमें इस बारकोड वाला कोई उत्पाद नहीं मिला।',
-    Marathi: 'आम्हाला या बारकोडचे उत्पादन सापडले नाही.',
+    Marathi: 'आम्हाला या बारकोडचे उत्पादन सापडले नाही।',
     Hinglish: 'Yeh barcode ka product nahi mila.',
   },
   nutritionInsightsTitle: {
@@ -168,7 +192,7 @@ export const translations: Translations = {
   historyEmpty: {
     English: 'No products scanned yet.',
     Hindi: 'अभी तक कोई उत्पाद स्कैन नहीं किया गया है।',
-    Marathi: 'अद्याप कोणतेही उत्पादन स्कॅन केलेले नाही.',
+    Marathi: 'अद्याप कोणतेही उत्पादन स्कॅन केलेले नाही।',
     Hinglish: 'Abhi tak kuch scan nahi kiya.',
   },
   // Dashboard Page
@@ -266,7 +290,7 @@ export const translations: Translations = {
   advancedUiModeDescription: {
     English: 'Show extra details on the dashboard.',
     Hindi: 'डैशबोर्ड पर अतिरिक्त विवरण दिखाएं।',
-    Marathi: 'डॅशबोर्डवर अतिरिक्त तपशील दर्शवा.',
+    Marathi: 'डॅशबोर्डवर अतिरिक्त तपशील दर्शवा।',
     Hinglish: 'Dashboard pe extra details dikhao.',
   },
 };
