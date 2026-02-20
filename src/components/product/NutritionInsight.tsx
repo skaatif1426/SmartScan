@@ -11,6 +11,7 @@ import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import AnalysisDisplay from './AnalysisDisplay';
+import type { LocalAnalysis } from '@/lib/scoring';
 
 const CACHE_KEY = 'nutriscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -20,68 +21,12 @@ interface CacheItem {
   data: NutritionInsightOutput;
 }
 
-interface LocalAnalysis {
-    score: number;
-    warnings: string[];
-}
-
 function getCacheKey(barcode: string, language: string, preferences: Partial<Omit<UserSettings, 'language'>>): string {
     const prefsString = `${preferences.isVeg}-${preferences.isNonVeg}-${preferences.allergies?.join(',')}`;
     return `${barcode}-${language}-${prefsString}`;
 }
 
-function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
-    let score = 100;
-    const warnings: { reason: string, impact: number }[] = [];
-    const nutriments = product.nutriments || {};
-
-    const HIGH_SUGAR_THRESHOLD = 22.5;
-    const HIGH_SALT_THRESHOLD = 1.5;
-    const HIGH_SATFAT_THRESHOLD = 5;
-
-    if (nutriments.sugars_100g !== undefined) {
-      if (nutriments.sugars_100g >= HIGH_SUGAR_THRESHOLD) {
-        warnings.push({ reason: 'High in sugar', impact: -25 });
-        score -= 25;
-      } else if (nutriments.sugars_100g > 10) {
-        score -= 10;
-      }
-    }
-
-    if (nutriments.salt_100g !== undefined) {
-        if (nutriments.salt_100g >= HIGH_SALT_THRESHOLD) {
-            warnings.push({ reason: 'High in salt', impact: -25 });
-            score -= 25;
-        } else if (nutriments.salt_100g > 0.3) {
-            score -= 10;
-        }
-    }
-
-    if (nutriments['saturated-fat_100g'] !== undefined) {
-        if (nutriments['saturated-fat_100g'] >= HIGH_SATFAT_THRESHOLD) {
-            warnings.push({ reason: 'High in saturated fat', impact: -20 });
-            score -= 20;
-        } else if (nutriments['saturated-fat_100g'] > 1.5) {
-            score -= 10;
-        }
-    }
-    
-    if (product.nova_group) {
-      if (product.nova_group === 4) {
-        warnings.push({ reason: 'Ultra-processed food (NOVA 4)', impact: -20 });
-        score -= 20;
-      } else if (product.nova_group === 3) {
-        warnings.push({ reason: 'Processed food (NOVA 3)', impact: -10 });
-        score -= 10;
-      }
-    }
-
-    const finalScore = Math.max(0, Math.min(100, Math.round(score)));
-    return { score: finalScore, warnings: warnings.map(w => w.reason) };
-}
-
-export default function NutritionInsight({ product, barcode }: { product: Product['product'], barcode: string }) {
-  const [localAnalysis, setLocalAnalysis] = useState<LocalAnalysis | null>(null);
+export default function NutritionInsight({ product, barcode, localAnalysis }: { product: Product['product'], barcode: string, localAnalysis: LocalAnalysis }) {
   const [aiInsight, setAiInsight] = useState<NutritionInsightOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -91,13 +36,13 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
   const { trackError } = useAnalytics();
 
   const fetchInsight = useCallback(async (forceRefresh = false) => {
+    if (!preferences.aiInsightsEnabled) {
+      setIsLoading(false);
+      return;
+    }
+
     setIsLoading(true);
     setAiError(null);
-    
-    if (!localAnalysis) {
-        const local = calculateLocalAnalysis(product);
-        setLocalAnalysis(local);
-    }
     
     if (!forceRefresh) {
         const cacheKey = getCacheKey(barcode, language, preferences);
@@ -159,24 +104,21 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
     } finally {
       setIsLoading(false);
     }
-  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError, localAnalysis]);
+  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError]);
 
 
   useEffect(() => {
     fetchInsight();
   }, [fetchInsight]);
-
-  // Initial loading state before local analysis
-  if (!localAnalysis) {
-    return <div className='space-y-4 min-h-[210px]'>
-        <Skeleton className="h-4 w-1/3 mb-1" />
-        <Skeleton className="h-2 w-full" />
-        <Skeleton className="h-4 w-1/4 mt-3" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-        <Skeleton className="h-10 w-full mt-2" />
-    </div>;
+  
+  if (!preferences.aiInsightsEnabled) {
+      return (
+          <div className='min-h-[210px]'>
+              <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true}/>
+          </div>
+      );
   }
+
 
   return (
     <div className='min-h-[210px]'>

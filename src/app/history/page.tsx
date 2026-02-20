@@ -3,12 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { History as HistoryIcon, ScanLine, Package } from 'lucide-react';
+import { History as HistoryIcon, ScanLine, Package, HeartPulse } from 'lucide-react';
 import { useState } from 'react';
 
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/AppProviders';
+import { cn } from '@/lib/utils';
 
 function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
     const [imageError, setImageError] = useState(false);
@@ -33,6 +34,19 @@ function HistoryImage({ item }: { item: { imageUrl?: string | null, productName:
         </div>
     );
 }
+
+const getHealthScoreColorClass = (score: number) => {
+    if (score >= 75) return 'text-green-600';
+    if (score >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+};
+
+const SimpleHealthScore = ({ score }: { score: number }) => (
+    <div className={cn("font-bold text-lg", getHealthScoreColorClass(score))}>
+        {score}
+    </div>
+);
+
 
 export default function HistoryPage() {
   const { history } = useScanHistory();
@@ -71,6 +85,12 @@ export default function HistoryPage() {
                            Scanned {formatDistanceToNow(new Date(item.scanDate), { addSuffix: true })}
                         </p>
                       </div>
+                       {item.healthScore !== undefined && (
+                        <div className="text-center px-2">
+                            <SimpleHealthScore score={item.healthScore} />
+                            <p className="text-xs text-muted-foreground">Score</p>
+                        </div>
+                      )}
                     </div>
                   </Link>
                 </li>

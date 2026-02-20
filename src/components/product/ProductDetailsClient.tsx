@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Utensils, Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package } from 'lucide-react';
+import { Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,6 +15,7 @@ import { usePreferences } from '@/contexts/AppProviders';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
+import { calculateLocalScore } from '@/lib/scoring';
 
 const ProductChatbot = dynamic(() => import('./ProductChatbot'), {
     loading: () => <Skeleton className="h-96 w-full" />,
@@ -38,27 +39,37 @@ export default function ProductDetailsClient({ product: productData }: { product
     const { preferences } = usePreferences();
     const [imageError, setImageError] = useState(false);
 
-    useEffect(() => {
-        addScanToHistory({
-            barcode: productData.code,
-            productName: product.product_name,
-            brand: product.brands,
-            imageUrl: product.image_front_url,
-            categories: product.categories,
-        });
-    }, [addScanToHistory, product.product_name, product.brands, product.image_front_url, productData.code, product.categories]);
-    
-    const hasAllergens = preferences.allergies.some(allergy => product.allergens_tags?.some(tag => tag.includes(allergy)));
+    const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
 
-    const nutritionValues = [
-        { label: "Energy (kcal)", value: product.nutriments?.['energy-kcal_100g'], unit: "kcal" },
-        { label: "Fat", value: product.nutriments?.fat_100g, unit: "g" },
-        { label: "Saturated Fat", value: product.nutriments?.['saturated-fat_100g'], unit: "g" },
-        { label: "Carbohydrates", value: product.nutriments?.carbohydrates_100g, unit: "g" },
-        { label: "Sugars", value: product.nutriments?.sugars_100g, unit: "g" },
-        { label: "Proteins", value: product.nutriments?.proteins_100g, unit: "g" },
-        { label: "Salt", value: product.nutriments?.salt_100g, unit: "g" }
-    ].filter(item => item.value !== undefined && item.value !== null);
+    useEffect(() => {
+        if (product) {
+            addScanToHistory({
+                barcode: productData.code,
+                productName: product.product_name,
+                brand: product.brands,
+                imageUrl: product.image_front_url,
+                categories: product.categories,
+                healthScore: localAnalysis.score,
+            });
+        }
+    }, [addScanToHistory, product, productData.code, localAnalysis]);
+    
+    const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));
+
+    const nutritionValues = useMemo(() => [
+        { label: "Energy (kcal)", value: product?.nutriments?.['energy-kcal_100g'], unit: "kcal" },
+        { label: "Fat", value: product?.nutriments?.fat_100g, unit: "g" },
+        { label: "Saturated Fat", value: product?.nutriments?.['saturated-fat_100g'], unit: "g" },
+        { label: "Carbohydrates", value: product?.nutriments?.carbohydrates_100g, unit: "g" },
+        { label: "Sugars", value: product?.nutriments?.sugars_100g, unit: "g" },
+        { label: "Proteins", value: product?.nutriments?.proteins_100g, unit: "g" },
+        { label: "Salt", value: product?.nutriments?.salt_100g, unit: "g" }
+    ].filter(item => item.value !== undefined && item.value !== null), [product]);
+
+    if (!product) {
+        // This case should be handled by the parent page, but it's a good safeguard.
+        return null; 
+    }
 
     return (
         <div className="p-4 md:p-6 space-y-4">
@@ -97,16 +108,14 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-            {preferences.aiInsightsEnabled && (
-                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> AI Nutrition Insight</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <NutritionInsight product={product} barcode={productData.code} />
-                    </CardContent>
-                </Card>
-            )}
+             <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Health Analysis</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <NutritionInsight product={product} barcode={productData.code} localAnalysis={localAnalysis} />
+                </CardContent>
+            </Card>
 
             <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="nutrition-facts">
                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">

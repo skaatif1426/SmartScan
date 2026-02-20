@@ -21,7 +21,7 @@ export const ProductSchema = z.object({
     allergens_tags: z.array(z.string()).nullish().transform(v => v ?? []),
     categories: z.string().nullish().transform(v => v ?? ''),
   }).passthrough().nullish(),
-  status: z.coerce.number(),
+  status: z.coerce.number().or(z.string()).transform(v => typeof v === 'string' ? parseInt(v, 10) : v),
 });
 export type Product = z.infer<typeof ProductSchema>;
 
@@ -33,6 +33,7 @@ export interface ScanHistoryItem {
   imageUrl?: string | null;
   scanDate: string;
   categories?: string | null;
+  healthScore?: number;
 }
 
 export interface DiscoveryItem {
