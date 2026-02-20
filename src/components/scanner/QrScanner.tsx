@@ -52,7 +52,10 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
                 qrbox: (viewfinderWidth, viewfinderHeight) => {
                     const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
                     const qrboxWidth = Math.floor(minEdge * 0.9);
-                    return { width: qrboxWidth, height: qrboxWidth / 2 };
+                    // The scanning library requires a minimum dimension of 50px.
+                    // By changing the aspect ratio from 2:1 to 1.5:1, we make it less
+                    // likely for the height to drop below 50px on smaller screens.
+                    return { width: qrboxWidth, height: Math.floor(qrboxWidth / 1.5) };
                 },
                 aspectRatio: 16/9,
               },
