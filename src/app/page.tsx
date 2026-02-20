@@ -53,7 +53,9 @@ export default function ScannerPage() {
   }, [router]);
 
   const handleScanFailure = useCallback((error: unknown) => {
-    if (error instanceof Error && error.name === 'NotFoundException') {
+    // This error fires continuously when a barcode is not in view.
+    // We only want to log real errors, not the expected "not found" state.
+    if (String(error).includes('NotFoundException')) {
         return;
     }
     trackError();
@@ -150,7 +152,7 @@ export default function ScannerPage() {
                 ) : (
                   <FileImage className="w-5 h-5 mr-2" />
                 )}
-                {isUploading ? t('uploading') : t('uploadImage')}
+                {isUploading ? t('uploading') : t('processing')}
               </Button>
               <input
                 type="file"
