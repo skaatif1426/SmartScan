@@ -100,7 +100,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             {preferences.aiInsightsEnabled && (
                  <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Nutrition AI Insight</CardTitle>
+                        <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> AI Nutrition Insight</CardTitle>
                     </CardHeader>
                     <CardContent>
                         <NutritionInsight product={product} barcode={productData.code} />
@@ -133,7 +133,11 @@ export default function ProductDetailsClient({ product: productData }: { product
                             <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent className="px-6 pt-0 pb-6">
-                            <p className="text-sm text-muted-foreground">{product.ingredients_text_with_allergens || 'Not available'}</p>
+                             {product.ingredients_text_with_allergens ? (
+                                <p className="text-sm text-muted-foreground">{product.ingredients_text_with_allergens}</p>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No ingredients information available for this product.</p>
+                            )}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>

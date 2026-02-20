@@ -77,6 +77,14 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
     });
   }, [history]);
 
+  if (history.length === 0) {
+      return (
+          <div className="text-center text-muted-foreground p-4">
+              <p>Scan products to start unlocking achievements!</p>
+          </div>
+      )
+  }
+
   return (
     <div className="flex flex-wrap gap-4 justify-center">
       {allAchievements.map(ach => {
@@ -88,7 +96,7 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
                 <Tooltip>
                     <TooltipTrigger>
                         <div className={cn("relative w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all", isUnlocked ? 'border-primary bg-primary/10' : 'border-dashed bg-muted')}>
-                            {image ? <Image src={image.imageUrl} alt={ach.name} width={48} height={48} className={cn("rounded-full transition-opacity object-cover", isUnlocked ? 'opacity-100' : 'opacity-20 grayscale')}/> : <Award className={cn("w-8 h-8", isUnlocked ? 'text-primary' : 'text-muted-foreground')}/>}
+                           {image && isUnlocked ? <Image src={image.imageUrl} alt={ach.name} width={48} height={48} className="rounded-full object-cover"/> : <Award className={cn("w-8 h-8", isUnlocked ? 'text-primary' : 'text-muted-foreground')}/>}
                             {isUnlocked && <CheckCircle className="absolute -bottom-1 -right-1 w-5 h-5 bg-background text-green-500 rounded-full"/>}
                         </div>
                     </TooltipTrigger>
