@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Award, CheckCircle, Compass, Flame, Layers } from 'lucide-react';
+import { Award, CheckCircle, Compass, Flame, Layers, Star } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import {
@@ -9,19 +9,34 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from "@/components/ui/tooltip"
+} from "@/components/ui/tooltip";
+import { Progress } from "@/components/ui/progress";
 import { differenceInCalendarDays } from 'date-fns';
 import { useDiscovery } from '@/hooks/useDiscovery';
 
 
-const allAchievements = [
-  { id: 'scan-1', name: 'First Scan!', description: 'You scanned your first item.', type: 'scanCount', value: 1, icon: Award },
-  { id: 'scan-10', name: 'Scanner Pro', description: 'You\'ve scanned 10 items.', type: 'scanCount', value: 10, icon: Award },
-  { id: 'scan-50', name: 'Master Scanner', description: '50 items scanned. Incredible!', type: 'scanCount', value: 50, icon: Award },
-  { id: 'streak-3', name: 'On Fire!', description: 'You\'ve maintained a 3-day scan streak.', type: 'streak', value: 3, icon: Flame },
-  { id: 'diverse-5', name: 'Diverse Palette', description: 'You\'ve scanned items from 5 different categories.', type: 'categories', value: 5, icon: Layers },
-  { id: 'discovery-1', name: 'Explorer', description: 'You discovered a product not yet in our database.', type: 'discovery', value: 1, icon: Compass },
-];
+const achievementTiers = {
+  scanCount: [
+    { id: 'scan-1', name: 'First Scan', description: 'Scan your first item.', value: 1, icon: Award },
+    { id: 'scan-10', name: 'Scanner Pro', description: 'Scan 10 items.', value: 10, icon: Star },
+    { id: 'scan-50', name: 'Master Scanner', description: 'Scan 50 items. Incredible!', value: 50, icon: Star },
+  ],
+  discovery: [
+    { id: 'discovery-1', name: 'Explorer I', description: 'Discover 1 new product.', value: 1, icon: Compass },
+    { id: 'discovery-5', name: 'Explorer II', description: 'Discover 5 new products.', value: 5, icon: Compass },
+    { id: 'discovery-10', name: 'Explorer Pro', description: 'Discover 10 new products.', value: 10, icon: Compass },
+  ],
+  streak: [
+    { id: 'streak-3', name: 'On Fire!', description: 'Maintain a 3-day scan streak.', value: 3, icon: Flame },
+    { id: 'streak-7', name: 'Inferno', description: 'A 7-day scan streak! You\'re unstoppable.', value: 7, icon: Flame },
+  ],
+  categories: [
+    { id: 'diverse-5', name: 'Diverse Palette', description: 'Scan items from 5 different categories.', value: 5, icon: Layers },
+    { id: 'diverse-10', name: 'Food Critic', description: 'Scan 10 different categories.', value: 10, icon: Layers },
+  ],
+};
+
+const allAchievements = Object.values(achievementTiers).flat();
 
 function calculateScanStreak(history: ScanHistoryItem[]): number {
     if (history.length === 0) return 0;
@@ -52,7 +67,7 @@ function calculateScanStreak(history: ScanHistoryItem[]): number {
 function Achievements({ history }: { history: ScanHistoryItem[] }) {
   const { discoveryCount } = useDiscovery();
 
-  const unlockedAchievements = useMemo(() => {
+  const stats = useMemo(() => {
     const scanCount = history.length;
     const streak = calculateScanStreak(history);
     
@@ -65,20 +80,12 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
     });
     const categoryCount = uniqueCategories.size;
 
-    return allAchievements.filter(ach => {
-        switch (ach.type) {
-            case 'scanCount':
-                return scanCount >= ach.value;
-            case 'streak':
-                return streak >= ach.value;
-            case 'categories':
-                return categoryCount >= ach.value;
-            case 'discovery':
-                return discoveryCount >= ach.value;
-            default:
-                return false;
-        }
-    });
+    return {
+      scanCount,
+      discovery: discoveryCount,
+      streak,
+      categories: categoryCount,
+    };
   }, [history, discoveryCount]);
 
   if (history.length === 0 && discoveryCount === 0) {
@@ -89,11 +96,41 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
       )
   }
 
+  const typeToStatMap: { [key in keyof typeof achievementTiers]: keyof typeof stats } = {
+    scanCount: 'scanCount',
+    discovery: 'discovery',
+    streak: 'streak',
+    categories: 'categories',
+  };
+
   return (
     <div className="flex flex-wrap gap-4 justify-center">
       {allAchievements.map(ach => {
-        const isUnlocked = unlockedAchievements.some(unlocked => unlocked.id === ach.id);
+        const type = Object.keys(achievementTiers).find(key => achievementTiers[key as keyof typeof achievementTiers].some(a => a.id === ach.id)) as keyof typeof achievementTiers | undefined;
+        
+        if (!type) return null;
+
+        const statKey = typeToStatMap[type];
+        const currentValue = stats[statKey];
+        const isUnlocked = currentValue >= ach.value;
         const Icon = ach.icon;
+
+        let progressContent = null;
+        if (!isUnlocked) {
+            const tiers = achievementTiers[type];
+            const highestUnlockedTier = [...tiers].reverse().find(t => currentValue >= t.value);
+            const currentAchIndex = tiers.findIndex(t => t.id === ach.id);
+            const isNextGoal = (!highestUnlockedTier && currentAchIndex === 0) || (highestUnlockedTier && currentAchIndex === tiers.findIndex(t => t.id === highestUnlockedTier.id) + 1);
+
+            if (isNextGoal) {
+                progressContent = (
+                    <div className="mt-2 w-full">
+                        <p className="text-xs font-semibold text-primary">{currentValue} / {ach.value}</p>
+                        <Progress value={(currentValue / ach.value) * 100} className="h-1 mt-1" />
+                    </div>
+                );
+            }
+        }
 
         return (
             <TooltipProvider key={ach.id} delayDuration={100}>
@@ -104,9 +141,10 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
                             {isUnlocked && <CheckCircle className="absolute -bottom-1 -right-1 w-5 h-5 bg-background text-green-500 rounded-full"/>}
                         </div>
                     </TooltipTrigger>
-                    <TooltipContent>
+                    <TooltipContent className="w-48">
                         <p className="font-bold">{ach.name}</p>
                         <p className="text-sm text-muted-foreground">{ach.description}</p>
+                        {progressContent}
                     </TooltipContent>
                 </Tooltip>
             </TooltipProvider>
