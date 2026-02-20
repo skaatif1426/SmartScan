@@ -152,7 +152,7 @@ export default function ScannerPage() {
                 ) : (
                   <FileImage className="w-5 h-5 mr-2" />
                 )}
-                {isUploading ? t('uploading') : t('processing')}
+                {isUploading ? t('uploading') : t('uploadImage')}
               </Button>
               <input
                 type="file"
