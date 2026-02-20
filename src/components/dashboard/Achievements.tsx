@@ -1,10 +1,8 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import Image from 'next/image';
 import { Award, CheckCircle } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
-import { PlaceHolderImages } from '@/lib/placeholder-images';
 import { cn } from '@/lib/utils';
 import {
   Tooltip,
@@ -16,11 +14,11 @@ import { differenceInCalendarDays } from 'date-fns';
 
 
 const allAchievements = [
-  { id: 'scan-1', name: 'First Scan!', description: 'You scanned your first item.', imageId: 'achievement-1', type: 'scanCount', value: 1 },
-  { id: 'scan-10', name: 'Scanner Pro', description: 'You\'ve scanned 10 items.', imageId: 'achievement-10', type: 'scanCount', value: 10 },
-  { id: 'scan-50', name: 'Master Scanner', description: '50 items scanned. Incredible!', imageId: 'achievement-50', type: 'scanCount', value: 50 },
-  { id: 'streak-3', name: 'On Fire!', description: 'You\'ve maintained a 3-day scan streak.', imageId: 'achievement-streak-3', type: 'streak', value: 3 },
-  { id: 'diverse-5', name: 'Diverse Palette', description: 'You\'ve scanned items from 5 different categories.', imageId: 'achievement-diverse-5', type: 'categories', value: 5 },
+  { id: 'scan-1', name: 'First Scan!', description: 'You scanned your first item.', type: 'scanCount', value: 1 },
+  { id: 'scan-10', name: 'Scanner Pro', description: 'You\'ve scanned 10 items.', type: 'scanCount', value: 10 },
+  { id: 'scan-50', name: 'Master Scanner', description: '50 items scanned. Incredible!', type: 'scanCount', value: 50 },
+  { id: 'streak-3', name: 'On Fire!', description: 'You\'ve maintained a 3-day scan streak.', type: 'streak', value: 3 },
+  { id: 'diverse-5', name: 'Diverse Palette', description: 'You\'ve scanned items from 5 different categories.', type: 'categories', value: 5 },
 ];
 
 function calculateScanStreak(history: ScanHistoryItem[]): number {
@@ -89,14 +87,13 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
     <div className="flex flex-wrap gap-4 justify-center">
       {allAchievements.map(ach => {
         const isUnlocked = unlockedAchievements.some(unlocked => unlocked.id === ach.id);
-        const image = PlaceHolderImages.find(img => img.id === ach.imageId);
 
         return (
-            <TooltipProvider key={ach.id}>
+            <TooltipProvider key={ach.id} delayDuration={100}>
                 <Tooltip>
-                    <TooltipTrigger>
-                        <div className={cn("relative w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all", isUnlocked ? 'border-primary bg-primary/10' : 'border-dashed bg-muted')}>
-                           {image && isUnlocked ? <Image src={image.imageUrl} alt={ach.name} width={48} height={48} className="rounded-full object-cover"/> : <Award className={cn("w-8 h-8", isUnlocked ? 'text-primary' : 'text-muted-foreground')}/>}
+                    <TooltipTrigger asChild>
+                        <div className={cn("relative w-16 h-16 rounded-full border-2 flex items-center justify-center transition-all duration-300", isUnlocked ? 'border-primary bg-primary/10' : 'border-dashed bg-muted')}>
+                           <Award className={cn("w-8 h-8 transition-colors", isUnlocked ? 'text-primary' : 'text-muted-foreground/50')}/>
                             {isUnlocked && <CheckCircle className="absolute -bottom-1 -right-1 w-5 h-5 bg-background text-green-500 rounded-full"/>}
                         </div>
                     </TooltipTrigger>
