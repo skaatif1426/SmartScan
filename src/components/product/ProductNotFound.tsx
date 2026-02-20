@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { Bot, Camera } from 'lucide-react';
 
@@ -10,12 +10,20 @@ import { getAIEstimate } from '@/lib/actions';
 import type { NutritionInsightOutput } from '@/lib/types';
 import AnalysisDisplay from './AnalysisDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useDiscovery } from '@/hooks/useDiscovery';
 
 export default function ProductNotFound({ barcode }: { barcode: string }) {
     const router = useRouter();
     const [isEstimating, setIsEstimating] = useState(false);
     const [estimate, setEstimate] = useState<NutritionInsightOutput | null>(null);
     const [error, setError] = useState<string | null>(null);
+    const { addDiscovery } = useDiscovery();
+
+    useEffect(() => {
+        if (barcode) {
+            addDiscovery(barcode);
+        }
+    }, [barcode, addDiscovery]);
 
     const handleGetEstimate = async () => {
         setIsEstimating(true);
