@@ -250,6 +250,12 @@ export const translations: Translations = {
     Marathi: 'स्कॅन केलेल्या श्रेणी',
     Hinglish: 'Scanned Categories',
   },
+  newProductsDiscovered: {
+    English: 'New Discoveries',
+    Hindi: 'नई खोजें',
+    Marathi: 'नवीन शोध',
+    Hinglish: 'New Discoveries',
+  },
   // Settings Page
   settingsTitle: {
     English: 'Settings',
