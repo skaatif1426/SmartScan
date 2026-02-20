@@ -47,14 +47,20 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                     <CardTitle className="text-2xl font-bold">✨ New Discovery!</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                    <p className="text-muted-foreground">
-                        Looks like this product isn’t in our database yet — thanks for scanning something unique! 🙌
-                    </p>
-                    <p className="text-sm text-muted-foreground pt-2">
-                        We’re always expanding and improving our product coverage to make this smarter every day 🚀
+                    <div>
+                        <p className="text-muted-foreground">
+                            Looks like this product isn’t in our database yet — thanks for scanning something unique! 🙌
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-2">
+                            We’re always expanding and improving our product coverage to make this smarter every day 🚀
+                        </p>
+                    </div>
+
+                    <p className="text-xs text-muted-foreground italic !-mt-1">
+                        This counts towards your Explorer achievements 🧭
                     </p>
 
-                    <div className="flex flex-col sm:flex-row gap-2 pt-4">
+                    <div className="flex flex-col sm:flex-row gap-2 pt-2">
                         <Button className="w-full" onClick={handleGetEstimate} disabled={isEstimating}>
                             <Bot className="mr-2" />
                             {isEstimating ? 'Estimating...' : 'Get AI Estimate'}
