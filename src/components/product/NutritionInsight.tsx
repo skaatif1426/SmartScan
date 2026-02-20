@@ -5,14 +5,12 @@ import { AlertCircle, Sparkles, RefreshCcw } from 'lucide-react';
 import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { Progress } from '@/components/ui/progress';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import AnalysisDisplay from './AnalysisDisplay';
 
 const CACHE_KEY = 'nutriscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
@@ -81,50 +79,6 @@ function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
     const finalScore = Math.max(0, Math.min(100, Math.round(score)));
     return { score: finalScore, warnings: warnings.map(w => w.reason) };
 }
-
-const getHealthScoreColor = (score: number) => {
-    if (score >= 75) return 'bg-green-500';
-    if (score >= 50) return 'bg-yellow-500';
-    return 'bg-red-500';
-};
-
-const AnalysisDisplay = ({ title, score, risks, recommendation, summary, isLocal = false }: { title: string, score: number, risks?: string[], recommendation?: string, summary?: string, isLocal?: boolean }) => (
-    <div className="space-y-4">
-        <div>
-            <Label className="text-sm font-medium">{title}: {score}/100</Label>
-            <Progress value={score} className="h-2" indicatorClassName={getHealthScoreColor(score)} />
-        </div>
-        {summary && (
-             <div>
-                <Label className="text-sm font-medium">Summary</Label>
-                <p className="text-sm text-muted-foreground">{summary}</p>
-            </div>
-        )}
-        {isLocal && risks && risks.length > 0 && (
-             <div>
-                <Label className="text-sm font-medium">Score Factors</Label>
-                <p className="text-sm text-muted-foreground">Score reduced due to: {risks.join(', ')}.</p>
-            </div>
-        )}
-        {recommendation && (
-            <div>
-                <Label className="text-sm font-medium">Recommendation</Label>
-                <p className="text-sm text-muted-foreground">{recommendation}</p>
-            </div>
-        )}
-        {!isLocal && risks && risks.length > 0 && (
-            <div>
-                 <Label className="text-sm font-medium">Potential Risks</Label>
-                 <div className="flex flex-wrap gap-2 mt-1">
-                    {risks.map((risk, i) => (
-                        <Badge key={i} variant="destructive">{risk}</Badge>
-                    ))}
-                 </div>
-            </div>
-        )}
-    </div>
-);
-
 
 export default function NutritionInsight({ product, barcode }: { product: Product['product'], barcode: string }) {
   const [localAnalysis, setLocalAnalysis] = useState<LocalAnalysis | null>(null);

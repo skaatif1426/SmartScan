@@ -6,6 +6,7 @@ import ProductDetailsClient from '@/components/product/ProductDetailsClient';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { headers } from 'next/headers';
+import ProductNotFound from '@/components/product/ProductNotFound';
 
 export default async function ProductPage({ params }: { params: { barcode: string } }) {
   const { barcode } = params;
@@ -41,27 +42,7 @@ export default async function ProductPage({ params }: { params: { barcode: strin
   }
 
   if (!productResult.product) {
-    return (
-      <div className="flex items-center justify-center h-full p-4">
-        <Card className="w-full max-w-md text-center">
-          <CardHeader>
-            <CardTitle className="text-xl">Product Not Found</CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <Alert variant="destructive">
-              <AlertCircle className="h-4 w-4" />
-              <AlertTitle>No Match Found</AlertTitle>
-              <AlertDescription>
-                We couldn&apos;t find any product with barcode: <strong className="font-mono">{barcode}</strong>. It might not be in our database.
-              </AlertDescription>
-            </Alert>
-             <Link href="/">
-                <Button variant="outline">Scan Another Product</Button>
-            </Link>
-          </CardContent>
-        </Card>
-      </div>
-    );
+    return <ProductNotFound barcode={barcode} />;
   }
 
   return <ProductDetailsClient product={productResult.product} />;
