@@ -4,7 +4,7 @@ export const ProductSchema = z.object({
   code: z.string(),
   product: z.object({
     product_name: z.string().nullish().transform(v => v ?? 'Unknown Product'),
-    brands: z.string().nullish().default('Unknown Brand'),
+    brands: z.string().nullish().transform(v => v ?? 'Unknown Brand'),
     image_front_url: z.string().url().nullish(),
     nutriments: z.object({
       "energy-kcal_100g": z.coerce.number().nullish(),
@@ -15,13 +15,13 @@ export const ProductSchema = z.object({
       proteins_100g: z.coerce.number().nullish(),
       salt_100g: z.coerce.number().nullish(),
     }).passthrough().nullish().transform(v => v ?? {}),
-    ingredients_text_with_allergens: z.string().nullish().default('Not available'),
+    ingredients_text_with_allergens: z.string().nullish().transform(v => v ?? 'Not available'),
     nutriscore_grade: z.string().nullish(),
     nova_group: z.coerce.number().nullish(),
-    allergens_tags: z.array(z.string()).default([]),
-    categories: z.string().nullish().default(''),
+    allergens_tags: z.array(z.string()).nullish().transform(v => v ?? []),
+    categories: z.string().nullish().transform(v => v ?? ''),
   }).passthrough().nullish(),
-  status: z.number(),
+  status: z.coerce.number(),
 });
 export type Product = z.infer<typeof ProductSchema>;
 
