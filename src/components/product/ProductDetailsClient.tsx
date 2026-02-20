@@ -1,10 +1,10 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Utensils, Wheat, Beef, Sparkles, MessageCircle, Info, Hash, ChevronLeft } from 'lucide-react';
+import { Utensils, Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -36,6 +36,7 @@ export default function ProductDetailsClient({ product: productData }: { product
     const { addScanToHistory } = useScanHistory();
     const { product } = productData;
     const { preferences } = usePreferences();
+    const [imageError, setImageError] = useState(false);
 
     useEffect(() => {
         addScanToHistory({
@@ -47,9 +48,17 @@ export default function ProductDetailsClient({ product: productData }: { product
         });
     }, [addScanToHistory, product.product_name, product.brands, product.image_front_url, productData.code, product.categories]);
     
-    const isVeg = !product.ingredients_text_with_allergens?.toLowerCase().includes('beef') && !product.ingredients_text_with_allergens?.toLowerCase().includes('chicken'); // Simple check
-    const matchesDiet = (preferences.isVeg && isVeg) || (preferences.isNonVeg && !isVeg) || (!preferences.isVeg && !preferences.isNonVeg);
     const hasAllergens = preferences.allergies.some(allergy => product.allergens_tags?.some(tag => tag.includes(allergy)));
+
+    const nutritionValues = [
+        { label: "Energy (kcal)", value: product.nutriments?.['energy-kcal_100g'], unit: "kcal" },
+        { label: "Fat", value: product.nutriments?.fat_100g, unit: "g" },
+        { label: "Saturated Fat", value: product.nutriments?.['saturated-fat_100g'], unit: "g" },
+        { label: "Carbohydrates", value: product.nutriments?.carbohydrates_100g, unit: "g" },
+        { label: "Sugars", value: product.nutriments?.sugars_100g, unit: "g" },
+        { label: "Proteins", value: product.nutriments?.proteins_100g, unit: "g" },
+        { label: "Salt", value: product.nutriments?.salt_100g, unit: "g" }
+    ].filter(item => item.value !== undefined && item.value !== null);
 
     return (
         <div className="p-4 md:p-6 space-y-4">
@@ -61,21 +70,28 @@ export default function ProductDetailsClient({ product: productData }: { product
             </div>
 
             <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-100">
-                <CardHeader className="p-0 relative h-64">
-                    <Image
-                        src={product.image_front_url || 'https://picsum.photos/seed/product/600/400'}
-                        alt={product.product_name}
-                        fill
-                        className="object-contain rounded-t-lg bg-white"
-                        data-ai-hint="product image"
-                    />
-                </CardHeader>
+                <div className="p-0 relative h-64 bg-muted rounded-t-lg flex items-center justify-center">
+                    {(product.image_front_url && !imageError) ? (
+                        <Image
+                            src={product.image_front_url}
+                            alt={product.product_name}
+                            fill
+                            className="object-contain"
+                            onError={() => setImageError(true)}
+                            data-ai-hint="product image"
+                        />
+                    ) : (
+                        <div className="flex flex-col items-center text-muted-foreground">
+                            <Package size={48} />
+                            <p className="mt-2 text-sm">No image available</p>
+                        </div>
+                    )}
+                </div>
                 <CardContent className="pt-6">
                     <p className="text-muted-foreground text-lg">{product.brands}</p>
                     <div className="flex flex-wrap gap-2 mt-2">
                         {product.nutriscore_grade && <Badge variant="outline">Nutri-Score: {product.nutriscore_grade.toUpperCase()}</Badge>}
                         {product.nova_group && <Badge variant="outline">NOVA: {product.nova_group}</Badge>}
-                        {matchesDiet ? (isVeg ? <Badge variant="secondary" className="bg-green-100 text-green-800"><Utensils className="mr-1 h-3 w-3" /> Veg</Badge> : <Badge className="bg-red-100 text-red-800"><Beef className="mr-1 h-3 w-3" />Non-Veg</Badge>) : <Badge variant="destructive">Doesn't match preference</Badge>}
                         {hasAllergens && <Badge variant="destructive"><Wheat className="mr-1 h-3 w-3" /> Contains Allergens</Badge>}
                     </div>
                 </CardContent>
@@ -99,14 +115,14 @@ export default function ProductDetailsClient({ product: productData }: { product
                             <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
                         </AccordionTrigger>
                         <AccordionContent className="px-6 pt-0 pb-6">
-                             <p className="text-sm text-muted-foreground pb-4">per 100g serving</p>
-                            <NutritionValue label="Energy (kcal)" value={product.nutriments?.['energy-kcal_100g']} unit="kcal" />
-                            <NutritionValue label="Fat" value={product.nutriments?.fat_100g} unit="g" />
-                            <NutritionValue label="Saturated Fat" value={product.nutriments?.['saturated-fat_100g']} unit="g" />
-                            <NutritionValue label="Carbohydrates" value={product.nutriments?.carbohydrates_100g} unit="g" />
-                            <NutritionValue label="Sugars" value={product.nutriments?.sugars_100g} unit="g" />
-                            <NutritionValue label="Proteins" value={product.nutriments?.proteins_100g} unit="g" />
-                            <NutritionValue label="Salt" value={product.nutriments?.salt_100g} unit="g" />
+                            {nutritionValues.length > 0 ? (
+                                <>
+                                    <p className="text-sm text-muted-foreground pb-4">per 100g serving</p>
+                                    {nutritionValues.map(item => <NutritionValue key={item.label} {...item} />)}
+                                </>
+                            ) : (
+                                <p className="text-sm text-muted-foreground">No nutrition data available for this product.</p>
+                            )}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>

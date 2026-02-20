@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { LayoutGrid } from 'lucide-react';
+import { LayoutGrid, ScanLine } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import StatsCards from '@/components/dashboard/StatsCards';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -15,8 +15,18 @@ const CategoryChart = dynamic(() => import('@/components/dashboard/CategoryChart
 });
 
 export default function DashboardPage() {
-    const { history } = useScanHistory();
+    const { history, isLoaded } = useScanHistory();
     const { t } = useLanguage();
+
+    if (isLoaded && history.length === 0) {
+        return (
+            <div className="flex flex-col items-center justify-center h-full p-4 text-center">
+                <ScanLine className="mx-auto h-16 w-16 text-muted-foreground" />
+                <h2 className="mt-4 text-xl font-semibold">{t('dashboardEmptyTitle')}</h2>
+                <p className="mt-2 text-sm text-muted-foreground">{t('dashboardEmptyDescription')}</p>
+            </div>
+        )
+    }
 
     return (
         <div className="p-4 md:p-6 space-y-6">

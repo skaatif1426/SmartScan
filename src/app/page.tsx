@@ -6,7 +6,7 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import dynamic from 'next/dynamic';
-import { CameraOff, ScanLine, FileImage, Loader2 } from 'lucide-react';
+import { CameraOff, ScanLine, FileImage, Loader2, Send } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -35,6 +35,7 @@ export default function ScannerPage() {
   const [showScanner, setShowScanner] = useState(false);
   const [cameraError, setCameraError] = useState<Error | null>(null);
   const [isUploading, setIsUploading] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const { t } = useLanguage();
   const { trackError } = useAnalytics();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -53,7 +54,6 @@ export default function ScannerPage() {
 
   const handleScanFailure = useCallback((error: unknown) => {
     if (error instanceof Error && error.name === 'NotFoundException') {
-        // This is expected when no barcode is in the frame, so we can ignore it.
         return;
     }
     trackError();
@@ -75,13 +75,12 @@ export default function ScannerPage() {
     setIsUploading(true);
 
     try {
-      // The library doesn't expose its decoder instance easily, so we create a temporary one.
-      const html5QrCode = new Html5Qrcode('reader');
+      const html5QrCode = new Html5Qrcode('reader', false);
       const decodedText = await html5QrCode.scanFile(file, false);
       handleScanSuccess(decodedText);
     } catch (err: unknown) {
       trackError();
-      const isNotFound = err instanceof Error && err.name === 'NotFoundException';
+      const isNotFound = err instanceof Error && (err.name === 'NotFoundException' || err.message.includes('No MultiFormat Readers'));
       
       if (!isNotFound) {
         console.error('File Scan Error:', err);
@@ -101,8 +100,11 @@ export default function ScannerPage() {
   };
 
   function onSubmit(values: z.infer<typeof formSchema>) {
+    setIsSubmitting(true);
     router.push(`/product/${values.barcode}`);
   }
+
+  const isLoading = isUploading || isSubmitting;
 
   return (
     <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6">
@@ -124,7 +126,7 @@ export default function ScannerPage() {
                 onScanFailure={handleScanFailure}
                 onCameraPermissionError={handleCameraPermission}
               />
-              <Button variant="outline" className="w-full rounded-full" onClick={() => setShowScanner(false)} disabled={isUploading}>
+              <Button variant="outline" className="w-full rounded-full" onClick={() => setShowScanner(false)} disabled={isLoading}>
                 <CameraOff className="w-4 h-4 mr-2" />
                 {t('stopScanning')}
               </Button>
@@ -132,7 +134,7 @@ export default function ScannerPage() {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">{t('scannerPrompt')}</p>
-              <Button size="lg" className="w-full rounded-full" onClick={() => setShowScanner(true)} disabled={isUploading}>
+              <Button size="lg" className="w-full rounded-full" onClick={() => setShowScanner(true)} disabled={isLoading}>
                 <ScanLine className="w-5 h-5 mr-2" />
                 {t('startScanning')}
               </Button>
@@ -141,7 +143,7 @@ export default function ScannerPage() {
                 size="lg"
                 className="w-full rounded-full"
                 onClick={() => fileInputRef.current?.click()}
-                disabled={isUploading}
+                disabled={isLoading}
               >
                 {isUploading ? (
                   <Loader2 className="w-5 h-5 mr-2 animate-spin" />
@@ -156,7 +158,7 @@ export default function ScannerPage() {
                 onChange={handleFileChange}
                 className="hidden"
                 accept="image/*"
-                disabled={isUploading}
+                disabled={isLoading}
               />
             </div>
           )}
@@ -185,15 +187,20 @@ export default function ScannerPage() {
                         inputMode="numeric"
                         pattern="[0-9]*"
                         className="bg-background/80"
-                        disabled={isUploading}
+                        disabled={isLoading}
                       />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
-              <Button type="submit" className="w-full bg-accent hover:bg-accent/90 text-accent-foreground rounded-full" disabled={isUploading}>
-                {t('searchProduct')}
+              <Button type="submit" className="w-full rounded-full" disabled={isLoading || !form.formState.isValid}>
+                 {isSubmitting ? (
+                    <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                ) : (
+                   <Send className="w-5 h-5 mr-2" />
+                )}
+                {isSubmitting ? 'Searching...' : t('searchProduct')}
               </Button>
             </form>
           </Form>

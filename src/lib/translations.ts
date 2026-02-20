@@ -208,6 +208,18 @@ export const translations: Translations = {
     Marathi: 'माझा डॅशबोर्ड',
     Hinglish: 'Mera Dashboard',
   },
+  dashboardEmptyTitle: {
+    English: 'Your Dashboard is Waiting',
+    Hindi: 'आपका डैशबोर्ड प्रतीक्षा कर रहा है',
+    Marathi: 'तुमचा डॅशबोर्ड वाट पाहत आहे',
+    Hinglish: 'Aapka dashboard wait kar raha hai',
+  },
+  dashboardEmptyDescription: {
+    English: 'Scan your first product to unlock achievements and see your stats.',
+    Hindi: 'उपलब्धियों को अनलॉक करने और अपने आँकड़े देखने के लिए अपना पहला उत्पाद स्कैन करें।',
+    Marathi: 'उपलब्धी अनलॉक करण्यासाठी आणि तुमची आकडेवारी पाहण्यासाठी तुमचे पहिले उत्पादन स्कॅन करा।',
+    Hinglish: 'Achievements unlock karne aur stats dekhne ke liye apna pehla product scan karo.',
+  },
   totalScans: {
     English: 'Total Scans',
     Hindi: 'कुल स्कैन',

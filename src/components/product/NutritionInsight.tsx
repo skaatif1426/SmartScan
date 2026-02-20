@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AlertCircle, Sparkles } from 'lucide-react';
+import { AlertCircle, Sparkles, RefreshCcw } from 'lucide-react';
 import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
@@ -31,10 +32,9 @@ function getCacheKey(barcode: string, language: string, preferences: Partial<Omi
     return `${barcode}-${language}-${prefsString}`;
 }
 
-// Local scoring engine
 function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
     let score = 100;
-    const warnings: string[] = [];
+    const warnings: { reason: string, impact: number }[] = [];
     const nutriments = product.nutriments || {};
 
     const HIGH_SUGAR_THRESHOLD = 22.5;
@@ -43,7 +43,7 @@ function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
 
     if (nutriments.sugars_100g !== undefined) {
       if (nutriments.sugars_100g >= HIGH_SUGAR_THRESHOLD) {
-        warnings.push('High in sugar');
+        warnings.push({ reason: 'High in sugar', impact: -25 });
         score -= 25;
       } else if (nutriments.sugars_100g > 10) {
         score -= 10;
@@ -52,7 +52,7 @@ function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
 
     if (nutriments.salt_100g !== undefined) {
         if (nutriments.salt_100g >= HIGH_SALT_THRESHOLD) {
-            warnings.push('High in salt');
+            warnings.push({ reason: 'High in salt', impact: -25 });
             score -= 25;
         } else if (nutriments.salt_100g > 0.3) {
             score -= 10;
@@ -61,7 +61,7 @@ function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
 
     if (nutriments['saturated-fat_100g'] !== undefined) {
         if (nutriments['saturated-fat_100g'] >= HIGH_SATFAT_THRESHOLD) {
-            warnings.push('High in saturated fat');
+            warnings.push({ reason: 'High in saturated fat', impact: -20 });
             score -= 20;
         } else if (nutriments['saturated-fat_100g'] > 1.5) {
             score -= 10;
@@ -70,16 +70,16 @@ function calculateLocalAnalysis(product: Product['product']): LocalAnalysis {
     
     if (product.nova_group) {
       if (product.nova_group === 4) {
-        warnings.push('Ultra-processed food (NOVA 4)');
+        warnings.push({ reason: 'Ultra-processed food (NOVA 4)', impact: -20 });
         score -= 20;
       } else if (product.nova_group === 3) {
-        warnings.push('Processed food (NOVA 3)');
+        warnings.push({ reason: 'Processed food (NOVA 3)', impact: -10 });
         score -= 10;
       }
     }
 
     const finalScore = Math.max(0, Math.min(100, Math.round(score)));
-    return { score: finalScore, warnings };
+    return { score: finalScore, warnings: warnings.map(w => w.reason) };
 }
 
 const getHealthScoreColor = (score: number) => {
@@ -88,7 +88,7 @@ const getHealthScoreColor = (score: number) => {
     return 'bg-red-500';
 };
 
-const AnalysisDisplay = ({ title, score, risks, recommendation, summary }: { title: string, score: number, risks?: string[], recommendation?: string, summary?: string }) => (
+const AnalysisDisplay = ({ title, score, risks, recommendation, summary, isLocal = false }: { title: string, score: number, risks?: string[], recommendation?: string, summary?: string, isLocal?: boolean }) => (
     <div className="space-y-4">
         <div>
             <Label className="text-sm font-medium">{title}: {score}/100</Label>
@@ -100,13 +100,19 @@ const AnalysisDisplay = ({ title, score, risks, recommendation, summary }: { tit
                 <p className="text-sm text-muted-foreground">{summary}</p>
             </div>
         )}
+        {isLocal && risks && risks.length > 0 && (
+             <div>
+                <Label className="text-sm font-medium">Score Factors</Label>
+                <p className="text-sm text-muted-foreground">Score reduced due to: {risks.join(', ')}.</p>
+            </div>
+        )}
         {recommendation && (
             <div>
                 <Label className="text-sm font-medium">Recommendation</Label>
                 <p className="text-sm text-muted-foreground">{recommendation}</p>
             </div>
         )}
-        {risks && risks.length > 0 && (
+        {!isLocal && risks && risks.length > 0 && (
             <div>
                  <Label className="text-sm font-medium">Potential Risks</Label>
                  <div className="flex flex-wrap gap-2 mt-1">
@@ -130,28 +136,33 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
   const { incrementAiCallCount } = useAiUsage();
   const { trackError } = useAnalytics();
 
-  const fetchInsight = useCallback(async () => {
+  const fetchInsight = useCallback(async (forceRefresh = false) => {
     setIsLoading(true);
     setAiError(null);
     
-    const local = calculateLocalAnalysis(product);
-    setLocalAnalysis(local);
-
-    const cacheKey = getCacheKey(barcode, language, preferences);
-    try {
-      const cached = localStorage.getItem(CACHE_KEY);
-      if (cached) {
-          const cache: { [key: string]: CacheItem } = JSON.parse(cached);
-          const item = cache[cacheKey];
-          if (item && (Date.now() - item.timestamp < CACHE_TTL)) {
-              setAiInsight(item.data);
-              setIsLoading(false);
-              return;
-          }
-      }
-    } catch (e) {
-        console.warn("Failed to read AI cache", e);
+    if (!localAnalysis) {
+        const local = calculateLocalAnalysis(product);
+        setLocalAnalysis(local);
     }
+    
+    if (!forceRefresh) {
+        const cacheKey = getCacheKey(barcode, language, preferences);
+        try {
+          const cached = localStorage.getItem(CACHE_KEY);
+          if (cached) {
+              const cache: { [key: string]: CacheItem } = JSON.parse(cached);
+              const item = cache[cacheKey];
+              if (item && (Date.now() - item.timestamp < CACHE_TTL)) {
+                  setAiInsight(item.data);
+                  setIsLoading(false);
+                  return;
+              }
+          }
+        } catch (e) {
+            console.warn("Failed to read AI cache", e);
+        }
+    }
+
 
     try {
       incrementAiCallCount();
@@ -175,6 +186,7 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
       
       if (result) {
         setAiInsight(result);
+        const cacheKey = getCacheKey(barcode, language, preferences);
         try {
             const cached = localStorage.getItem(CACHE_KEY);
             const cache = cached ? JSON.parse(cached) : {};
@@ -193,7 +205,7 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
     } finally {
       setIsLoading(false);
     }
-  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError]);
+  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError, localAnalysis]);
 
 
   useEffect(() => {
@@ -202,34 +214,29 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
 
   // Initial loading state before local analysis
   if (!localAnalysis) {
-    return <div className='space-y-4 h-[180px]'>
+    return <div className='space-y-4 min-h-[210px]'>
         <Skeleton className="h-4 w-1/3 mb-1" />
         <Skeleton className="h-2 w-full" />
         <Skeleton className="h-4 w-1/4 mt-3" />
         <Skeleton className="h-4 w-full" />
         <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-10 w-full mt-2" />
     </div>;
   }
 
-  // AI is loading, show local analysis + loading indicator
-  if (isLoading) {
-    return (
-        <div>
-            <AnalysisDisplay title="Initial Score" score={localAnalysis.score} risks={localAnalysis.warnings} />
-            <div className="mt-4 space-y-2 animate-pulse">
-                <div className="flex items-center gap-2 text-primary text-sm font-medium">
-                    <Sparkles className="h-4 w-4" />
-                    <p>Refining analysis with AI...</p>
+  return (
+    <div className='min-h-[210px]'>
+        {isLoading ? (
+            <div>
+                <AnalysisDisplay title="Initial Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true} />
+                <div className="mt-4 space-y-2 animate-pulse">
+                    <div className="flex items-center gap-2 text-primary text-sm font-medium">
+                        <Sparkles className="h-4 w-4" />
+                        <p>Refining analysis with AI...</p>
+                    </div>
                 </div>
             </div>
-        </div>
-    );
-  }
-  
-  // AI has finished loading
-  return (
-    <div>
-        {aiInsight ? (
+        ) : aiInsight ? (
             <AnalysisDisplay 
                 title="AI Health Score"
                 score={aiInsight.healthScore}
@@ -239,14 +246,17 @@ export default function NutritionInsight({ product, barcode }: { product: Produc
             />
         ) : (
             <>
-                <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} />
+                <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true}/>
                 {aiError && (
                     <Alert variant="destructive" className="mt-4">
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>AI Analysis Unavailable</AlertTitle>
                         <AlertDescription>
-                            Showing a local analysis. The AI couldn't be reached.
+                            An error occurred while fetching the AI insight. Showing local analysis.
                         </AlertDescription>
+                        <Button variant="destructive" size="sm" onClick={() => fetchInsight(true)} className="mt-2 gap-2">
+                           <RefreshCcw size={14} /> Retry AI Analysis
+                        </Button>
                     </Alert>
                 )}
             </>

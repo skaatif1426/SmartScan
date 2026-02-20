@@ -3,11 +3,36 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { History as HistoryIcon, ScanLine } from 'lucide-react';
+import { History as HistoryIcon, ScanLine, Package } from 'lucide-react';
+import { useState } from 'react';
 
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/AppProviders';
+
+function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
+    const [imageError, setImageError] = useState(false);
+
+    if (item.imageUrl && !imageError) {
+        return (
+            <Image
+                src={item.imageUrl}
+                alt={item.productName}
+                width={64}
+                height={64}
+                className="rounded-md object-contain bg-white"
+                onError={() => setImageError(true)}
+                data-ai-hint="product image"
+            />
+        );
+    }
+    
+    return (
+         <div className="w-16 h-16 rounded-md bg-muted flex items-center justify-center">
+            <Package className="w-8 h-8 text-muted-foreground" />
+        </div>
+    );
+}
 
 export default function HistoryPage() {
   const { history } = useScanHistory();
@@ -38,14 +63,7 @@ export default function HistoryPage() {
                 >
                   <Link href={`/product/${item.barcode}`} className="block p-4 border rounded-lg hover:bg-muted transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]">
                     <div className="flex items-center gap-4">
-                      <Image
-                        src={item.imageUrl || 'https://picsum.photos/seed/history/100/100'}
-                        alt={item.productName}
-                        width={64}
-                        height={64}
-                        className="rounded-md object-contain bg-white"
-                        data-ai-hint="product image"
-                      />
+                      <HistoryImage item={item} />
                       <div className="flex-1">
                         <p className="font-semibold">{item.productName}</p>
                         <p className="text-sm text-muted-foreground">{item.brand}</p>

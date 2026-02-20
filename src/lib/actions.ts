@@ -6,10 +6,12 @@ import { fetchProductFromApi } from './openfoodfacts-api';
 import { Product, NutritionInsightOutput } from './types';
 import { sanitizeInput } from '@/ai/prompt-firewall';
 
-export async function getProduct(barcode: string): Promise<Product | null> {
+type GetProductResult = { status: 'success', product: Product | null } | { status: 'error' };
+
+export async function getProduct(barcode: string): Promise<GetProductResult> {
   try {
     const product = await fetchProductFromApi(barcode);
-    return product;
+    return { status: 'success', product: product };
   } catch (error: unknown) {
     console.error(JSON.stringify({
         level: 'error',
@@ -18,7 +20,7 @@ export async function getProduct(barcode: string): Promise<Product | null> {
         barcode,
         error: error instanceof Error ? error.message : String(error),
     }, null, 2));
-    return null;
+    return { status: 'error' };
   }
 }
 
