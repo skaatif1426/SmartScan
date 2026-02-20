@@ -11,8 +11,8 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
-import { differenceInCalendarDays } from 'date-fns';
 import { useDiscovery } from '@/hooks/useDiscovery';
+import { useScanHistory } from '@/hooks/useScanHistory';
 
 
 const achievementTiers = {
@@ -38,38 +38,12 @@ const achievementTiers = {
 
 const allAchievements = Object.values(achievementTiers).flat();
 
-function calculateScanStreak(history: ScanHistoryItem[]): number {
-    if (history.length === 0) return 0;
-    let streak = 0;
-    const uniqueDaysScanned = [...new Set(history.map(scan => new Date(scan.scanDate).setHours(0, 0, 0, 0)))].sort((a, b) => b - a);
-    if (uniqueDaysScanned.length === 0) return 0;
-
-    const today = new Date();
-    const mostRecentScanDate = new Date(uniqueDaysScanned[0]);
-
-    if (differenceInCalendarDays(today, mostRecentScanDate) > 1) {
-        return 0;
-    }
-    
-    streak = 1;
-    for (let i = 1; i < uniqueDaysScanned.length; i++) {
-        const dayDiff = differenceInCalendarDays(new Date(uniqueDaysScanned[i-1]), new Date(uniqueDaysScanned[i]));
-        if (dayDiff === 1) {
-            streak++;
-        } else {
-            break;
-        }
-    }
-    return streak;
-}
-
-
 function Achievements({ history }: { history: ScanHistoryItem[] }) {
   const { discoveryCount } = useDiscovery();
+  const { scanStreak } = useScanHistory();
 
   const stats = useMemo(() => {
     const scanCount = history.length;
-    const streak = calculateScanStreak(history);
     
     const uniqueCategories = new Set<string>();
     history.forEach(item => {
@@ -83,10 +57,10 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
     return {
       scanCount,
       discovery: discoveryCount,
-      streak,
+      streak: scanStreak,
       categories: categoryCount,
     };
-  }, [history, discoveryCount]);
+  }, [history, discoveryCount, scanStreak]);
 
   if (history.length === 0 && discoveryCount === 0) {
       return (

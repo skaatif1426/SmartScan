@@ -1,49 +1,18 @@
 'use client';
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import { Scan, Flame, Compass } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { ScanHistoryItem } from '@/lib/types';
-import { useLanguage, usePreferences } from '@/contexts/AppProviders';
+import { useLanguage } from '@/contexts/AppProviders';
 import { useDiscovery } from '@/hooks/useDiscovery';
+import { useScanHistory } from '@/hooks/useScanHistory';
 
-function calculateScanStreak(history: ScanHistoryItem[]): number {
-    if (history.length === 0) return 0;
-
-    let streak = 0;
-    
-    const uniqueDaysScanned = [...new Set(history.map(scan => new Date(scan.scanDate).setHours(0, 0, 0, 0)))].sort((a, b) => b - a);
-
-    if (uniqueDaysScanned.length === 0) return 0;
-
-    const today = new Date().setHours(0, 0, 0, 0);
-    const yesterday = new Date(today);
-    yesterday.setDate(yesterday.getDate() - 1);
-
-    if (uniqueDaysScanned[0] !== today && uniqueDaysScanned[0] !== new Date(yesterday).getTime()) {
-        return 0;
-    }
-    
-    streak = 1;
-    for (let i = 1; i < uniqueDaysScanned.length; i++) {
-        const dayDiff = (uniqueDaysScanned[i-1] - uniqueDaysScanned[i]) / (1000 * 3600 * 24);
-        if (dayDiff === 1) {
-            streak++;
-        } else {
-            break;
-        }
-    }
-    
-    return streak;
-}
-
-
-function StatsCards({ history }: { history: ScanHistoryItem[] }) {
+function StatsCards() {
     const { t } = useLanguage();
-    const { preferences } = usePreferences();
-    const { discoveryCount } = useDiscovery();
+    const { discoveryStreak } = useDiscovery();
+    const { scanStreak, history } = useScanHistory();
     const totalScans = history.length;
-    const scanStreak = useMemo(() => calculateScanStreak(history), [history]);
+
 
     return (
         <div className="grid gap-6 md:grid-cols-3">
@@ -63,17 +32,16 @@ function StatsCards({ history }: { history: ScanHistoryItem[] }) {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{scanStreak} <span className="text-sm text-muted-foreground">{t('days')}</span></div>
-                    {preferences.advancedUiMode && <p className="text-xs text-muted-foreground">Advanced detail visible!</p>}
                 </CardContent>
             </Card>
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">{t('newProductsDiscovered')}</CardTitle>
+                    <CardTitle className="text-sm font-medium">{t('discoveryStreak')}</CardTitle>
                     <Compass className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                    <div className="text-2xl font-bold">{discoveryCount}</div>
-                    {discoveryCount > 0 && <p className="text-xs text-muted-foreground">Curious Explorer 🧭</p>}
+                    <div className="text-2xl font-bold">{discoveryStreak} <span className="text-sm text-muted-foreground">{t('days')}</span></div>
+                     {discoveryStreak > 0 && <p className="text-xs text-muted-foreground">On a discovery journey! 🔥</p>}
                 </CardContent>
             </Card>
         </div>

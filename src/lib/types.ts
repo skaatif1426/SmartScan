@@ -35,6 +35,11 @@ export interface ScanHistoryItem {
   categories?: string | null;
 }
 
+export interface DiscoveryItem {
+  barcode: string;
+  date: string;
+}
+
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
 export type AiVerbosity = 'concise' | 'detailed';
 export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain';

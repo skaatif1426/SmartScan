@@ -232,6 +232,12 @@ export const translations: Translations = {
     Marathi: 'स्कॅन स्ट्रीक',
     Hinglish: 'Scan Streak',
   },
+  discoveryStreak: {
+    English: 'Discovery Streak',
+    Hindi: 'खोज स्ट्रीक',
+    Marathi: 'शोध स्ट्रीक',
+    Hinglish: 'Discovery Streak',
+  },
   days: {
     English: 'days',
     Hindi: 'दिन',
