@@ -35,14 +35,17 @@ function HistoryImage({ item }: { item: { imageUrl?: string | null, productName:
     );
 }
 
-const getHealthScoreColorClass = (score: number) => {
-    if (score >= 75) return 'text-green-600';
-    if (score >= 50) return 'text-yellow-600';
-    return 'text-red-600';
+const getHealthScoreBadgeClass = (score: number) => {
+    if (score >= 75) return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700';
+    if (score >= 50) return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700';
+    return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700';
 };
 
 const SimpleHealthScore = ({ score }: { score: number }) => (
-    <div className={cn("font-bold text-lg", getHealthScoreColorClass(score))}>
+    <div className={cn(
+        "inline-flex items-center justify-center rounded-full h-12 w-12 border-2 font-bold text-lg",
+        getHealthScoreBadgeClass(score)
+    )}>
         {score}
     </div>
 );
@@ -86,9 +89,8 @@ export default function HistoryPage() {
                         </p>
                       </div>
                        {item.healthScore !== undefined && (
-                        <div className="text-center px-2">
+                        <div className="flex-shrink-0">
                             <SimpleHealthScore score={item.healthScore} />
-                            <p className="text-xs text-muted-foreground">Score</p>
                         </div>
                       )}
                     </div>

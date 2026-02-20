@@ -4,11 +4,18 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle } from '@/components/ui/alert';
+import { cn } from '@/lib/utils';
 
 const getHealthScoreColor = (score: number) => {
     if (score >= 75) return 'bg-green-500';
     if (score >= 50) return 'bg-yellow-500';
     return 'bg-red-500';
+};
+
+const getHealthScoreTextColor = (score: number) => {
+    if (score >= 75) return 'text-green-600';
+    if (score >= 50) return 'text-yellow-600';
+    return 'text-red-600';
 };
 
 const AnalysisDisplay = ({ title, score, risks, recommendation, summary, isLocal = false, warningTitle }: { title: string, score: number, risks?: string[], recommendation?: string, summary?: string, isLocal?: boolean, warningTitle?: string }) => (
@@ -20,7 +27,10 @@ const AnalysisDisplay = ({ title, score, risks, recommendation, summary, isLocal
             </Alert>
         )}
         <div>
-            <Label className="text-sm font-medium">{title}: {score}/100</Label>
+            <div className="flex justify-between items-center mb-1">
+                <Label className="text-sm font-medium">{title}</Label>
+                <span className={cn('font-bold text-lg', getHealthScoreTextColor(score))}>{score}/100</span>
+            </div>
             <Progress value={score} className="h-2" indicatorClassName={getHealthScoreColor(score)} />
         </div>
         {summary && (

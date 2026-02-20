@@ -6,6 +6,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useLanguage } from '@/contexts/AppProviders';
 import { useDiscovery } from '@/hooks/useDiscovery';
 import { useScanHistory } from '@/hooks/useScanHistory';
+import { cn } from '@/lib/utils';
+
+const getHealthScoreTextColor = (score: number | null) => {
+    if (score === null) return '';
+    if (score >= 75) return 'text-green-600';
+    if (score >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+};
 
 function StatsCards() {
     const { t } = useLanguage();
@@ -39,7 +47,9 @@ function StatsCards() {
                 </CardHeader>
                 <CardContent>
                     {averageScore !== null ? (
-                        <div className="text-2xl font-bold">{averageScore}<span className="text-sm font-normal text-muted-foreground">/100</span></div>
+                        <div className={cn("text-2xl font-bold", getHealthScoreTextColor(averageScore))}>
+                            {averageScore}<span className="text-sm font-normal text-muted-foreground">/100</span>
+                        </div>
                     ) : (
                          <div className="text-2xl font-bold">-</div>
                     )}
