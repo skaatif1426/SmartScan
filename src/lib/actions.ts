@@ -14,13 +14,23 @@ export async function getProduct(barcode: string): Promise<GetProductResult> {
     const product = await fetchProductFromApi(barcode);
     return { status: 'success', product: product };
   } catch (error: unknown) {
-    console.error(JSON.stringify({
-        level: 'error',
-        action: 'getProduct',
-        message: 'Failed to fetch product from API',
-        barcode,
-        error: error instanceof Error ? error.message : String(error),
-    }, null, 2));
+    // A 'fetch failed' TypeError occurs during network errors (e.g., no internet).
+    // This is an expected condition, not an application bug. The UI handles it 
+    // by showing a network error message, so we don't need to log a scary 
+    // console error and trigger the Next.js dev overlay.
+    if (error instanceof TypeError && error.message.includes('fetch failed')) {
+        // Silently return the error status for the UI to handle.
+    } else {
+        // For all other errors (e.g., API server errors, data validation issues), 
+        // log them for debugging purposes.
+        console.error(JSON.stringify({
+            level: 'error',
+            action: 'getProduct',
+            message: 'Failed to fetch product from API',
+            barcode,
+            error: error instanceof Error ? error.message : String(error),
+        }, null, 2));
+    }
     return { status: 'error' };
   }
 }

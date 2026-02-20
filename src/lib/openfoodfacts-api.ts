@@ -34,8 +34,8 @@ export async function fetchProductFromApi(barcode: string): Promise<Product | nu
 
     return parsedProduct.data;
   } catch (error) {
-    console.error('Error fetching product from OpenFoodFacts:', error);
-    // Re-throw the error to be handled by the caller (e.g. Server Action)
-    throw new Error('Failed to fetch or validate product data.');
+    // Let the calling server action handle logging and error presentation.
+    // Re-throwing the original error preserves the stack trace and error type.
+    throw error;
   }
 }
