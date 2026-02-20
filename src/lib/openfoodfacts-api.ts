@@ -6,6 +6,11 @@ export async function fetchProductFromApi(barcode: string): Promise<Product | nu
   try {
     const response = await fetch(`${API_URL}/${barcode}?fields=product_name,brands,image_front_url,nutriments,ingredients_text_with_allergens,nutriscore_grade,nova_group,allergens_tags,categories`);
     
+    // A 404 status from this API means the product was not found, which is a valid flow.
+    if (response.status === 404) {
+      return null;
+    }
+
     if (!response.ok) {
       throw new Error(`API request failed with status ${response.status}`);
     }
