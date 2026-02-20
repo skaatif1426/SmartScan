@@ -95,7 +95,8 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
             console.warn("Failed to write to AI cache", e);
         }
       } else {
-          throw new Error("AI response was empty.");
+        trackError();
+        setAiError(t('generatingInsightError'));
       }
     } catch (e) {
         trackError();
