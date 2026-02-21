@@ -60,7 +60,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                             Looks like this product isn’t in our database yet — thanks for scanning something unique! 🙌
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
-                            We’re always expanding and improving our product coverage to make this smarter every day.
+                            This product is under review. Soon you'll see full AI insights. Check back later!
                         </p>
                     </div>
 
