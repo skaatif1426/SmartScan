@@ -34,6 +34,7 @@ export interface ScanHistoryItem {
   scanDate: string;
   categories?: string | null;
   healthScore?: number;
+  isDiscovery?: boolean;
 }
 
 export interface DiscoveryItem {

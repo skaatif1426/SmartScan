@@ -11,6 +11,7 @@ import type { NutritionInsightOutput } from '@/lib/types';
 import AnalysisDisplay from './AnalysisDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDiscovery } from '@/hooks/useDiscovery';
+import { useScanHistory } from '@/hooks/useScanHistory';
 
 export default function ProductNotFound({ barcode }: { barcode: string }) {
     const router = useRouter();
@@ -18,12 +19,19 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const [estimate, setEstimate] = useState<NutritionInsightOutput | null>(null);
     const [error, setError] = useState<string | null>(null);
     const { addDiscovery } = useDiscovery();
+    const { addScanToHistory } = useScanHistory();
 
     useEffect(() => {
         if (barcode) {
             addDiscovery(barcode);
+            addScanToHistory({
+                barcode,
+                productName: `Discovery: #${barcode.slice(-4)}`,
+                brand: 'Unknown Product',
+                isDiscovery: true,
+            });
         }
-    }, [barcode, addDiscovery]);
+    }, [barcode, addDiscovery, addScanToHistory]);
 
     const handleGetEstimate = async () => {
         setIsEstimating(true);
@@ -42,7 +50,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
             <Card className="w-full max-w-lg shadow-lg animate-in fade-in zoom-in-95 duration-500">
                 <CardHeader>
                     <div className="flex justify-center mb-2">
-                        <Badge variant="outline">🆕 You discovered a new item</Badge>
+                        <Badge variant="outline">🚀 You discovered a new item</Badge>
                     </div>
                     <CardTitle className="text-2xl font-bold">✨ New Discovery!</CardTitle>
                 </CardHeader>
@@ -52,7 +60,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                             Looks like this product isn’t in our database yet — thanks for scanning something unique! 🙌
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
-                            We’re always expanding and improving our product coverage to make this smarter every day 🚀
+                            We’re always expanding and improving our product coverage to make this smarter every day.
                         </p>
                     </div>
 

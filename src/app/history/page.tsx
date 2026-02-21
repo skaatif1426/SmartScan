@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { History as HistoryIcon, ScanLine, Package, CheckCircle, AlertTriangle, ShieldQuestion } from 'lucide-react';
+import { History as HistoryIcon, ScanLine, Package, CheckCircle, AlertTriangle, ShieldQuestion, Rocket } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -102,6 +102,7 @@ export default function HistoryPage() {
   const { history } = useScanHistory();
   const { t } = useLanguage();
   const [sortBy, setSortBy] = useState<'recent' | 'healthiest'>('recent');
+  const [filter, setFilter] = useState<'all' | 'known' | 'discovered'>('all');
 
   const sortedHistory = useMemo(() => {
       const historyCopy = [...history];
@@ -110,6 +111,16 @@ export default function HistoryPage() {
       }
       return historyCopy; // Already sorted by recent
   }, [history, sortBy]);
+
+  const filteredHistory = useMemo(() => {
+    if (filter === 'known') {
+        return sortedHistory.filter(item => !item.isDiscovery);
+    }
+    if (filter === 'discovered') {
+        return sortedHistory.filter(item => item.isDiscovery);
+    }
+    return sortedHistory;
+  }, [sortedHistory, filter]);
 
 
   return (
@@ -132,7 +143,14 @@ export default function HistoryPage() {
             <>
                 <HistorySummary history={history} />
 
-                <div className="flex justify-end mb-4">
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-4">
+                    <Tabs value={filter} onValueChange={(value) => setFilter(value as any)}>
+                        <TabsList className="grid w-full grid-cols-3 sm:w-auto">
+                            <TabsTrigger value="all">All</TabsTrigger>
+                            <TabsTrigger value="known">Scanned</TabsTrigger>
+                            <TabsTrigger value="discovered">Discovered</TabsTrigger>
+                        </TabsList>
+                    </Tabs>
                     <Tabs value={sortBy} onValueChange={(value) => setSortBy(value as 'recent' | 'healthiest')}>
                         <TabsList>
                             <TabsTrigger value="recent">Recent</TabsTrigger>
@@ -142,7 +160,7 @@ export default function HistoryPage() {
                 </div>
 
                 <ul className="space-y-4">
-                  {sortedHistory.map((item, index) => {
+                  {filteredHistory.map((item, index) => {
                      const decision = item.healthScore !== undefined ? getDecision(item.healthScore) : null;
                      return (
                         <li 
@@ -150,13 +168,24 @@ export default function HistoryPage() {
                         className="animate-in fade-in slide-in-from-bottom-4 duration-500"
                         style={{ animationDelay: `${Math.min(index * 80, 800)}ms` }}
                         >
-                        <Link href={`/product/${item.barcode}`} className="block p-4 border rounded-lg hover:bg-muted transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]">
+                        <Link 
+                            href={`/product/${item.barcode}`} 
+                            className={cn(
+                                "block p-4 border rounded-lg hover:bg-muted transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]",
+                                item.isDiscovery && "border-primary/50 bg-primary/5 hover:bg-primary/10"
+                            )}
+                        >
                             <div className="flex items-center gap-4">
                             <HistoryImage item={item} />
                             <div className="flex-1">
                                 <p className="font-semibold">{item.productName}</p>
                                 <p className="text-sm text-muted-foreground">{item.brand}</p>
-                                {decision && (
+                                {item.isDiscovery ? (
+                                    <div className="flex items-center gap-1.5 mt-1.5">
+                                        <Rocket className="h-4 w-4 text-primary" />
+                                        <span className="text-xs font-semibold text-primary">Discovered by you</span>
+                                    </div>
+                                ) : decision && (
                                     <div className="flex items-center gap-1.5 mt-1.5">
                                         <decision.icon className={cn("h-4 w-4", decision.className)} />
                                         <span className={cn("text-xs font-semibold", decision.className)}>{decision.text}</span>
@@ -166,7 +195,7 @@ export default function HistoryPage() {
                                 Scanned {formatDistanceToNow(new Date(item.scanDate), { addSuffix: true })}
                                 </p>
                             </div>
-                            {item.healthScore !== undefined && (
+                            {!item.isDiscovery && item.healthScore !== undefined && (
                                 <div className="flex-shrink-0">
                                     <SimpleHealthScore score={item.healthScore} />
                                 </div>

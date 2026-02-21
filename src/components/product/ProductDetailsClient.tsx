@@ -71,6 +71,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 imageUrl: product.image_front_url,
                 categories: product.categories,
                 healthScore: localAnalysis.score,
+                isDiscovery: false,
             });
         }
     }, [addScanToHistory, product, productData.code, localAnalysis]);
