@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { calculateLocalScore } from '@/lib/scoring';
+import { cn } from '@/lib/utils';
 
 const ProductChatbot = dynamic(() => import('./ProductChatbot'), {
     loading: () => <Skeleton className="h-96 w-full" />,
@@ -40,6 +41,26 @@ export default function ProductDetailsClient({ product: productData }: { product
     const [imageError, setImageError] = useState(false);
 
     const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
+
+    const decision = useMemo(() => {
+        const score = localAnalysis.score;
+        if (score >= 75) {
+            return {
+                text: "Good Choice 👍",
+                className: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700",
+            };
+        }
+        if (score >= 50) {
+            return {
+                text: "Consume Occasionally ⚖️",
+                className: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700",
+            };
+        }
+        return {
+            text: "Limit Consumption ⚠️",
+            className: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700",
+        };
+    }, [localAnalysis.score]);
 
     useEffect(() => {
         if (product) {
@@ -77,10 +98,19 @@ export default function ProductDetailsClient({ product: productData }: { product
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0" aria-label="Go back">
                     <ChevronLeft className="h-6 w-6" />
                 </Button>
-                <h1 className="text-xl font-bold truncate">{product.product_name}</h1>
+                <div className="flex-1 truncate">
+                    <h1 className="text-xl font-bold truncate">{product.product_name}</h1>
+                    <p className="text-muted-foreground">{product.brands}</p>
+                </div>
+            </div>
+            
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
+                 <Badge variant="outline" className={cn('font-semibold text-base px-3 py-1 border-2 w-full justify-center whitespace-normal h-auto text-center', decision.className)}>
+                    {decision.text}
+                </Badge>
             </div>
 
-            <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-100">
+            <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-200">
                 <div className="p-0 relative h-64 bg-muted rounded-t-lg flex items-center justify-center">
                     {(product.image_front_url && !imageError) ? (
                         <Image
@@ -99,8 +129,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     )}
                 </div>
                 <CardContent className="pt-6">
-                    <p className="text-muted-foreground text-lg">{product.brands}</p>
-                    <div className="flex flex-wrap gap-2 mt-2">
+                    <div className="flex flex-wrap gap-2">
                         {product.nutriscore_grade && <Badge variant="outline">Nutri-Score: {product.nutriscore_grade.toUpperCase()}</Badge>}
                         {product.nova_group && <Badge variant="outline">NOVA: {product.nova_group}</Badge>}
                         {hasAllergens && <Badge variant="destructive"><Wheat className="mr-1 h-3 w-3" /> Contains Allergens</Badge>}
@@ -108,7 +137,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-             <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+             <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Health Analysis</CardTitle>
                 </CardHeader>
@@ -118,7 +147,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Card>
 
             <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="nutrition-facts">
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
                     <AccordionItem value="nutrition-facts" className="border-none">
                         <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
@@ -136,7 +165,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     </AccordionItem>
                 </Card>
 
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
                     <AccordionItem value="ingredients" className="border-none">
                          <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
@@ -153,7 +182,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Accordion>
             
             {preferences.aiChatEnabled && (
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
                     </CardHeader>
