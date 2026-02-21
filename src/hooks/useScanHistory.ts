@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ScanHistoryItem } from '@/lib/types';
 import { differenceInCalendarDays } from 'date-fns';
 
-const HISTORY_KEY = 'nutriscan-history';
+const OLD_HISTORY_KEY = 'nutriscan-history';
+const HISTORY_KEY = 'smartscan-history';
 const MAX_HISTORY_ITEMS = 50;
 
 function calculateScanStreak(history: ScanHistoryItem[]): number {
@@ -39,12 +40,19 @@ export function useScanHistory() {
 
   useEffect(() => {
     try {
-      const item = window.localStorage.getItem(HISTORY_KEY);
-      if (item) {
-        // You might want to add validation here (e.g. with Zod)
-        setHistory(JSON.parse(item));
+      const oldHistoryItem = window.localStorage.getItem(OLD_HISTORY_KEY);
+      if (oldHistoryItem) {
+          const oldHistory = JSON.parse(oldHistoryItem);
+          setHistory(oldHistory);
+          window.localStorage.setItem(HISTORY_KEY, JSON.stringify(oldHistory));
+          window.localStorage.removeItem(OLD_HISTORY_KEY);
       } else {
-        setHistory([]);
+          const item = window.localStorage.getItem(HISTORY_KEY);
+          if (item) {
+            setHistory(JSON.parse(item));
+          } else {
+            setHistory([]);
+          }
       }
     } catch (error) {
       console.warn('Error reading scan history from localStorage', error);

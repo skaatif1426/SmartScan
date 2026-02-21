@@ -32,10 +32,10 @@ export const translations: Translations = {
   },
   // Scanner Page
   scannerTitle: {
-    English: 'NutriScan AI',
-    Hindi: 'न्यूट्रीस्कैन AI',
-    Marathi: 'न्यूट्रीस्कॅन AI',
-    Hinglish: 'NutriScan AI',
+    English: 'SmartScan AI',
+    Hindi: 'स्मार्टस्कैन AI',
+    Marathi: 'स्मार्टस्कॅन AI',
+    Hinglish: 'SmartScan AI',
   },
   scannerPrompt: {
     English: 'Point your camera at a barcode to start.',
@@ -82,7 +82,7 @@ export const translations: Translations = {
   scanErrorDescription: {
     English: 'Could not read barcode. Please try again.',
     Hindi: 'बारकोड नहीं पढ़ा जा सका। कृपया पुनः प्रयास करें।',
-    Marathi: 'बारकोड वाचता आला नाही. कृपया पुन्हा प्रयत्न करा.',
+    Marathi: 'बारकोड वाचता आला नाही. कृपया पुन्हा प्रयत्न करा।',
     Hinglish: 'Barcode read nahi hua. Phir se try karo.',
   },
   cameraPermissionErrorTitle: {

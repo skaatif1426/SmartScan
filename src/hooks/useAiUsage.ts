@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const AI_USAGE_KEY = 'nutriscan-ai-usage';
+const OLD_AI_USAGE_KEY = 'nutriscan-ai-usage';
+const AI_USAGE_KEY = 'smartscan-ai-usage';
 
 interface AiUsage {
   callCount: number;
@@ -14,9 +15,17 @@ export function useAiUsage() {
 
   useEffect(() => {
     try {
-      const item = window.localStorage.getItem(AI_USAGE_KEY);
-      if (item) {
-        setUsage(JSON.parse(item));
+      const oldItem = window.localStorage.getItem(OLD_AI_USAGE_KEY);
+      if (oldItem) {
+        const oldUsage = JSON.parse(oldItem);
+        setUsage(oldUsage);
+        window.localStorage.setItem(AI_USAGE_KEY, JSON.stringify(oldUsage));
+        window.localStorage.removeItem(OLD_AI_USAGE_KEY);
+      } else {
+        const item = window.localStorage.getItem(AI_USAGE_KEY);
+        if (item) {
+          setUsage(JSON.parse(item));
+        }
       }
     } catch (error) {
       console.warn('Error reading AI usage from localStorage', error);

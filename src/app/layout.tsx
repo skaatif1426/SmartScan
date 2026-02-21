@@ -4,7 +4,7 @@ import { AppShell } from '@/components/layout/AppShell';
 import { Toaster } from '@/components/ui/toaster';
 
 export const metadata: Metadata = {
-  title: 'NutriScan AI',
+  title: 'SmartScan AI',
   description: 'Smart Product Scanner with AI Nutrition Assistant',
 };
 

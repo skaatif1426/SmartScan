@@ -13,7 +13,8 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import AnalysisDisplay from './AnalysisDisplay';
 import type { LocalAnalysis } from '@/lib/scoring';
 
-const CACHE_KEY = 'nutriscan-ai-cache';
+const OLD_CACHE_KEY = 'nutriscan-ai-cache';
+const CACHE_KEY = 'smartscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
 interface CacheItem {
@@ -34,6 +35,18 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
   const { preferences } = usePreferences();
   const { incrementAiCallCount } = useAiUsage();
   const { trackError } = useAnalytics();
+
+  useEffect(() => {
+    try {
+        const oldCache = window.localStorage.getItem(OLD_CACHE_KEY);
+        if (oldCache) {
+            window.localStorage.setItem(CACHE_KEY, oldCache);
+            window.localStorage.removeItem(OLD_CACHE_KEY);
+        }
+    } catch(e) {
+        console.warn("Failed to migrate AI cache", e);
+    }
+  }, []);
 
   const fetchInsight = useCallback(async (forceRefresh = false) => {
     if (!preferences.aiInsightsEnabled) {

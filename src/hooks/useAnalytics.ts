@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 
-const ANALYTICS_KEY = 'nutriscan-analytics';
+const OLD_ANALYTICS_KEY = 'nutriscan-analytics';
+const ANALYTICS_KEY = 'smartscan-analytics';
 
 interface AnalyticsData {
   errorCount: number;
@@ -14,10 +15,18 @@ export function useAnalytics() {
 
   useEffect(() => {
     try {
-      const item = window.localStorage.getItem(ANALYTICS_KEY);
-      if (item) {
-        setAnalytics(JSON.parse(item));
-      }
+        const oldItem = window.localStorage.getItem(OLD_ANALYTICS_KEY);
+        if (oldItem) {
+            const oldAnalytics = JSON.parse(oldItem);
+            setAnalytics(oldAnalytics);
+            window.localStorage.setItem(ANALYTICS_KEY, JSON.stringify(oldAnalytics));
+            window.localStorage.removeItem(OLD_ANALYTICS_KEY);
+        } else {
+            const item = window.localStorage.getItem(ANALYTICS_KEY);
+            if (item) {
+                setAnalytics(JSON.parse(item));
+            }
+        }
     } catch (error) {
       console.warn('Error reading analytics from localStorage', error);
     }

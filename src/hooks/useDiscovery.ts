@@ -5,7 +5,8 @@ import { useToast } from './use-toast';
 import type { DiscoveryItem } from '@/lib/types';
 import { differenceInCalendarDays } from 'date-fns';
 
-const DISCOVERY_KEY = 'nutriscan-discoveries';
+const OLD_DISCOVERY_KEY = 'nutriscan-discoveries';
+const DISCOVERY_KEY = 'smartscan-discoveries';
 
 function calculateDiscoveryStreak(discoveries: DiscoveryItem[]): number {
     if (discoveries.length === 0) return 0;
@@ -40,10 +41,17 @@ export function useDiscovery() {
 
     useEffect(() => {
         try {
-            const item = window.localStorage.getItem(DISCOVERY_KEY);
-            if (item) {
-                // Add validation in a real app, e.g. with Zod
-                setDiscoveries(JSON.parse(item));
+            const oldItem = window.localStorage.getItem(OLD_DISCOVERY_KEY);
+            if (oldItem) {
+                const oldDiscoveries = JSON.parse(oldItem);
+                setDiscoveries(oldDiscoveries);
+                window.localStorage.setItem(DISCOVERY_KEY, JSON.stringify(oldDiscoveries));
+                window.localStorage.removeItem(OLD_DISCOVERY_KEY);
+            } else {
+                const item = window.localStorage.getItem(DISCOVERY_KEY);
+                if (item) {
+                    setDiscoveries(JSON.parse(item));
+                }
             }
         } catch (e) { 
             console.warn('Error reading discoveries from localStorage', e);
