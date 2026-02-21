@@ -80,6 +80,8 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
           proteins_100g: product.nutriments?.proteins_100g,
           salt_100g: product.nutriments?.salt_100g,
         },
+        healthScore: localAnalysis.score,
+        warnings: localAnalysis.warnings,
       };
       const result = await getAINutritionInsight(insightData);
       
@@ -105,7 +107,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
     } finally {
       setIsLoading(false);
     }
-  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError]);
+  }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError, localAnalysis]);
 
 
   useEffect(() => {
@@ -125,11 +127,11 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
     <div className='min-h-[210px]'>
         {isLoading ? (
             <div>
-                <AnalysisDisplay title="Initial Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true} />
+                <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true} />
                 <div className="mt-4 space-y-2 animate-pulse">
                     <div className="flex items-center gap-2 text-primary text-sm font-medium">
                         <Sparkles className="h-4 w-4" />
-                        <p>Refining analysis with AI...</p>
+                        <p>Generating AI explanation...</p>
                     </div>
                 </div>
             </div>
