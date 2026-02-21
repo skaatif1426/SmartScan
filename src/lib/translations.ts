@@ -24,11 +24,11 @@ export const translations: Translations = {
     Marathi: 'डॅशबोर्ड',
     Hinglish: 'Dashboard',
   },
-  navProfile: {
-    English: 'Profile',
-    Hindi: 'प्रोफ़ाइल',
-    Marathi: 'प्रोफाइल',
-    Hinglish: 'Profile',
+  navSettings: {
+    English: 'Settings',
+    Hindi: 'सेटिंग्स',
+    Marathi: 'सेटिंग्ज',
+    Hinglish: 'Settings',
   },
   // Scanner Page
   scannerTitle: {

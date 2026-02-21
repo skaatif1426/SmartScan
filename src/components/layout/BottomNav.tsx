@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { QrCode, History, LayoutGrid, User } from 'lucide-react';
+import { QrCode, History, LayoutGrid, Settings } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/AppProviders';
 
@@ -10,7 +10,7 @@ const navItems = [
   { href: '/', icon: QrCode, labelKey: 'navScan' },
   { href: '/history', icon: History, labelKey: 'navHistory' },
   { href: '/dashboard', icon: LayoutGrid, labelKey: 'navDashboard' },
-  { href: '/profile', icon: User, labelKey: 'navProfile' },
+  { href: '/settings', icon: Settings, labelKey: 'navSettings' },
 ] as const;
 
 export default function BottomNav() {
