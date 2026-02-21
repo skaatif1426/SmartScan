@@ -65,28 +65,27 @@ export function useDiscovery() {
         }
 
         try {
-            const wasFirstDiscovery = discoveries.length === 0;
             const newDiscovery: DiscoveryItem = { barcode, date: new Date().toISOString() };
             const newDiscoveries = [...discoveries, newDiscovery];
             
             setDiscoveries(newDiscoveries);
             window.localStorage.setItem(DISCOVERY_KEY, JSON.stringify(newDiscoveries));
 
-            if (wasFirstDiscovery) {
-                 toast({
-                    title: '🎉 Achievement Unlocked!',
-                    description: `You've earned the "Explorer I" achievement.`,
-                });
-            } else if (newDiscoveries.length === 5) {
-                toast({
-                    title: '🎉 Achievement Unlocked!',
-                    description: `You've earned the "Explorer II" achievement.`,
-                });
-            } else if (newDiscoveries.length === 10) {
-                 toast({
-                    title: '🎉 Achievement Unlocked!',
-                    description: `You've earned the "Explorer Pro" achievement.`,
-                });
+            const newCount = newDiscoveries.length;
+            let achievementToast: { title: string; description: string } | null = null;
+            
+            if (newCount === 1) {
+                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "Explorer 🧭" achievement.` };
+            } else if (newCount === 5) {
+                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "Pathfinder 🗺️" achievement.` };
+            } else if (newCount === 10) {
+                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "Data Builder 🧠" achievement.` };
+            } else if (newCount === 25) {
+                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "AI Trainer 🤖" achievement.` };
+            }
+            
+            if (achievementToast) {
+                toast(achievementToast);
             }
         } catch (e) {
             console.warn('Failed to save discovery to localStorage', e);

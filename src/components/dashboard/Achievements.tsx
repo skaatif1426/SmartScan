@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Award, CheckCircle, Compass, Flame, Layers, Star } from 'lucide-react';
+import { Award, Bot, BrainCircuit, CheckCircle, Compass, Flame, Layers, Map, Star } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import {
@@ -22,9 +22,10 @@ const achievementTiers = {
     { id: 'scan-50', name: 'Master Scanner', description: 'Scan 50 items. Incredible!', value: 50, icon: Star },
   ],
   discovery: [
-    { id: 'discovery-1', name: 'Explorer I', description: 'Discover 1 new product.', value: 1, icon: Compass },
-    { id: 'discovery-5', name: 'Explorer II', description: 'Discover 5 new products.', value: 5, icon: Compass },
-    { id: 'discovery-10', name: 'Explorer Pro', description: 'Discover 10 new products.', value: 10, icon: Compass },
+    { id: 'discovery-1', name: 'Explorer 🧭', description: 'Discover your first product.', value: 1, icon: Compass },
+    { id: 'discovery-5', name: 'Pathfinder 🗺️', description: 'Discover 5 new products.', value: 5, icon: Map },
+    { id: 'discovery-10', name: 'Data Builder 🧠', description: 'Discover 10 new products.', value: 10, icon: BrainCircuit },
+    { id: 'discovery-25', name: 'AI Trainer 🤖', description: 'Discover 25 new products and help train the AI.', value: 25, icon: Bot },
   ],
   streak: [
     { id: 'streak-3', name: 'On Fire!', description: 'Maintain a 3-day scan streak.', value: 3, icon: Flame },

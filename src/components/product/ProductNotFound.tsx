@@ -57,7 +57,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                     </div>
 
                     <p className="text-xs text-muted-foreground italic !-mt-1">
-                        This counts towards your Explorer achievements 🧭
+                        Keep discovering to unlock more rewards! 🚀
                     </p>
 
                     <div className="flex flex-col sm:flex-row gap-2 pt-2">
