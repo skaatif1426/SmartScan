@@ -24,11 +24,11 @@ export const translations: Translations = {
     Marathi: 'डॅशबोर्ड',
     Hinglish: 'Dashboard',
   },
-  navSettings: {
-    English: 'Settings',
-    Hindi: 'सेटिंग्स',
-    Marathi: 'सेटिंग्ज',
-    Hinglish: 'Settings',
+  navProfile: {
+    English: 'Profile',
+    Hindi: 'प्रोफ़ाइल',
+    Marathi: 'प्रोफाइल',
+    Hinglish: 'Profile',
   },
   // Scanner Page
   scannerTitle: {
@@ -262,7 +262,13 @@ export const translations: Translations = {
     Marathi: 'नवीन शोध',
     Hinglish: 'New Discoveries',
   },
-  // Settings Page
+  // Settings/Profile Page
+  profileTitle: {
+    English: 'Profile',
+    Hindi: 'प्रोफ़ाइल',
+    Marathi: 'प्रोफाइल',
+    Hinglish: 'Profile',
+  },
   settingsTitle: {
     English: 'Settings',
     Hindi: 'सेटिंग्स',
