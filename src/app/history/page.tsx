@@ -14,8 +14,21 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
     const [imageError, setImageError] = useState(false);
+    const isProblematicDomain = item.imageUrl?.includes('images.openfoodfacts.org');
 
     if (item.imageUrl && !imageError) {
+        if (isProblematicDomain) {
+            // eslint-disable-next-line @next/next/no-img-element
+            return <img
+                src={item.imageUrl}
+                alt={item.productName}
+                width={64}
+                height={64}
+                className="rounded-md object-contain bg-white w-16 h-16"
+                onError={() => setImageError(true)}
+                data-ai-hint="product image"
+            />;
+        }
         return (
             <Image
                 src={item.imageUrl}

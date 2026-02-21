@@ -39,6 +39,7 @@ export default function ProductDetailsClient({ product: productData }: { product
     const { product } = productData;
     const { preferences } = usePreferences();
     const [imageError, setImageError] = useState(false);
+    const isProblematicDomain = product.image_front_url?.includes('images.openfoodfacts.org');
 
     const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
 
@@ -114,14 +115,25 @@ export default function ProductDetailsClient({ product: productData }: { product
             <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-200">
                 <div className="p-0 relative h-64 bg-muted rounded-t-lg flex items-center justify-center">
                     {(product.image_front_url && !imageError) ? (
-                        <Image
-                            src={product.image_front_url}
-                            alt={product.product_name}
-                            fill
-                            className="object-contain"
-                            onError={() => setImageError(true)}
-                            data-ai-hint="product image"
-                        />
+                        isProblematicDomain ? (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img
+                                src={product.image_front_url}
+                                alt={product.product_name}
+                                className="object-contain h-full w-full"
+                                onError={() => setImageError(true)}
+                                data-ai-hint="product image"
+                            />
+                        ) : (
+                            <Image
+                                src={product.image_front_url}
+                                alt={product.product_name}
+                                fill
+                                className="object-contain"
+                                onError={() => setImageError(true)}
+                                data-ai-hint="product image"
+                            />
+                        )
                     ) : (
                         <div className="flex flex-col items-center text-muted-foreground">
                             <Package size={48} />
