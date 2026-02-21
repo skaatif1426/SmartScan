@@ -8,6 +8,17 @@ import { differenceInCalendarDays } from 'date-fns';
 const OLD_DISCOVERY_KEY = 'nutriscan-discoveries';
 const DISCOVERY_KEY = 'smartscan-discoveries';
 
+const contributorLevels = [
+    { title: 'AI Trainer', icon: '🤖', minDiscoveries: 25 },
+    { title: 'Contributor', icon: '🧠', minDiscoveries: 10 },
+    { title: 'Explorer', icon: '🧭', minDiscoveries: 3 },
+    { title: 'Beginner', icon: '🌱', minDiscoveries: 0 }
+];
+
+function getContributorLevel(discoveryCount: number) {
+    return contributorLevels.find(level => discoveryCount >= level.minDiscoveries)!;
+}
+
 function calculateDiscoveryStreak(discoveries: DiscoveryItem[]): number {
     if (discoveries.length === 0) return 0;
     
@@ -94,6 +105,7 @@ export function useDiscovery() {
 
     const discoveryCount = discoveries.length;
     const discoveryStreak = useMemo(() => calculateDiscoveryStreak(discoveries), [discoveries]);
+    const contributorLevel = useMemo(() => getContributorLevel(discoveryCount), [discoveryCount]);
 
-    return { discoveryCount, addDiscovery, isLoaded, discoveryStreak };
+    return { discoveryCount, addDiscovery, isLoaded, discoveryStreak, contributorLevel };
 }

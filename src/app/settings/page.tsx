@@ -1,6 +1,6 @@
 'use client';
 
-import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Award } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -12,6 +12,7 @@ import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { useAnalytics } from '@/hooks/useAnalytics';
+import { useDiscovery } from '@/hooks/useDiscovery';
 import type { Language, AiVerbosity, HealthGoal, DataRetention } from '@/lib/types';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
@@ -25,6 +26,7 @@ export default function SettingsPage() {
   const { usage, resetAiCallCount, isLoaded: isAiUsageLoaded } = useAiUsage();
   const { history, isLoaded: isHistoryLoaded } = useScanHistory();
   const { analytics, resetErrorCount, isLoaded: isAnalyticsLoaded } = useAnalytics();
+  const { discoveryCount, contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
@@ -51,6 +53,31 @@ export default function SettingsPage() {
       
       <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
         <CardHeader>
+            <CardTitle className="flex items-center gap-2"><Award /> Your Contributor Role</CardTitle>
+        </CardHeader>
+        <CardContent>
+            {isDiscoveryLoaded ? (
+                <div className="flex items-center gap-4">
+                    <div className="text-4xl">{contributorLevel.icon}</div>
+                    <div>
+                        <p className="text-lg font-bold">{contributorLevel.title}</p>
+                        <p className="text-sm text-muted-foreground">You've made {discoveryCount} new discoveries.</p>
+                    </div>
+                </div>
+            ) : (
+                <div className="flex items-center gap-4">
+                    <Skeleton className="h-10 w-10" />
+                    <div className="space-y-2">
+                        <Skeleton className="h-6 w-32" />
+                        <Skeleton className="h-4 w-48" />
+                    </div>
+                </div>
+            )}
+        </CardContent>
+      </Card>
+
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+        <CardHeader>
           <CardTitle className="flex items-center gap-2"><Languages /> {t('language')}</CardTitle>
         </CardHeader>
         <CardContent>
@@ -70,7 +97,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
         <CardHeader>
           <CardTitle className="flex items-center gap-2"><Leaf /> {t('preferences')}</CardTitle>
         </CardHeader>
@@ -96,7 +123,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
       
-      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><ShieldAlert /> {t('allergies')}</CardTitle>
         </CardHeader>
@@ -112,7 +139,7 @@ export default function SettingsPage() {
         </CardContent>
       </Card>
 
-      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
           <CardHeader>
               <CardTitle className="flex items-center gap-2"><HeartPulse /> {t('personalizationTitle')}</CardTitle>
           </CardHeader>
@@ -152,7 +179,7 @@ export default function SettingsPage() {
           </CardContent>
       </Card>
 
-      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
+      <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
         <CardHeader>
             <CardTitle className="flex items-center gap-2"><Zap /> {t('advancedSettings')}</CardTitle>
         </CardHeader>
