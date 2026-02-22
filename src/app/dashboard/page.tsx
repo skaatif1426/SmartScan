@@ -170,14 +170,14 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
             <h2 className="font-semibold text-lg">Your Progress</h2>
             <div className="grid grid-cols-3 gap-4">
                 <Card>
-                    <CardContent className="p-4 text-center">
+                    <CardContent className="p-3 text-center sm:p-4">
                         <Scan className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
                         <div className="text-xl font-bold">{history.length}</div>
                         <p className="text-xs text-muted-foreground">Total Scans</p>
                     </CardContent>
                 </Card>
                  <Card>
-                    <CardContent className="p-4 text-center">
+                    <CardContent className="p-3 text-center sm:p-4">
                         <HeartPulse className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
                         <div className={cn("text-xl font-bold", scoreInfo.textClassName)}>
                             {averageScore !== null ? <AnimatedCounter value={averageScore} /> : '-'}
@@ -186,7 +186,7 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
                     </CardContent>
                 </Card>
                 <Card>
-                    <CardContent className="p-4 text-center">
+                    <CardContent className="p-3 text-center sm:p-4">
                         <Flame className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
                         <div className="text-xl font-bold">{scanStreak}</div>
                         <p className="text-xs text-muted-foreground">Day Streak</p>

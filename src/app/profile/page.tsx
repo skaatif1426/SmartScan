@@ -236,7 +236,7 @@ export default function ProfilePage() {
                 <CardContent className="space-y-6">
                     <div>
                         <Label className="font-semibold text-base">Diet</Label>
-                        <div className="grid grid-cols-3 gap-2 mt-2">
+                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mt-2">
                             {dietTypes.map(({ id, label, icon: Icon }) => (
                                 <Button key={id} variant={preferences.diet === id ? 'default' : 'outline'} onClick={() => savePreferences({ diet: id })} className="justify-start h-12">
                                     <Icon className="mr-2 h-4 w-4" /> {label}
@@ -292,7 +292,7 @@ export default function ProfilePage() {
                 <CardContent className="space-y-6">
                     <div>
                         <Label>{t('aiVerbosity')}</Label>
-                        <div className="grid grid-cols-3 gap-2 mt-2">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
                             {verbosityLevels.map(({ id, label }) => (
                                 <Button key={id} variant={preferences.aiVerbosity === id ? 'default' : 'outline'} onClick={() => savePreferences({ aiVerbosity: id })}>
                                     {label}
@@ -302,7 +302,7 @@ export default function ProfilePage() {
                     </div>
                     <div>
                         <Label>{t('healthGoal')}</Label>
-                        <div className="grid grid-cols-2 gap-2 mt-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                             {healthGoals.map(({ id, label }) => (
                                 <Button key={id} variant={preferences.healthGoal === id ? 'default' : 'outline'} onClick={() => savePreferences({ healthGoal: id })}>
                                     {label}
@@ -461,3 +461,4 @@ export default function ProfilePage() {
   );
 
     
+
