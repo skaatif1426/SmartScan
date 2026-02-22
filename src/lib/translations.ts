@@ -282,10 +282,10 @@ export const translations: Translations = {
     Hinglish: 'Language',
   },
   preferences: {
-    English: 'Preferences',
-    Hindi: 'वरीयताएँ',
-    Marathi: 'प्राधान्ये',
-    Hinglish: 'Preferences',
+    English: 'Dietary Preferences',
+    Hindi: 'आहार संबंधी प्राथमिकताएँ',
+    Marathi: 'आहाराची प्राधान्ये',
+    Hinglish: 'Dietary Preferences',
   },
   vegetarian: {
     English: 'Vegetarian',
@@ -324,10 +324,10 @@ export const translations: Translations = {
     Hinglish: 'Advanced UI Mode',
   },
   advancedUiModeDescription: {
-    English: 'Show extra details and analytics.',
-    Hindi: 'अतिरिक्त विवरण और विश्लेषण दिखाएं।',
-    Marathi: 'अतिरिक्त तपशील आणि विश्लेषण दर्शवा।',
-    Hinglish: 'Extra details aur analytics dikhao.',
+    English: 'Show extra details and developer tools.',
+    Hindi: 'अतिरिक्त विवरण और डेवलपर टूल दिखाएं।',
+    Marathi: 'अतिरिक्त तपशील आणि डेव्हलपर साधने दर्शवा।',
+    Hinglish: 'Extra details aur developer tools dikhao.',
   },
   aiUsage: {
     English: 'AI Usage',
@@ -443,6 +443,12 @@ export const translations: Translations = {
     Marathi: 'डेटा आणि गोपनीयता',
     Hinglish: 'Data & Privacy',
   },
+   dataPrivacyDescription: {
+    English: 'Manage your local scan history.',
+    Hindi: 'अपने स्थानीय स्कैन इतिहास को प्रबंधित करें।',
+    Marathi: 'तुमचा स्थानिक स्कॅन इतिहास व्यवस्थापित करा.',
+    Hinglish: 'Apna local scan history manage karo.',
+  },
   dataRetention: {
     English: 'Scan History Retention',
     Hindi: 'स्कैन इतिहास प्रतिधारण',
@@ -466,5 +472,41 @@ export const translations: Translations = {
     Hindi: 'हमेशा',
     Marathi: 'कायमचे',
     Hinglish: 'Forever',
+  },
+  clearHistory: {
+    English: 'Clear History',
+    Hindi: 'इतिहास साफ़ करें',
+    Marathi: 'इतिहास साफ करा',
+    Hinglish: 'History Clear Karo',
+  },
+  clearHistoryConfirmTitle: {
+    English: 'Are you sure?',
+    Hindi: 'क्या आप निश्चित हैं?',
+    Marathi: 'तुम्ही निश्चित आहात का?',
+    Hinglish: 'Pakka?',
+  },
+  clearHistoryConfirmDescription: {
+    English: 'This will permanently delete all your scan history. This action cannot be undone.',
+    Hindi: 'यह आपके सभी स्कैन इतिहास को स्थायी रूप से हटा देगा। यह क्रिया पूर्ववत नहीं की जा सकती।',
+    Marathi: 'हे तुमचा सर्व स्कॅन इतिहास कायमचा हटवेल. ही क्रिया पूर्ववत केली जाऊ शकत नाही.',
+    Hinglish: 'Yeh aapka saara scan history permanently delete kar dega. Yeh action undo nahi ho sakta.',
+  },
+  cancel: {
+    English: 'Cancel',
+    Hindi: 'रद्द करें',
+    Marathi: 'रद्द करा',
+    Hinglish: 'Cancel',
+  },
+  confirm: {
+    English: 'Confirm',
+    Hindi: 'पुष्टि करें',
+    Marathi: 'पुष्टी करा',
+    Hinglish: 'Confirm',
+  },
+  clearing: {
+    English: 'Clearing...',
+    Hindi: 'हटा रहा है...',
+    Marathi: 'साफ करत आहे...',
+    Hinglish: 'Clearing...',
   },
 };

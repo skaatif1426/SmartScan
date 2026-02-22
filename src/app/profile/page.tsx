@@ -1,6 +1,18 @@
 'use client';
-import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { useState, useMemo } from 'react';
+import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
+import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -15,11 +27,19 @@ import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDiscovery } from '@/hooks/useDiscovery';
 import type { Language, AiVerbosity, HealthGoal, DataRetention } from '@/lib/types';
 import { cn } from '@/lib/utils';
+import Achievements from '@/components/dashboard/Achievements';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 const verbosityLevels: AiVerbosity[] = ['concise', 'detailed'];
 const healthGoals: HealthGoal[] = ['general', 'weight-loss', 'muscle-gain'];
 const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
+
+const getHealthScoreTextColor = (score: number | null) => {
+    if (score === null) return '';
+    if (score >= 75) return 'text-green-600';
+    if (score >= 50) return 'text-yellow-600';
+    return 'text-red-600';
+};
 
 const ProfileStatCard = ({ title, value, icon: Icon, valueClassName, isLoading }: { title: string, value: React.ReactNode, icon: React.ElementType, valueClassName?: string, isLoading: boolean }) => (
     <Card>
@@ -41,14 +61,28 @@ export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
   const { preferences, savePreferences } = usePreferences();
   const { usage, resetAiCallCount, isLoaded: isAiUsageLoaded } = useAiUsage();
-  const { history, isLoaded: isHistoryLoaded } = useScanHistory();
+  const { history, clearHistory, isLoaded: isHistoryLoaded } = useScanHistory();
   const { analytics, resetErrorCount, isLoaded: isAnalyticsLoaded } = useAnalytics();
   const { discoveryCount, contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
+  const [isClearing, setIsClearing] = useState(false);
+
+  const averageScore = useMemo(() => {
+    const scores = history.map(item => item.healthScore).filter(score => score !== undefined) as number[];
+    if (scores.length === 0) return null;
+    const sum = scores.reduce((a, b) => a + b, 0);
+    return Math.round(sum / scores.length);
+  }, [history]);
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
     savePreferences({ allergies });
   };
+  
+  const handleClearHistory = () => {
+    setIsClearing(true);
+    clearHistory();
+    // No need to setIsClearing(false) as the dialog will close
+  }
 
   const healthGoalLabels: { [key in HealthGoal]: string } = {
     'general': t('generalWellness'),
@@ -82,7 +116,7 @@ export default function ProfilePage() {
         </div>
 
         {/* User Info Stats */}
-        <div className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
+        <div className="grid gap-4 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
              <ProfileStatCard 
                 title="Total Scans"
                 value={history.length}
@@ -95,6 +129,13 @@ export default function ProfilePage() {
                 icon={Compass}
                 isLoading={!isDiscoveryLoaded}
              />
+             <ProfileStatCard 
+                title="Avg. Health Score"
+                value={averageScore !== null ? <>{averageScore}<span className="text-base font-normal text-muted-foreground">/100</span></> : '-'}
+                icon={HeartPulse}
+                isLoading={!isHistoryLoaded}
+                valueClassName={getHealthScoreTextColor(averageScore)}
+             />
         </div>
 
         <Separator className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200" />
@@ -104,6 +145,15 @@ export default function ProfilePage() {
             <h2 className="text-2xl font-bold flex items-center gap-2">
                 <SettingsIcon className="text-primary" /> {t('settingsTitle')}
             </h2>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Sparkles /> {t('achievements')}</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <Achievements history={history} />
+                </CardContent>
+            </Card>
 
             <Card>
                 <CardHeader>
@@ -131,43 +181,37 @@ export default function ProfilePage() {
                 <CardTitle className="flex items-center gap-2"><Leaf /> {t('preferences')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="vegetarian-switch" className="flex items-center gap-2"><Leaf className="text-green-600" /> {t('vegetarian')}</Label>
-                    <Switch
-                    id="vegetarian-switch"
-                    checked={preferences.isVeg}
-                    onCheckedChange={(checked) => savePreferences({ isVeg: checked })}
-                    aria-label={t('vegetarian')}
-                    />
-                </div>
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="non-vegetarian-switch" className="flex items-center gap-2"><Drumstick className="text-red-600" /> {t('nonVegetarian')}</Label>
-                    <Switch
-                    id="non-vegetarian-switch"
-                    checked={preferences.isNonVeg}
-                    onCheckedChange={(checked) => savePreferences({ isNonVeg: checked })}
-                    aria-label={t('nonVegetarian')}
-                    />
-                </div>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="vegetarian-switch" className="flex items-center gap-2"><Leaf className="text-green-600" /> {t('vegetarian')}</Label>
+                        <Switch
+                        id="vegetarian-switch"
+                        checked={preferences.isVeg}
+                        onCheckedChange={(checked) => savePreferences({ isVeg: checked })}
+                        aria-label={t('vegetarian')}
+                        />
+                    </div>
+                    <div className="flex items-center justify-between">
+                        <Label htmlFor="non-vegetarian-switch" className="flex items-center gap-2"><Drumstick className="text-red-600" /> {t('nonVegetarian')}</Label>
+                        <Switch
+                        id="non-vegetarian-switch"
+                        checked={preferences.isNonVeg}
+                        onCheckedChange={(checked) => savePreferences({ isNonVeg: checked })}
+                        aria-label={t('nonVegetarian')}
+                        />
+                    </div>
+                    <div className="pt-2">
+                        <Label htmlFor="allergies-input" className="flex items-center gap-2 mb-2"><ShieldAlert /> {t('allergies')}</Label>
+                        <Input 
+                            id="allergies-input"
+                            placeholder={t('allergiesPlaceholder')}
+                            defaultValue={preferences.allergies.join(', ')}
+                            onBlur={handleAllergyChange}
+                            aria-label={t('allergies')}
+                        />
+                    </div>
                 </CardContent>
             </Card>
             
-            <Card>
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><ShieldAlert /> {t('allergies')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Label htmlFor="allergies-input">{t('allergiesPlaceholder')}</Label>
-                    <Input 
-                        id="allergies-input"
-                        placeholder={t('allergiesPlaceholder')}
-                        defaultValue={preferences.allergies.join(', ')}
-                        onBlur={handleAllergyChange}
-                        aria-label={t('allergies')}
-                    />
-                </CardContent>
-            </Card>
-
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><HeartPulse /> {t('personalizationTitle')}</CardTitle>
@@ -210,6 +254,53 @@ export default function ProfilePage() {
 
             <Card>
                 <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><History />{t('dataPrivacy')}</CardTitle>
+                    <CardDescription>{t('dataPrivacyDescription')}</CardDescription>
+                </CardHeader>
+                 <CardContent className="space-y-6">
+                    <div>
+                        <Label htmlFor="data-retention-select">{t('dataRetention')}</Label>
+                        <Select
+                            value={preferences.dataRetention}
+                            onValueChange={(value: DataRetention) => savePreferences({ dataRetention: value })}
+                        >
+                            <SelectTrigger id="data-retention-select" aria-label={t('dataRetention')}>
+                                <SelectValue placeholder={t('dataRetention')} />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {retentionPeriods.map(period => (
+                                    <SelectItem key={period} value={period}>{retentionLabels[period]}</SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
+                    </div>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                            <Button variant="destructive" className="w-full sm:w-auto">
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                {t('clearHistory')}
+                            </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                            <AlertDialogTitle>{t('clearHistoryConfirmTitle')}</AlertDialogTitle>
+                            <AlertDialogDescription>
+                               {t('clearHistoryConfirmDescription')}
+                            </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                            <AlertDialogCancel disabled={isClearing}>{t('cancel')}</AlertDialogCancel>
+                            <AlertDialogAction onClick={handleClearHistory} disabled={isClearing}>
+                                {isClearing ? t('clearing') : t('confirm')}
+                            </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
+                </CardContent>
+            </Card>
+
+            <Card>
+                <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Zap /> {t('advancedSettings')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-6">
@@ -225,27 +316,29 @@ export default function ProfilePage() {
                             aria-label={t('advancedUiMode')}
                         />
                     </div>
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="ai-insights-switch" className="flex items-center gap-2"><Sparkles /> {t('aiInsights')}</Label>
-                        <Switch
-                        id="ai-insights-switch"
-                        checked={preferences.aiInsightsEnabled}
-                        onCheckedChange={(checked) => savePreferences({ aiInsightsEnabled: checked })}
-                        aria-label={t('aiInsights')}
-                        />
-                    </div>
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="ai-chat-switch" className="flex items-center gap-2"><MessageCircle /> {t('aiChat')}</Label>
-                        <Switch
-                        id="ai-chat-switch"
-                        checked={preferences.aiChatEnabled}
-                        onCheckedChange={(checked) => savePreferences({ aiChatEnabled: checked })}
-                        aria-label={t('aiChat')}
-                        />
-                    </div>
-
                     {preferences.advancedUiMode && (
                         <>
+                        <div className="border-t pt-6 space-y-4">
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="ai-insights-switch" className="flex items-center gap-2"><Sparkles /> {t('aiInsights')}</Label>
+                                <Switch
+                                id="ai-insights-switch"
+                                checked={preferences.aiInsightsEnabled}
+                                onCheckedChange={(checked) => savePreferences({ aiInsightsEnabled: checked })}
+                                aria-label={t('aiInsights')}
+                                />
+                            </div>
+                            <div className="flex items-center justify-between">
+                                <Label htmlFor="ai-chat-switch" className="flex items-center gap-2"><MessageCircle /> {t('aiChat')}</Label>
+                                <Switch
+                                id="ai-chat-switch"
+                                checked={preferences.aiChatEnabled}
+                                onCheckedChange={(checked) => savePreferences({ aiChatEnabled: checked })}
+                                aria-label={t('aiChat')}
+                                />
+                            </div>
+                        </div>
+
                         <div className="border-t pt-6">
                             <div className="flex items-center justify-between">
                                 <div>
@@ -282,26 +375,6 @@ export default function ProfilePage() {
                                 ) : (
                                     <Skeleton className="h-12 w-full mt-2" />
                                 )}
-                            </div>
-                            <div className="border-t pt-6">
-                            <div>
-                                <Label htmlFor="data-retention-select" className="flex items-center gap-2"><History />{t('dataPrivacy')}</Label>
-
-                                <p className="text-sm text-muted-foreground">{t('dataRetention')}</p>
-                            </div>
-                            <Select
-                                value={preferences.dataRetention}
-                                onValueChange={(value: DataRetention) => savePreferences({ dataRetention: value })}
-                            >
-                                <SelectTrigger id="data-retention-select" aria-label={t('dataRetention')}>
-                                    <SelectValue placeholder={t('dataRetention')} />
-                                </SelectTrigger>
-                                <SelectContent>
-                                    {retentionPeriods.map(period => (
-                                        <SelectItem key={period} value={period}>{retentionLabels[period]}</SelectItem>
-                                    ))}
-                                </SelectContent>
-                            </Select>
                             </div>
                         </>
                     )}

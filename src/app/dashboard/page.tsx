@@ -4,15 +4,13 @@ import { LayoutGrid, ScanLine, CheckCircle, AlertTriangle, ShieldQuestion } from
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import StatsCards from '@/components/dashboard/StatsCards';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import { useLanguage } from '@/contexts/AppProviders';
+import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ScanHistoryItem } from '@/lib/types';
+import { useDiscovery } from '@/hooks/useDiscovery';
 
-const Achievements = dynamic(() => import('@/components/dashboard/Achievements'), { 
-    loading: () => <Skeleton className="h-24 w-full" />,
-});
 const CategoryChart = dynamic(() => import('@/components/dashboard/CategoryChart'), {
     loading: () => <Skeleton className="h-[250px] w-full" />,
 });
@@ -64,6 +62,8 @@ const DashboardSummary = ({ history }: { history: ScanHistoryItem[] }) => {
 export default function DashboardPage() {
     const { history, isLoaded: isHistoryLoaded } = useScanHistory();
     const { t } = useLanguage();
+    const { contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
+
 
     if (isHistoryLoaded && history.length === 0) {
         return (
@@ -82,9 +82,13 @@ export default function DashboardPage() {
                     <LayoutGrid className="text-primary" />
                     Dashboard
                 </h1>
-                <p className="text-muted-foreground">
-                    An overview of your scanning activity and insights.
-                </p>
+                {isDiscoveryLoaded ? (
+                    <p className="text-muted-foreground">
+                        Welcome back, {contributorLevel.title}. Here's your activity overview.
+                    </p>
+                ): (
+                    <Skeleton className="h-6 w-72" />
+                )}
             </div>
             
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
@@ -99,15 +103,6 @@ export default function DashboardPage() {
                     </CardHeader>
                     <CardContent className="pl-2">
                         <CategoryChart history={history} />
-                    </CardContent>
-                </Card>
-
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
-                    <CardHeader>
-                        <CardTitle>{t('achievements')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Achievements history={history} />
                     </CardContent>
                 </Card>
             </div>

@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ScanHistoryItem } from '@/lib/types';
 import { differenceInCalendarDays } from 'date-fns';
+import { usePreferences } from '@/contexts/AppProviders';
 
 const OLD_HISTORY_KEY = 'nutriscan-history';
 const HISTORY_KEY = 'smartscan-history';
-const MAX_HISTORY_ITEMS = 50;
+const MAX_HISTORY_ITEMS = 100;
 
 function calculateScanStreak(history: ScanHistoryItem[]): number {
     if (history.length === 0) return 0;
@@ -37,6 +38,7 @@ function calculateScanStreak(history: ScanHistoryItem[]): number {
 export function useScanHistory() {
   const [history, setHistory] = useState<ScanHistoryItem[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const { preferences, isSettingsLoaded } = usePreferences();
 
   useEffect(() => {
     try {
@@ -91,6 +93,32 @@ export function useScanHistory() {
   }, []);
 
   const scanStreak = useMemo(() => calculateScanStreak(history), [history]);
+
+  useEffect(() => {
+    if (isSettingsLoaded) {
+      const now = new Date();
+      const retentionDays = {
+        '30d': 30,
+        '90d': 90,
+        'forever': Infinity
+      }[preferences.dataRetention];
+
+      if (retentionDays !== Infinity) {
+        setHistory(currentHistory => {
+            const filtered = currentHistory.filter(item => {
+              const itemDate = new Date(item.scanDate);
+              return differenceInCalendarDays(now, itemDate) < retentionDays;
+            });
+
+            if (filtered.length < currentHistory.length) {
+                window.localStorage.setItem(HISTORY_KEY, JSON.stringify(filtered));
+                return filtered;
+            }
+            return currentHistory;
+        });
+      }
+    }
+  }, [isSettingsLoaded, preferences.dataRetention]);
 
   return { history, addScanToHistory, clearHistory, isLoaded, scanStreak };
 }
