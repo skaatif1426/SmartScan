@@ -31,6 +31,7 @@ type PreferencesContextType = {
       aiInsightsEnabled: boolean;
       dataRetention: UserSettings['dataRetention'];
       notifications: UserSettings['notifications'];
+      units: UserSettings['units'];
   };
   savePreferences: (newPreferences: Partial<UserSettings>) => void;
   isSettingsLoaded: boolean;
@@ -109,6 +110,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         aiVerbosity: settings.aiVerbosity,
         strictMode: settings.strictMode,
         theme: settings.theme,
+        units: settings.units,
         advancedUiMode: settings.advancedUiMode,
         aiChatEnabled: settings.aiChatEnabled,
         aiInsightsEnabled: settings.aiInsightsEnabled,

@@ -491,7 +491,7 @@ export const translations: Translations = {
     Marathi: '90 दिवस',
     Hinglish: '90 Days',
   },
-  retentionForever: {
+  retentionforever: {
     English: 'Forever',
     Hindi: 'हमेशा',
     Marathi: 'कायमचे',

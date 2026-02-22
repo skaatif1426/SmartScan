@@ -9,6 +9,7 @@ const SETTINGS_KEY = 'smartscan-settings';
 const defaultSettings: Omit<UserSettings, 'isVeg' | 'isNonVeg'> = {
   language: 'English',
   theme: 'system',
+  units: 'metric',
   diet: 'none',
   allergies: [],
   healthGoal: 'general',

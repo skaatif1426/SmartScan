@@ -50,11 +50,13 @@ export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' 
 export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo' | 'eggetarian';
 export type DataRetention = '30d' | '90d' | 'forever';
 export type Theme = 'light' | 'dark' | 'system';
+export type UnitSystem = 'metric' | 'imperial';
 
 
 export interface UserSettings {
   language: Language;
   theme: Theme;
+  units: UnitSystem;
   diet: DietType;
   allergies: string[];
   healthGoal: HealthGoal;
