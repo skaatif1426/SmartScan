@@ -14,6 +14,7 @@ import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import { getScoreInfo } from '@/lib/scoring';
 import type { ScanHistoryItem } from '@/lib/types';
+import { Button } from '@/components/ui/button';
 
 function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
     const [imageError, setImageError] = useState(false);
