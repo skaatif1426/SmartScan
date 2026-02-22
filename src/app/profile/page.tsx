@@ -19,6 +19,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -384,10 +385,8 @@ export default function ProfilePage() {
                             <Label htmlFor="advanced-ui-switch">{t('advancedUiMode')}</Label>
                             <p className="text-sm text-muted-foreground">{t('advancedUiModeDescription')}</p>
                         </div>
-                        <Input
+                        <Switch
                             id="advanced-ui-switch"
-                            type="checkbox"
-                            className="h-6 w-11"
                             checked={preferences.advancedUiMode}
                             onCheckedChange={(checked) => savePreferences({ advancedUiMode: Boolean(checked) })}
                             aria-label={t('advancedUiMode')}
@@ -398,10 +397,8 @@ export default function ProfilePage() {
                         <div className="border-t pt-6 space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="ai-insights-switch" className="flex items-center gap-2"><Sparkles /> {t('aiInsights')}</Label>
-                                <Input
+                                <Switch
                                 id="ai-insights-switch"
-                                type="checkbox"
-                                className="h-6 w-11"
                                 checked={preferences.aiInsightsEnabled}
                                 onCheckedChange={(checked) => savePreferences({ aiInsightsEnabled: Boolean(checked) })}
                                 aria-label={t('aiInsights')}
@@ -409,10 +406,8 @@ export default function ProfilePage() {
                             </div>
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="ai-chat-switch" className="flex items-center gap-2"><MessageCircle /> {t('aiChat')}</Label>
-                                <Input
+                                <Switch
                                 id="ai-chat-switch"
-                                type="checkbox"
-                                className="h-6 w-11"
                                 checked={preferences.aiChatEnabled}
                                 onCheckedChange={(checked) => savePreferences({ aiChatEnabled: Boolean(checked) })}
                                 aria-label={t('aiChat')}
