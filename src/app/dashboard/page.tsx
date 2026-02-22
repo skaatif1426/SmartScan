@@ -1,6 +1,6 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { LayoutGrid, ScanLine, CheckCircle, AlertTriangle, ShieldQuestion } from 'lucide-react';
+import { LayoutGrid, ScanLine, CheckCircle, AlertTriangle, ShieldQuestion, Sparkles } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import StatsCards from '@/components/dashboard/StatsCards';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -10,6 +10,7 @@ import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ScanHistoryItem } from '@/lib/types';
 import { useDiscovery } from '@/hooks/useDiscovery';
+import Achievements from '@/components/dashboard/Achievements';
 
 const CategoryChart = dynamic(() => import('@/components/dashboard/CategoryChart'), {
     loading: () => <Skeleton className="h-[250px] w-full" />,
@@ -98,6 +99,14 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-6">
                 <DashboardSummary history={history} />
                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2"><Sparkles /> {t('achievements')}</CardTitle>
+                    </CardHeader>
+                    <CardContent>
+                        <Achievements history={history} />
+                    </CardContent>
+                </Card>
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
                     <CardHeader>
                         <CardTitle>{t('scannedCategories')}</CardTitle>
                     </CardHeader>

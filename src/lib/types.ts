@@ -61,6 +61,16 @@ export interface UserSettings {
   dataRetention: DataRetention;
 }
 
+export const UserPreferencesSchema = z.object({
+  isVeg: z.boolean(),
+  isNonVeg: z.boolean(),
+  allergies: z.array(z.string()),
+  healthGoal: z.enum(['general', 'weight-loss', 'muscle-gain']),
+  aiVerbosity: z.enum(['concise', 'detailed']),
+});
+export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
+
+
 // New AI Output Schema
 export const NutritionInsightOutputSchema = z.object({
   summary: z.string().describe("A one-line, easy-to-understand summary of the product's nutritional profile."),

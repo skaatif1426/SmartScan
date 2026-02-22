@@ -148,15 +148,6 @@ export default function ProfilePage() {
 
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Sparkles /> {t('achievements')}</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <Achievements history={history} />
-                </CardContent>
-            </Card>
-
-            <Card>
-                <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Languages /> {t('language')}</CardTitle>
                 </CardHeader>
                 <CardContent>

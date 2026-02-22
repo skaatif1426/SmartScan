@@ -49,18 +49,15 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
         <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6 text-center">
             <Card className="w-full max-w-lg shadow-lg animate-in fade-in zoom-in-95 duration-500">
                 <CardHeader>
-                    <div className="flex justify-center mb-2">
-                        <Badge variant="outline">🚀 You discovered a new item</Badge>
-                    </div>
                     <CardTitle className="text-2xl font-bold">✨ New Discovery!</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
                         <p className="text-muted-foreground">
-                            Looks like this product isn’t in our database yet — thanks for scanning something unique! 🙌
+                            Thanks for discovering something new! We're learning from this.
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
-                            This product is under review. Soon you'll see full AI insights. Check back later!
+                           This product is under review. Soon you'll see full AI insights. Check back later!
                         </p>
                     </div>
 

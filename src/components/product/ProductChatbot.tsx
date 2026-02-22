@@ -6,11 +6,12 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { useLanguage } from '@/contexts/AppProviders';
+import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { getAIChatResponse } from '@/lib/actions';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
+import type { UserPreferences } from '@/lib/types';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -22,6 +23,7 @@ export default function ProductChatbot({ productData }: { productData: string })
   const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const { language, t } = useLanguage();
+  const { preferences } = usePreferences();
   const { incrementAiCallCount } = useAiUsage();
   const { trackError } = useAnalytics();
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -43,10 +45,20 @@ export default function ProductChatbot({ productData }: { productData: string })
 
     try {
         incrementAiCallCount();
+        
+        const userPrefs: UserPreferences = {
+            isVeg: preferences.isVeg,
+            isNonVeg: preferences.isNonVeg,
+            allergies: preferences.allergies,
+            healthGoal: preferences.healthGoal,
+            aiVerbosity: preferences.aiVerbosity,
+        };
+
         const response = await getAIChatResponse({
           productData: productData,
           userQuestion: input,
           language: language,
+          userPreferences: userPrefs,
         });
 
         const botMessage: Message = { sender: 'bot', text: response };

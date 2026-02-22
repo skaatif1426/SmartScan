@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { UserPreferencesSchema } from '@/lib/types';
 
 const MultilingualProductChatbotInputSchema = z.object({
   productData: z
@@ -19,6 +20,7 @@ const MultilingualProductChatbotInputSchema = z.object({
   language: z
     .enum(['English', 'Hindi', 'Marathi', 'Hinglish'])
     .describe('The preferred language for the chatbot response.'),
+  userPreferences: UserPreferencesSchema.optional().describe("The user's dietary and personalization preferences."),
 });
 export type MultilingualProductChatbotInput = z.infer<
   typeof MultilingualProductChatbotInputSchema
@@ -40,8 +42,15 @@ export async function multilingualProductChatbot(
 }
 
 const SYSTEM_PROMPT = `You are a friendly and helpful nutrition assistant chatbot, like a knowledgeable friend. Your goal is to make understanding nutrition easy and accessible for everyone.
-Based on the provided product information, answer the user's question in a simple, conversational, and user-friendly way.
+Based on the provided product information AND the user's preferences, answer the user's question in a simple, conversational, and user-friendly way.
 Respond concisely in the specified language.
+
+--- USER PREFERENCES (to tailor your response) ---
+- Health Goal: {{{userPreferences.healthGoal}}}
+- Known Allergies: {{{userPreferences.allergies}}}
+- Is Vegetarian: {{{userPreferences.isVeg}}}
+- Is Non-Vegetarian: {{{userPreferences.isNonVeg}}}
+---
 
 When asked if a product is "good for a child", analyze the nutritional information (especially sugar, fat, and Nutri-score) and explain it in simple terms.
 For example, you could say something like: "This product is quite high in sugar, which might not be ideal for a child's daily diet. It's best enjoyed as an occasional treat."
@@ -50,7 +59,7 @@ Your advice should be helpful guidance. If you suggest consulting an expert, do 
 Never give direct medical advice or use phrases like "I am an AI". You're a helpful buddy.`;
 
 const prompt = ai.definePrompt({
-  name: 'multilingualProductChatbotPrompt_v1',
+  name: 'multilingualProductChatbotPrompt_v2',
   input: {schema: MultilingualProductChatbotInputSchema},
   output: {schema: MultilingualProductChatbotOutputSchema},
   prompt: `--- SYSTEM INSTRUCTIONS (LOCKED) ---

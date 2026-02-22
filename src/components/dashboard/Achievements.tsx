@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useMemo } from 'react';
-import { Award, Bot, BrainCircuit, CheckCircle, Compass, Flame, Layers, Map, Star } from 'lucide-react';
+import { Award, Bot, BrainCircuit, CheckCircle, Compass, Flame, Heart, Layers, Map, Star } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import {
@@ -35,6 +35,10 @@ const achievementTiers = {
     { id: 'diverse-5', name: 'Diverse Palette', description: 'Scan items from 5 different categories.', value: 5, icon: Layers },
     { id: 'diverse-10', name: 'Food Critic', description: 'Scan 10 different categories.', value: 10, icon: Layers },
   ],
+  healthyChoice: [
+    { id: 'healthy-10', name: 'Good Start', description: 'Scan 10 healthy items (score > 75).', value: 10, icon: Heart },
+    { id: 'healthy-25', name: 'Health Advocate', description: 'Scan 25 healthy items.', value: 25, icon: Award },
+  ],
 };
 
 const allAchievements = Object.values(achievementTiers).flat();
@@ -54,12 +58,14 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
         }
     });
     const categoryCount = uniqueCategories.size;
+    const healthyScans = history.filter(item => item.healthScore && item.healthScore > 75).length;
 
     return {
       scanCount,
       discovery: discoveryCount,
       streak: scanStreak,
       categories: categoryCount,
+      healthyChoice: healthyScans,
     };
   }, [history, discoveryCount, scanStreak]);
 
@@ -76,6 +82,7 @@ function Achievements({ history }: { history: ScanHistoryItem[] }) {
     discovery: 'discovery',
     streak: 'streak',
     categories: 'categories',
+    healthyChoice: 'healthyChoice',
   };
 
   return (

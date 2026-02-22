@@ -8,8 +8,8 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
-import { NutritionInsightOutput, NutritionInsightOutputSchema } from '@/lib/types';
+import { z } from 'zod';
+import { NutritionInsightOutput, NutritionInsightOutputSchema, UserPreferencesSchema } from '@/lib/types';
 
 const NutritionFactsSchema = z.object({
   energy_kcal_100g: z.number().optional().describe('Energy in kcal per 100g.'),
@@ -30,24 +30,33 @@ const NutritionInsightInputSchema = z.object({
   nutritionFacts: NutritionFactsSchema.optional().describe('Detailed nutritional values per 100g.'),
   healthScore: z.number().describe('The pre-calculated health score from 0 to 100.'),
   warnings: z.array(z.string()).describe('A list of pre-identified warnings that contributed to the score.'),
+  userPreferences: UserPreferencesSchema.optional().describe("The user's dietary and personalization preferences."),
 });
 export type NutritionInsightInput = z.infer<typeof NutritionInsightInputSchema>;
 
 const nutritionInsightPrompt = ai.definePrompt({
-  name: 'nutritionInsightPrompt_v1',
+  name: 'nutritionInsightPrompt_v2',
   input: { schema: NutritionInsightInputSchema },
   output: { schema: NutritionInsightOutputSchema },
-  prompt: `You are an expert AI nutrition analyst. Your task is to explain a pre-calculated health score for a food product.
+  prompt: `You are an expert AI nutrition analyst. Your task is to explain a pre-calculated health score for a food product, PERSONALIZED for the user.
 
-You have been given the product information, a health score (from 0-100), and a list of warnings that determined that score.
+You have been given the product information, a health score (from 0-100), a list of warnings that determined that score, and the user's preferences.
 
-Based on ALL the provided product information, your task is to:
+--- USER PREFERENCES (Use these to tailor your response) ---
+- Health Goal: {{{userPreferences.healthGoal}}}
+- Known Allergies: {{{userPreferences.allergies}}}
+- Is Vegetarian: {{{userPreferences.isVeg}}}
+- Desired Verbosity: {{{userPreferences.aiVerbosity}}}
+---
+
+Based on ALL the provided information, your task is to:
 1.  Use the provided 'healthScore' as the final 'healthScore' in your output. DO NOT change it.
-2.  Use the provided 'warnings' as the primary basis for the 'risks' in your output. You can add more risks if you identify them from the ingredients list (e.g., artificial sweeteners, preservatives), but you MUST include the original warnings.
-3.  Write a 'summary' that explains IN SIMPLE TERMS why the product received its score, referencing the main warnings.
-4.  Provide a helpful and encouraging 'recommendation' for consumption.
-
-Your language should be informative, not alarming.
+2.  Use the provided 'warnings' as the primary basis for the 'risks' in your output. You can add more risks if you identify them from the ingredients list.
+3.  **PRIORITY:** If any of the user's known allergies are present in the product's allergens list, you MUST add a specific risk for it (e.g., "Contains nuts, which you are allergic to").
+4.  Write a 'summary' that explains IN SIMPLE TERMS why the product received its score, referencing the main warnings.
+5.  Write a 'recommendation' for consumption that is PERSONALLY tailored to the user's 'Health Goal'. For example, if their goal is 'weight-loss', suggest if this product fits that goal.
+6.  Adjust the length and detail of your 'summary' and 'recommendation' based on the user's 'Desired Verbosity'. 'concise' should be 1-2 sentences. 'detailed' can be longer.
+7.  If the user is vegetarian and the product contains non-vegetarian ingredients, mention this as a risk.
 
 Product Information:
 - Name: {{{productName}}}
@@ -56,7 +65,7 @@ Product Information:
 - Ingredients: {{{ingredientsText}}}
 - Nutri-score: {{{nutriscoreGrade}}}
 - NOVA Group: {{{novaGroup}}}
-- Allergens: {{{allergens}}}
+- Product Allergens: {{{allergens}}}
 - Nutrition Facts (per 100g):
   - Energy: {{{nutritionFacts.energy_kcal_100g}}} kcal
   - Fat: {{{nutritionFacts.fat_100g}}}g

@@ -6,14 +6,14 @@ import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import type { Product, NutritionInsightOutput, UserSettings } from '@/lib/types';
+import type { Product, NutritionInsightOutput, UserSettings, UserPreferences } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import AnalysisDisplay from './AnalysisDisplay';
 import type { LocalAnalysis } from '@/lib/scoring';
+import type { NutritionInsightInput } from '@/ai/flows/ai-nutrition-insights';
 
-const OLD_CACHE_KEY = 'nutriscan-ai-cache';
 const CACHE_KEY = 'smartscan-ai-cache';
 const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
 
@@ -22,8 +22,8 @@ interface CacheItem {
   data: NutritionInsightOutput;
 }
 
-function getCacheKey(barcode: string, language: string, preferences: Partial<Omit<UserSettings, 'language'>>): string {
-    const prefsString = `${preferences.isVeg}-${preferences.isNonVeg}-${preferences.allergies?.join(',')}`;
+function getCacheKey(barcode: string, language: string, preferences: UserPreferences): string {
+    const prefsString = `${preferences.isVeg}-${preferences.allergies?.join(',')}-${preferences.healthGoal}-${preferences.aiVerbosity}`;
     return `${barcode}-${language}-${prefsString}`;
 }
 
@@ -36,18 +36,6 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
   const { incrementAiCallCount } = useAiUsage();
   const { trackError } = useAnalytics();
 
-  useEffect(() => {
-    try {
-        const oldCache = window.localStorage.getItem(OLD_CACHE_KEY);
-        if (oldCache) {
-            window.localStorage.setItem(CACHE_KEY, oldCache);
-            window.localStorage.removeItem(OLD_CACHE_KEY);
-        }
-    } catch(e) {
-        console.warn("Failed to migrate AI cache", e);
-    }
-  }, []);
-
   const fetchInsight = useCallback(async (forceRefresh = false) => {
     if (!preferences.aiInsightsEnabled) {
       setIsLoading(false);
@@ -56,9 +44,17 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
 
     setIsLoading(true);
     setAiError(null);
+
+    const userPrefs: UserPreferences = {
+      isVeg: preferences.isVeg,
+      isNonVeg: preferences.isNonVeg,
+      allergies: preferences.allergies,
+      healthGoal: preferences.healthGoal,
+      aiVerbosity: preferences.aiVerbosity,
+    };
     
     if (!forceRefresh) {
-        const cacheKey = getCacheKey(barcode, language, preferences);
+        const cacheKey = getCacheKey(barcode, language, userPrefs);
         try {
           const cached = localStorage.getItem(CACHE_KEY);
           if (cached) {
@@ -78,7 +74,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
 
     try {
       incrementAiCallCount();
-      const insightData = {
+      const insightData: NutritionInsightInput = {
         productName: product.product_name,
         ingredientsText: product.ingredients_text_with_allergens,
         nutriscoreGrade: product.nutriscore_grade,
@@ -95,12 +91,13 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
         },
         healthScore: localAnalysis.score,
         warnings: localAnalysis.warnings,
+        userPreferences: userPrefs,
       };
       const result = await getAINutritionInsight(insightData);
       
       if (result) {
         setAiInsight(result);
-        const cacheKey = getCacheKey(barcode, language, preferences);
+        const cacheKey = getCacheKey(barcode, language, userPrefs);
         try {
             const cached = localStorage.getItem(CACHE_KEY);
             const cache = cached ? JSON.parse(cached) : {};
@@ -144,7 +141,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
                 <div className="mt-4 space-y-2 animate-pulse">
                     <div className="flex items-center gap-2 text-primary text-sm font-medium">
                         <Sparkles className="h-4 w-4" />
-                        <p>Generating AI explanation...</p>
+                        <p>Generating personalized AI explanation...</p>
                     </div>
                 </div>
             </div>
