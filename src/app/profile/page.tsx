@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,6 +30,7 @@ import { cn } from '@/lib/utils';
 import Achievements from '@/components/dashboard/Achievements';
 import { useGamification } from '@/hooks/useGamification';
 import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 const verbosityLevels: AiVerbosity[] = ['concise', 'detailed'];
@@ -52,6 +53,15 @@ const ProfileStatCard = ({ title, value, icon: Icon, valueClassName, isLoading }
     </Card>
 );
 
+const commonAllergies = [
+    { name: 'Nuts', icon: Nut },
+    { name: 'Gluten', icon: Wheat },
+    { name: 'Dairy', icon: Milk },
+    { name: 'Eggs', icon: Egg },
+    { name: 'Seafood', icon: Fish },
+    { name: 'Soy', icon: Bean },
+];
+
 export default function ProfilePage() {
   const { language, setLanguage, t } = useLanguage();
   const { preferences, savePreferences } = usePreferences();
@@ -61,10 +71,50 @@ export default function ProfilePage() {
   const { discoveryCount, contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
   const [isClearing, setIsClearing] = useState(false);
   const { level, xp, getLevelProgress, isLoaded: isGamificationLoaded } = useGamification();
+  const [customAllergyInput, setCustomAllergyInput] = useState('');
 
-  const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-    savePreferences({ allergies });
+  const handleDietChange = (diet: 'veg' | 'nonveg' | 'none') => {
+    if (diet === 'veg') {
+        savePreferences({ isVeg: true, isNonVeg: false });
+    } else if (diet === 'nonveg') {
+        // When user selects non-veg, we assume they might still eat veg food.
+        // To provide the best recommendations, we keep isVeg as true.
+        // This is a business logic decision to be more inclusive in suggestions.
+        // If strict separation is needed, isVeg should be false.
+        savePreferences({ isVeg: false, isNonVeg: true });
+    } else {
+        savePreferences({ isVeg: false, isNonVeg: false });
+    }
+  };
+
+  const handleAllergyToggle = (allergy: string) => {
+      const lowerCaseAllergy = allergy.toLowerCase();
+      const newAllergies = preferences.allergies.map(a => a.toLowerCase()).includes(lowerCaseAllergy)
+          ? preferences.allergies.filter(a => a.toLowerCase() !== lowerCaseAllergy)
+          : [...preferences.allergies, allergy];
+      savePreferences({ allergies: newAllergies });
+  };
+  
+  const handleAddCustomAllergy = () => {
+      const newAllergy = customAllergyInput.trim();
+      const lowerCaseNewAllergy = newAllergy.toLowerCase();
+      if (newAllergy && !preferences.allergies.map(a => a.toLowerCase()).includes(lowerCaseNewAllergy)) {
+          const newAllergies = [...preferences.allergies, newAllergy];
+          savePreferences({ allergies: newAllergies });
+          setCustomAllergyInput('');
+      }
+  };
+
+  const handleCustomAllergyKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+        e.preventDefault();
+        handleAddCustomAllergy();
+    }
+  };
+  
+  const handleRemoveAllergy = (allergy: string) => {
+      const newAllergies = preferences.allergies.filter(a => a.toLowerCase() !== allergy.toLowerCase());
+      savePreferences({ allergies: newAllergies });
   };
   
   const handleClearHistory = () => {
@@ -84,6 +134,12 @@ export default function ProfilePage() {
     '90d': t('retention90d'),
     'forever': t('retentionForever'),
   };
+
+  const selectedDiet = useMemo(() => {
+    if (preferences.isNonVeg) return 'nonveg';
+    if (preferences.isVeg) return 'veg';
+    return 'none';
+  }, [preferences.isVeg, preferences.isNonVeg]);
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -164,36 +220,60 @@ export default function ProfilePage() {
 
             <Card>
                 <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Leaf /> {t('preferences')}</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Leaf /> Food Preferences</CardTitle>
+                    <CardDescription>We use this to give you better scan results and AI recommendations.</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="vegetarian-switch" className="flex items-center gap-2"><Leaf className="text-green-600" /> {t('vegetarian')}</Label>
-                        <Switch
-                        id="vegetarian-switch"
-                        checked={preferences.isVeg}
-                        onCheckedChange={(checked) => savePreferences({ isVeg: checked })}
-                        aria-label={t('vegetarian')}
-                        />
+                <CardContent className="space-y-6">
+                    <div>
+                        <Label className="font-semibold text-base">Diet</Label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                            <Button variant={selectedDiet === 'veg' ? 'default' : 'outline'} onClick={() => handleDietChange('veg')} className="justify-start h-12">
+                                <Leaf className="mr-2 h-4 w-4" /> Vegetarian
+                            </Button>
+                             <Button variant={selectedDiet === 'nonveg' ? 'default' : 'outline'} onClick={() => handleDietChange('nonveg')} className="justify-start h-12">
+                                <Drumstick className="mr-2 h-4 w-4" /> Non-Veg
+                            </Button>
+                             <Button variant={selectedDiet === 'none' ? 'default' : 'outline'} onClick={() => handleDietChange('none')} className="justify-start h-12">
+                                <UtensilsCrossed className="mr-2 h-4 w-4" /> None
+                            </Button>
+                        </div>
                     </div>
-                    <div className="flex items-center justify-between">
-                        <Label htmlFor="non-vegetarian-switch" className="flex items-center gap-2"><Drumstick className="text-red-600" /> {t('nonVegetarian')}</Label>
-                        <Switch
-                        id="non-vegetarian-switch"
-                        checked={preferences.isNonVeg}
-                        onCheckedChange={(checked) => savePreferences({ isNonVeg: checked })}
-                        aria-label={t('nonVegetarian')}
-                        />
-                    </div>
-                    <div className="pt-2">
-                        <Label htmlFor="allergies-input" className="flex items-center gap-2 mb-2"><ShieldAlert /> {t('allergies')}</Label>
-                        <Input 
-                            id="allergies-input"
-                            placeholder={t('allergiesPlaceholder')}
-                            defaultValue={preferences.allergies.join(', ')}
-                            onBlur={handleAllergyChange}
-                            aria-label={t('allergies')}
-                        />
+
+                    <div className="space-y-4">
+                        <Label className="font-semibold text-base">Allergies</Label>
+                         <div className="flex flex-wrap gap-2">
+                            {commonAllergies.map(({ name, icon: Icon }) => (
+                                <Button
+                                    key={name}
+                                    variant={preferences.allergies.map(a=>a.toLowerCase()).includes(name.toLowerCase()) ? 'default' : 'outline'}
+                                    onClick={() => handleAllergyToggle(name)}
+                                >
+                                    <Icon className="mr-2 h-4 w-4" />
+                                    {name}
+                                </Button>
+                            ))}
+                        </div>
+
+                        <div className="flex flex-wrap gap-2 pt-2">
+                            {preferences.allergies.map((allergy) => (
+                                <Badge key={allergy} variant="secondary" className="text-base py-1 pl-3 pr-1">
+                                    {allergy}
+                                    <Button size="icon" variant="ghost" className="h-6 w-6 ml-1" onClick={() => handleRemoveAllergy(allergy)}>
+                                        <X className="h-3 w-3" />
+                                    </Button>
+                                </Badge>
+                            ))}
+                        </div>
+
+                        <div className="flex gap-2">
+                            <Input 
+                                placeholder="Add other allergies..."
+                                value={customAllergyInput}
+                                onChange={(e) => setCustomAllergyInput(e.target.value)}
+                                onKeyDown={handleCustomAllergyKeyDown}
+                            />
+                            <Button onClick={handleAddCustomAllergy}>Add</Button>
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -369,4 +449,3 @@ export default function ProfilePage() {
         </div>
     </div>
   );
-}
