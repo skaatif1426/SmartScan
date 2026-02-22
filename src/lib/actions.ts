@@ -2,9 +2,9 @@
 
 import { generateNutritionInsights, NutritionInsightInput } from '@/ai/flows/ai-nutrition-insights';
 import { multilingualProductChatbot, MultilingualProductChatbotInput } from '@/ai/flows/multilingual-product-chatbot';
-import { generateEstimateFromBarcode } from '@/ai/flows/estimate-from-barcode';
+import { generateEstimateFromBarcode, EstimateInput } from '@/ai/flows/estimate-from-barcode';
 import { fetchProductFromApi } from './openfoodfacts-api';
-import { Product, NutritionInsightOutput } from './types';
+import { Product, NutritionInsightOutput, Language } from './types';
 import { sanitizeInput } from '@/ai/prompt-firewall';
 
 type GetProductResult = { status: 'success', product: Product | null } | { status: 'error' };
@@ -75,16 +75,16 @@ export async function getAIChatResponse(chatData: MultilingualProductChatbotInpu
   }
 }
 
-export async function getAIEstimate(barcode: string): Promise<NutritionInsightOutput | null> {
+export async function getAIEstimate(input: EstimateInput): Promise<NutritionInsightOutput | null> {
     try {
-        const insight = await generateEstimateFromBarcode({ barcode });
+        const insight = await generateEstimateFromBarcode(input);
         return insight;
     } catch (error: unknown) {
         console.error(JSON.stringify({
             level: 'error',
             action: 'getAIEstimate',
             message: 'AI estimate generation failed',
-            barcode,
+            barcode: input.barcode,
             error: error instanceof Error ? error.message : String(error),
         }, null, 2));
         return null;

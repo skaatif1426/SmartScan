@@ -13,6 +13,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useDiscovery } from '@/hooks/useDiscovery';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { useGamification } from '@/hooks/useGamification';
+import { useLanguage } from '@/contexts/AppProviders';
 
 export default function ProductNotFound({ barcode }: { barcode: string }) {
     const router = useRouter();
@@ -22,6 +23,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const { addDiscovery } = useDiscovery();
     const { addScanToHistory } = useScanHistory();
     const { addXp, XP_PER_DISCOVERY } = useGamification();
+    const { language } = useLanguage();
 
     useEffect(() => {
         if (barcode) {
@@ -39,7 +41,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const handleGetEstimate = async () => {
         setIsEstimating(true);
         setError(null);
-        const result = await getAIEstimate(barcode);
+        const result = await getAIEstimate({ barcode, language });
         if (result) {
             setEstimate(result);
         } else {

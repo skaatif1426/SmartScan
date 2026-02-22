@@ -6,7 +6,7 @@ import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import type { Product, NutritionInsightOutput, UserSettings, UserPreferences } from '@/lib/types';
+import type { Product, NutritionInsightOutput, UserSettings, UserPreferences, Language } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -92,6 +92,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
         healthScore: localAnalysis.score,
         warnings: localAnalysis.warnings,
         userPreferences: userPrefs,
+        language: language,
       };
       const result = await getAINutritionInsight(insightData);
       

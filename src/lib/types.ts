@@ -43,6 +43,7 @@ export interface DiscoveryItem {
 }
 
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
+export const LanguageSchema = z.enum(['English', 'Hindi', 'Marathi', 'Hinglish']);
 export type AiVerbosity = 'concise' | 'detailed';
 export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain';
 export type DataRetention = '30d' | '90d' | 'forever';

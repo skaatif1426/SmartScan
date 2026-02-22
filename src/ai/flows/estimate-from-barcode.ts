@@ -9,20 +9,23 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'genkit';
-import { NutritionInsightOutput, NutritionInsightOutputSchema } from '@/lib/types';
+import { NutritionInsightOutput, NutritionInsightOutputSchema, LanguageSchema } from '@/lib/types';
 
 const EstimateInputSchema = z.object({
     barcode: z.string().describe("The product barcode."),
+    language: LanguageSchema.describe("The language for the response."),
 });
 export type EstimateInput = z.infer<typeof EstimateInputSchema>;
 
 
 const estimateFromBarcodePrompt = ai.definePrompt({
-  name: 'estimateFromBarcodePrompt_v1',
+  name: 'estimateFromBarcodePrompt_v2',
   input: { schema: EstimateInputSchema },
   output: { schema: NutritionInsightOutputSchema },
   prompt: `You are a creative nutrition analyst AI. You've been given a barcode: {{{barcode}}}. You cannot look up barcodes on the internet.
 Your task is to generate a plausible, hypothetical nutritional analysis for a common type of product that *could* have such a barcode (e.g., a snack food, a beverage, a canned good).
+
+Your entire response MUST be in the specified language: {{{language}}}.
 
 Crucially, you MUST make it clear in your response that this is an estimate.
 - In the 'summary', start with a phrase like "As an AI estimate, this product could be...".

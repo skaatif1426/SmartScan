@@ -9,7 +9,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { NutritionInsightOutput, NutritionInsightOutputSchema, UserPreferencesSchema } from '@/lib/types';
+import { NutritionInsightOutput, NutritionInsightOutputSchema, UserPreferencesSchema, LanguageSchema } from '@/lib/types';
 
 const NutritionFactsSchema = z.object({
   energy_kcal_100g: z.number().optional().describe('Energy in kcal per 100g.'),
@@ -31,16 +31,17 @@ const NutritionInsightInputSchema = z.object({
   healthScore: z.number().describe('The pre-calculated health score from 0 to 100.'),
   warnings: z.array(z.string()).describe('A list of pre-identified warnings that contributed to the score.'),
   userPreferences: UserPreferencesSchema.optional().describe("The user's dietary and personalization preferences."),
+  language: LanguageSchema.describe("The language for the response."),
 });
 export type NutritionInsightInput = z.infer<typeof NutritionInsightInputSchema>;
 
 const nutritionInsightPrompt = ai.definePrompt({
-  name: 'nutritionInsightPrompt_v2',
+  name: 'nutritionInsightPrompt_v3',
   input: { schema: NutritionInsightInputSchema },
   output: { schema: NutritionInsightOutputSchema },
-  prompt: `You are an expert AI nutrition analyst. Your task is to explain a pre-calculated health score for a food product, PERSONALIZED for the user.
+  prompt: `You are an expert AI nutrition analyst. Your task is to explain a pre-calculated health score for a food product, PERSONALIZED for the user and delivered in their chosen language.
 
-You have been given the product information, a health score (from 0-100), a list of warnings that determined that score, and the user's preferences.
+Your entire response (summary, recommendation, and risk names) MUST be in the language specified here: {{{language}}}. Do not use any other language.
 
 --- USER PREFERENCES (Use these to tailor your response) ---
 - Health Goal: {{{userPreferences.healthGoal}}}
