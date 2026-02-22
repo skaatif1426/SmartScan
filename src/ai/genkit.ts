@@ -22,6 +22,6 @@ export const ai = genkit({
   ],
   // The default model can be switched easily.
   // Make sure the model name corresponds to one provided by your plugins.
-  model: 'googleai/gemini-2.5-flash',
+  model: 'googleai/gemini-1.5-flash-latest',
   // model: 'openai/gpt-4o', // Example
 });
