@@ -1,20 +1,16 @@
 'use client';
 import dynamic from 'next/dynamic';
-import { LayoutGrid, ScanLine, CheckCircle, AlertTriangle, ShieldQuestion, Sparkles } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { LayoutGrid, ScanLine, CheckCircle, AlertTriangle, ShieldQuestion } from 'lucide-react';
+import { Card, CardContent } from '@/components/ui/card';
 import StatsCards from '@/components/dashboard/StatsCards';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import { useLanguage, usePreferences } from '@/contexts/AppProviders';
+import { useLanguage } from '@/contexts/AppProviders';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ScanHistoryItem } from '@/lib/types';
-import { useDiscovery } from '@/hooks/useDiscovery';
 import Recommendations from '@/components/dashboard/Recommendations';
-
-const CategoryChart = dynamic(() => import('@/components/dashboard/CategoryChart'), {
-    loading: () => <Skeleton className="h-[250px] w-full" />,
-});
+import AiSmartInsights from '@/components/dashboard/AiSmartInsights';
 
 const DashboardSummary = ({ history }: { history: ScanHistoryItem[] }) => {
     const summary = useMemo(() => {
@@ -63,7 +59,6 @@ const DashboardSummary = ({ history }: { history: ScanHistoryItem[] }) => {
 export default function DashboardPage() {
     const { history, isLoaded: isHistoryLoaded } = useScanHistory();
     const { t } = useLanguage();
-    const { contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
 
 
     if (isHistoryLoaded && history.length === 0) {
@@ -95,14 +90,7 @@ export default function DashboardPage() {
             <div className="grid grid-cols-1 gap-6">
                 <DashboardSummary history={history} />
                 <Recommendations />
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
-                    <CardHeader>
-                        <CardTitle>{t('scannedCategories')}</CardTitle>
-                    </CardHeader>
-                    <CardContent className="pl-2">
-                        <CategoryChart history={history} />
-                    </CardContent>
-                </Card>
+                <AiSmartInsights history={history} />
             </div>
         </div>
     );
