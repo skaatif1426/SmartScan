@@ -71,7 +71,8 @@ export default function ProductDetailsClient({ product: productData }: { product
         };
 
         addScanWithCategory();
-    }, [addScanToHistory, product, productData.code, localAnalysis, addXp, XP_PER_SCAN]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [productData.code, localAnalysis.score]);
     
     const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));
 

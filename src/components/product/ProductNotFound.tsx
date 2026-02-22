@@ -37,7 +37,8 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
             });
             addXp(XP_PER_DISCOVERY);
         }
-    }, [barcode, addDiscovery, addScanToHistory, addXp, XP_PER_DISCOVERY]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [barcode]);
 
     const handleGetEstimate = async () => {
         setIsEstimating(true);

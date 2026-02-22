@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useMemo } from 'react';
 import type { ScanHistoryItem } from '@/lib/types';
 import { differenceInCalendarDays } from 'date-fns';
 import { usePreferences } from '@/contexts/AppProviders';
-import { toast } from '@/hooks/use-toast';
 
 const OLD_HISTORY_KEY = 'nutriscan-history';
 const HISTORY_KEY = 'smartscan-history';
@@ -74,28 +73,6 @@ export function useScanHistory() {
 
         const filteredHistory = prev.filter(h => h.barcode !== item.barcode);
         const updatedHistory = [newHistoryItem, ...filteredHistory].slice(0, MAX_HISTORY_ITEMS);
-
-        const oldStreak = calculateScanStreak(prev);
-        const newStreak = calculateScanStreak(updatedHistory);
-        if (newStreak > oldStreak) {
-            if (newStreak === 3) {
-                toast({ title: 'Achievement Unlocked', description: "On Fire: Maintained a 3-day scan streak!" });
-            } else if (newStreak === 7) {
-                toast({ title: 'Achievement Unlocked', description: "Inferno: Maintained a 7-day scan streak!" });
-            }
-        }
-        
-        if (!item.isDiscovery && item.healthScore) {
-            const oldHealthyCount = prev.filter(h => h.healthScore && h.healthScore > 75).length;
-            const newHealthyCount = updatedHistory.filter(h => h.healthScore && h.healthScore > 75).length;
-            if (newHealthyCount > oldHealthyCount) {
-                if (newHealthyCount === 10) {
-                    toast({ title: 'Achievement Unlocked', description: 'Good Start: Scanned 10 healthy items.' });
-                } else if (newHealthyCount === 25) {
-                    toast({ title: 'Achievement Unlocked', description: 'Health Advocate: Scanned 25 healthy items.' });
-                }
-            }
-        }
         
         window.localStorage.setItem(HISTORY_KEY, JSON.stringify(updatedHistory));
         return updatedHistory;

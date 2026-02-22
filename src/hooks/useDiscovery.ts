@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useToast } from './use-toast';
 import type { DiscoveryItem } from '@/lib/types';
 import { differenceInCalendarDays } from 'date-fns';
 
@@ -48,7 +47,6 @@ function calculateDiscoveryStreak(discoveries: DiscoveryItem[]): number {
 export function useDiscovery() {
     const [discoveries, setDiscoveries] = useState<DiscoveryItem[]>([]);
     const [isLoaded, setIsLoaded] = useState(false);
-    const { toast } = useToast();
 
     useEffect(() => {
         try {
@@ -78,31 +76,13 @@ export function useDiscovery() {
         try {
             const newDiscovery: DiscoveryItem = { barcode, date: new Date().toISOString() };
             const newDiscoveries = [...discoveries, newDiscovery];
-            const prevCount = discoveries.length;
             
             setDiscoveries(newDiscoveries);
             window.localStorage.setItem(DISCOVERY_KEY, JSON.stringify(newDiscoveries));
-
-            const newCount = newDiscoveries.length;
-            let achievementToast: { title: string; description: string } | null = null;
-            
-            if (newCount === 1 && prevCount < 1) {
-                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "Explorer"` };
-            } else if (newCount === 5 && prevCount < 5) {
-                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "Pathfinder"` };
-            } else if (newCount === 10 && prevCount < 10) {
-                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "Data Contributor"` };
-            } else if (newCount === 25 && prevCount < 25) {
-                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "AI Trainer"` };
-            }
-            
-            if (achievementToast) {
-                toast(achievementToast);
-            }
         } catch (e) {
             console.warn('Failed to save discovery to localStorage', e);
         }
-    }, [discoveries, toast]);
+    }, [discoveries]);
 
     const discoveryCount = discoveries.length;
     const discoveryStreak = useMemo(() => calculateDiscoveryStreak(discoveries), [discoveries]);
