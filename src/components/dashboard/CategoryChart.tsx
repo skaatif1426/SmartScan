@@ -25,7 +25,11 @@ function CategoryChart({ history }: { history: ScanHistoryItem[] }) {
         categoryCounts[primaryCategory] = (categoryCounts[primaryCategory] || 0) + 1;
     });
 
-    return Object.entries(categoryCounts)
+    // Only show 'Uncategorized' if it's the only category available.
+    const significantCategories = Object.entries(categoryCounts)
+      .filter(([name]) => name !== 'Uncategorized' || Object.keys(categoryCounts).length === 1);
+
+    return significantCategories
         .map(([name, count]) => ({ name, count }))
         .sort((a, b) => b.count - a.count)
         .slice(0, 5);
@@ -34,6 +38,10 @@ function CategoryChart({ history }: { history: ScanHistoryItem[] }) {
   
   if (history.length === 0) {
       return <p className="text-muted-foreground text-center py-8">Scan items to see category data.</p>;
+  }
+
+  if (chartData.length === 0) {
+    return <p className="text-muted-foreground text-center py-8 px-4">No scanned products have categories yet.</p>;
   }
 
   const chartConfig = {
