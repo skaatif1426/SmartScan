@@ -47,10 +47,10 @@ export default function ProductChatbot({ productData }: { productData: string })
         incrementAiCallCount();
         
         const userPrefs: UserPreferences = {
-            isVeg: preferences.isVeg,
-            isNonVeg: preferences.isNonVeg,
+            diet: preferences.diet,
             allergies: preferences.allergies,
             healthGoal: preferences.healthGoal,
+            healthFocus: preferences.healthFocus,
             aiVerbosity: preferences.aiVerbosity,
         };
 

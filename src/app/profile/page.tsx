@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X, Vegan, Beef, Donut, Salad, Protein, Car, CircleDollarSign, Target } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,7 +15,6 @@ import {
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -25,7 +24,7 @@ import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDiscovery } from '@/hooks/useDiscovery';
-import type { Language, AiVerbosity, HealthGoal, DataRetention } from '@/lib/types';
+import type { Language, AiVerbosity, HealthGoal, DataRetention, DietType, HealthFocus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Achievements from '@/components/dashboard/Achievements';
 import { useGamification } from '@/hooks/useGamification';
@@ -33,8 +32,37 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
-const verbosityLevels: AiVerbosity[] = ['concise', 'detailed'];
-const healthGoals: HealthGoal[] = ['general', 'weight-loss', 'muscle-gain'];
+const verbosityLevels: {id: AiVerbosity, label: string}[] = [
+    {id: 'concise', label: 'Concise'},
+    {id: 'balanced', label: 'Balanced'},
+    {id: 'detailed', label: 'Detailed'},
+];
+const dietTypes: {id: DietType, label: string, icon: React.ElementType}[] = [
+    {id: 'none', label: 'None', icon: UtensilsCrossed},
+    {id: 'vegetarian', label: 'Vegetarian', icon: Leaf},
+    {id: 'vegan', label: 'Vegan', icon: Vegan},
+    {id: 'non-vegetarian', label: 'Non-Veg', icon: Beef},
+    {id: 'keto', label: 'Keto', icon: Donut},
+    {id: 'paleo', label: 'Paleo', icon: Salad},
+]
+const healthGoals: {id: HealthGoal, label: string}[] = [
+    {id: 'general', label: 'General Wellness'},
+    {id: 'weight-loss', label: 'Weight Loss'},
+    {id: 'muscle-gain', label: 'Muscle Gain'},
+    {id: 'maintain-weight', label: 'Maintain Weight'},
+    {id: 'improve-diet', label: 'Improve Diet'},
+    {id: 'manage-condition', label: 'Manage Condition'},
+];
+const healthFocuses: {id: HealthFocus, label: string, icon: React.ElementType}[] = [
+    {id: 'low-sugar', label: 'Low Sugar', icon: Donut},
+    {id: 'low-fat', label: 'Low Fat', icon: Donut},
+    {id: 'high-protein', label: 'High Protein', icon: Protein},
+    {id: 'low-carb', label: 'Low Carb', icon: Car},
+    {id: 'high-fiber', label: 'High Fiber', icon: Leaf},
+    {id: 'low-sodium', label: 'Low Sodium', icon: Donut},
+    {id: 'organic', label: 'Organic', icon: Leaf},
+    {id: 'budget-friendly', label: 'Budget-Friendly', icon: CircleDollarSign},
+]
 const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
 
 const ProfileStatCard = ({ title, value, icon: Icon, valueClassName, isLoading }: { title: string, value: React.ReactNode, icon: React.ElementType, valueClassName?: string, isLoading: boolean }) => (
@@ -73,20 +101,6 @@ export default function ProfilePage() {
   const { level, xp, getLevelProgress, isLoaded: isGamificationLoaded } = useGamification();
   const [customAllergyInput, setCustomAllergyInput] = useState('');
 
-  const handleDietChange = (diet: 'veg' | 'nonveg' | 'none') => {
-    if (diet === 'veg') {
-        savePreferences({ isVeg: true, isNonVeg: false });
-    } else if (diet === 'nonveg') {
-        // When user selects non-veg, we assume they might still eat veg food.
-        // To provide the best recommendations, we keep isVeg as true.
-        // This is a business logic decision to be more inclusive in suggestions.
-        // If strict separation is needed, isVeg should be false.
-        savePreferences({ isVeg: false, isNonVeg: true });
-    } else {
-        savePreferences({ isVeg: false, isNonVeg: false });
-    }
-  };
-
   const handleAllergyToggle = (allergy: string) => {
       const lowerCaseAllergy = allergy.toLowerCase();
       const newAllergies = preferences.allergies.map(a => a.toLowerCase()).includes(lowerCaseAllergy)
@@ -123,23 +137,18 @@ export default function ProfilePage() {
     // No need to setIsClearing(false) as the dialog will close
   }
 
-  const healthGoalLabels: { [key in HealthGoal]: string } = {
-    'general': t('generalWellness'),
-    'weight-loss': t('weightLoss'),
-    'muscle-gain': t('muscleGain'),
-  };
+  const handleHealthFocusToggle = (focus: HealthFocus) => {
+      const newFocuses = preferences.healthFocus.includes(focus)
+          ? preferences.healthFocus.filter(f => f !== focus)
+          : [...preferences.healthFocus, focus];
+      savePreferences({ healthFocus: newFocuses });
+  }
 
   const retentionLabels: { [key in DataRetention]: string } = {
     '30d': t('retention30d'),
     '90d': t('retention90d'),
     'forever': t('retentionForever'),
   };
-
-  const selectedDiet = useMemo(() => {
-    if (preferences.isNonVeg) return 'nonveg';
-    if (preferences.isVeg) return 'veg';
-    return 'none';
-  }, [preferences.isVeg, preferences.isNonVeg]);
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -221,21 +230,17 @@ export default function ProfilePage() {
             <Card>
                 <CardHeader>
                     <CardTitle className="flex items-center gap-2"><Leaf /> Food Preferences</CardTitle>
-                    <CardDescription>We use this to give you better scan results and AI recommendations.</CardDescription>
+                    <CardDescription>This helps AI give you better results and warnings.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div>
                         <Label className="font-semibold text-base">Diet</Label>
                         <div className="grid grid-cols-3 gap-2 mt-2">
-                            <Button variant={selectedDiet === 'veg' ? 'default' : 'outline'} onClick={() => handleDietChange('veg')} className="justify-start h-12">
-                                <Leaf className="mr-2 h-4 w-4" /> Vegetarian
-                            </Button>
-                             <Button variant={selectedDiet === 'nonveg' ? 'default' : 'outline'} onClick={() => handleDietChange('nonveg')} className="justify-start h-12">
-                                <Drumstick className="mr-2 h-4 w-4" /> Non-Veg
-                            </Button>
-                             <Button variant={selectedDiet === 'none' ? 'default' : 'outline'} onClick={() => handleDietChange('none')} className="justify-start h-12">
-                                <UtensilsCrossed className="mr-2 h-4 w-4" /> None
-                            </Button>
+                            {dietTypes.map(({ id, label, icon: Icon }) => (
+                                <Button key={id} variant={preferences.diet === id ? 'default' : 'outline'} onClick={() => savePreferences({ diet: id })} className="justify-start h-12">
+                                    <Icon className="mr-2 h-4 w-4" /> {label}
+                                </Button>
+                            ))}
                         </div>
                     </div>
 
@@ -280,40 +285,44 @@ export default function ProfilePage() {
             
             <Card>
                 <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><HeartPulse /> {t('personalizationTitle')}</CardTitle>
+                    <CardTitle className="flex items-center gap-2"><Sparkles /> {t('personalizationTitle')}</CardTitle>
+                    <CardDescription>Customize the AI's personality and focus.</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                     <div>
-                        <Label htmlFor="ai-verbosity-select">{t('aiVerbosity')}</Label>
-                        <Select
-                            value={preferences.aiVerbosity}
-                            onValueChange={(value: AiVerbosity) => savePreferences({ aiVerbosity: value })}
-                        >
-                            <SelectTrigger id="ai-verbosity-select" aria-label={t('aiVerbosity')}>
-                                <SelectValue placeholder={t('aiVerbosity')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {verbosityLevels.map(level => (
-                                    <SelectItem key={level} value={level}>{t(level as 'concise' | 'detailed')}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Label>{t('aiVerbosity')}</Label>
+                        <div className="grid grid-cols-3 gap-2 mt-2">
+                            {verbosityLevels.map(({ id, label }) => (
+                                <Button key={id} variant={preferences.aiVerbosity === id ? 'default' : 'outline'} onClick={() => savePreferences({ aiVerbosity: id })}>
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
                     <div>
-                        <Label htmlFor="health-goal-select">{t('healthGoal')}</Label>
-                        <Select
-                            value={preferences.healthGoal}
-                            onValueChange={(value: HealthGoal) => savePreferences({ healthGoal: value })}
-                        >
-                            <SelectTrigger id="health-goal-select" aria-label={t('healthGoal')}>
-                                <SelectValue placeholder={t('healthGoal')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {healthGoals.map(goal => (
-                                    <SelectItem key={goal} value={goal}>{healthGoalLabels[goal]}</SelectItem>
-                                ))}
-                            </SelectContent>
-                        </Select>
+                        <Label>{t('healthGoal')}</Label>
+                        <div className="grid grid-cols-2 gap-2 mt-2">
+                            {healthGoals.map(({ id, label }) => (
+                                <Button key={id} variant={preferences.healthGoal === id ? 'default' : 'outline'} onClick={() => savePreferences({ healthGoal: id })}>
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
+                    </div>
+                     <div>
+                        <Label className="flex items-center gap-2"><Target /> Focus Areas</Label>
+                         <div className="flex flex-wrap gap-2 mt-2">
+                            {healthFocuses.map(({ id, label, icon: Icon }) => (
+                                <Button
+                                    key={id}
+                                    variant={preferences.healthFocus.includes(id) ? 'default' : 'outline'}
+                                    onClick={() => handleHealthFocusToggle(id)}
+                                >
+                                    <Icon className="mr-2 h-4 w-4" />
+                                    {label}
+                                </Button>
+                            ))}
+                        </div>
                     </div>
                 </CardContent>
             </Card>
@@ -375,10 +384,12 @@ export default function ProfilePage() {
                             <Label htmlFor="advanced-ui-switch">{t('advancedUiMode')}</Label>
                             <p className="text-sm text-muted-foreground">{t('advancedUiModeDescription')}</p>
                         </div>
-                        <Switch 
+                        <Input
                             id="advanced-ui-switch"
+                            type="checkbox"
+                            className="h-6 w-11"
                             checked={preferences.advancedUiMode}
-                            onCheckedChange={(checked) => savePreferences({ advancedUiMode: checked })}
+                            onCheckedChange={(checked) => savePreferences({ advancedUiMode: Boolean(checked) })}
                             aria-label={t('advancedUiMode')}
                         />
                     </div>
@@ -387,19 +398,23 @@ export default function ProfilePage() {
                         <div className="border-t pt-6 space-y-4">
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="ai-insights-switch" className="flex items-center gap-2"><Sparkles /> {t('aiInsights')}</Label>
-                                <Switch
+                                <Input
                                 id="ai-insights-switch"
+                                type="checkbox"
+                                className="h-6 w-11"
                                 checked={preferences.aiInsightsEnabled}
-                                onCheckedChange={(checked) => savePreferences({ aiInsightsEnabled: checked })}
+                                onCheckedChange={(checked) => savePreferences({ aiInsightsEnabled: Boolean(checked) })}
                                 aria-label={t('aiInsights')}
                                 />
                             </div>
                             <div className="flex items-center justify-between">
                                 <Label htmlFor="ai-chat-switch" className="flex items-center gap-2"><MessageCircle /> {t('aiChat')}</Label>
-                                <Switch
+                                <Input
                                 id="ai-chat-switch"
+                                type="checkbox"
+                                className="h-6 w-11"
                                 checked={preferences.aiChatEnabled}
-                                onCheckedChange={(checked) => savePreferences({ aiChatEnabled: checked })}
+                                onCheckedChange={(checked) => savePreferences({ aiChatEnabled: Boolean(checked) })}
                                 aria-label={t('aiChat')}
                                 />
                             </div>

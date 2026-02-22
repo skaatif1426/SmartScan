@@ -6,7 +6,7 @@ import { getAINutritionInsight } from '@/lib/actions';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import type { Product, NutritionInsightOutput, UserSettings, UserPreferences, Language } from '@/lib/types';
+import type { Product, NutritionInsightOutput, UserPreferences } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -23,7 +23,7 @@ interface CacheItem {
 }
 
 function getCacheKey(barcode: string, language: string, preferences: UserPreferences): string {
-    const prefsString = `${preferences.isVeg}-${preferences.allergies?.join(',')}-${preferences.healthGoal}-${preferences.aiVerbosity}`;
+    const prefsString = `${preferences.diet}-${preferences.allergies?.join(',')}-${preferences.healthGoal}-${preferences.aiVerbosity}-${preferences.healthFocus.join(',')}`;
     return `${barcode}-${language}-${prefsString}`;
 }
 
@@ -46,10 +46,10 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
     setAiError(null);
 
     const userPrefs: UserPreferences = {
-      isVeg: preferences.isVeg,
-      isNonVeg: preferences.isNonVeg,
+      diet: preferences.diet,
       allergies: preferences.allergies,
       healthGoal: preferences.healthGoal,
+      healthFocus: preferences.healthFocus,
       aiVerbosity: preferences.aiVerbosity,
     };
     

@@ -44,30 +44,58 @@ export interface DiscoveryItem {
 
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
 export const LanguageSchema = z.enum(['English', 'Hindi', 'Marathi', 'Hinglish']);
-export type AiVerbosity = 'concise' | 'detailed';
-export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain';
+export type AiVerbosity = 'concise' | 'balanced' | 'detailed';
+export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain' | 'maintain-weight' | 'improve-diet' | 'manage-condition';
+export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' | 'high-fiber' | 'low-sodium' | 'organic' | 'budget-friendly';
+export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo';
 export type DataRetention = '30d' | '90d' | 'forever';
 
 
 export interface UserSettings {
   language: Language;
-  isVeg: boolean;
-  isNonVeg: boolean;
+  diet: DietType;
   allergies: string[];
+  healthGoal: HealthGoal;
+  healthFocus: HealthFocus[];
+  aiVerbosity: AiVerbosity;
   advancedUiMode: boolean;
   aiChatEnabled: boolean;
   aiInsightsEnabled: boolean;
-  aiVerbosity: AiVerbosity;
-  healthGoal: HealthGoal;
   dataRetention: DataRetention;
+  // Deprecated, for migration only
+  isVeg?: boolean;
+  isNonVeg?: boolean;
 }
 
 export const UserPreferencesSchema = z.object({
-  isVeg: z.boolean(),
-  isNonVeg: z.boolean(),
+  diet: z.nativeEnum({
+    none: 'none',
+    vegetarian: 'vegetarian',
+    vegan: 'vegan',
+    'non-vegetarian': 'non-vegetarian',
+    keto: 'keto',
+    paleo: 'paleo',
+  }),
   allergies: z.array(z.string()),
-  healthGoal: z.enum(['general', 'weight-loss', 'muscle-gain']),
-  aiVerbosity: z.enum(['concise', 'detailed']),
+  healthGoal: z.nativeEnum({
+    general: 'general',
+    'weight-loss': 'weight-loss',
+    'muscle-gain': 'muscle-gain',
+    'maintain-weight': 'maintain-weight',
+    'improve-diet': 'improve-diet',
+    'manage-condition': 'manage-condition',
+  }),
+  healthFocus: z.array(z.nativeEnum({
+    'low-sugar': 'low-sugar',
+    'low-fat': 'low-fat',
+    'high-protein': 'high-protein',
+    'low-carb': 'low-carb',
+    'high-fiber': 'high-fiber',
+    'low-sodium': 'low-sodium',
+    organic: 'organic',
+    'budget-friendly': 'budget-friendly',
+  })),
+  aiVerbosity: z.enum(['concise', 'balanced', 'detailed']),
 });
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 

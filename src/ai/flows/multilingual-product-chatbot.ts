@@ -53,9 +53,8 @@ Based on the provided product information AND the user's preferences, answer the
 
 --- USER PREFERENCES (to tailor your response) ---
 - Health Goal: {{{userPreferences.healthGoal}}}
+- Diet: {{{userPreferences.diet}}}
 - Known Allergies: {{{userPreferences.allergies}}}
-- Is Vegetarian: {{{userPreferences.isVeg}}}
-- Is Non-Vegetarian: {{{userPreferences.isNonVeg}}}
 ---
 
 When asked if a product is "good for a child", analyze the nutritional information (especially sugar, fat, and Nutri-score) and explain it in simple terms.
@@ -65,7 +64,7 @@ Your advice should be helpful guidance. If you suggest consulting an expert, do 
 Never give direct medical advice or use phrases like "I am an AI". You're a helpful buddy.`;
 
 const prompt = ai.definePrompt({
-  name: 'multilingualProductChatbotPrompt_v3',
+  name: 'multilingualProductChatbotPrompt_v4',
   input: {schema: MultilingualProductChatbotInputSchema},
   output: {schema: MultilingualProductChatbotOutputSchema},
   prompt: `--- SYSTEM INSTRUCTIONS (LOCKED) ---

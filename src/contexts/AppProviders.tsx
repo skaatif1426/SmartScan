@@ -24,7 +24,7 @@ export function useLanguage() {
 
 // --- Preferences Context ---
 type PreferencesContextType = {
-  preferences: Omit<UserSettings, 'language'>;
+  preferences: Omit<UserSettings, 'language' | 'isVeg' | 'isNonVeg'>;
   savePreferences: (newPreferences: Partial<Omit<UserSettings, 'language'>>) => void;
   isSettingsLoaded: boolean;
 };
@@ -67,14 +67,14 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   const preferencesValue: PreferencesContextType = useMemo(() => ({
     preferences: {
-        isVeg: settings.isVeg,
-        isNonVeg: settings.isNonVeg,
+        diet: settings.diet,
         allergies: settings.allergies,
+        healthGoal: settings.healthGoal,
+        healthFocus: settings.healthFocus,
+        aiVerbosity: settings.aiVerbosity,
         advancedUiMode: settings.advancedUiMode,
         aiChatEnabled: settings.aiChatEnabled,
         aiInsightsEnabled: settings.aiInsightsEnabled,
-        aiVerbosity: settings.aiVerbosity,
-        healthGoal: settings.healthGoal,
         dataRetention: settings.dataRetention,
     },
     savePreferences,
