@@ -11,6 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { useLanguage } from '@/contexts/AppProviders';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import AnimatedCounter from '@/components/ui/AnimatedCounter';
 
 function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
     const [imageError, setImageError] = useState(false);
@@ -67,7 +68,7 @@ const SimpleHealthScore = ({ score }: { score: number }) => (
         "inline-flex items-center justify-center rounded-full h-12 w-12 border-2 font-bold text-lg",
         getHealthScoreBadgeClass(score)
     )}>
-        {score}
+        <AnimatedCounter value={score} />
     </div>
 );
 

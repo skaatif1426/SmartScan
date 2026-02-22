@@ -106,6 +106,13 @@ export default function ScannerPage() {
     router.push(`/product/${values.barcode}`);
   }
 
+  const handleStartScanning = () => {
+    if (window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
+    setShowScanner(true);
+  }
+
   const isLoading = isUploading || isSubmitting;
 
   return (
@@ -136,7 +143,7 @@ export default function ScannerPage() {
           ) : (
             <div className="text-center space-y-4">
               <p className="text-muted-foreground">{t('scannerPrompt')}</p>
-              <Button size="lg" className="w-full rounded-full" onClick={() => setShowScanner(true)} disabled={isLoading}>
+              <Button size="lg" className="w-full rounded-full" onClick={handleStartScanning} disabled={isLoading}>
                 <ScanLine className="w-5 h-5 mr-2" />
                 {t('startScanning')}
               </Button>

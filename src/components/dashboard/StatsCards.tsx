@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/AppProviders';
 import { useDiscovery } from '@/hooks/useDiscovery';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { cn } from '@/lib/utils';
+import AnimatedCounter from '../ui/AnimatedCounter';
 
 const getHealthScoreTextColor = (score: number | null) => {
     if (score === null) return '';
@@ -30,7 +31,7 @@ function StatsCards() {
 
 
     return (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
             <Card>
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
                     <CardTitle className="text-sm font-medium">{t('totalScans')}</CardTitle>
@@ -38,6 +39,17 @@ function StatsCards() {
                 </CardHeader>
                 <CardContent>
                     <div className="text-2xl font-bold">{totalScans}</div>
+                </CardContent>
+            </Card>
+             <Card>
+                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                    <CardTitle className="text-sm font-medium">Avg. Health Score</CardTitle>
+                    <HeartPulse className="h-4 w-4 text-muted-foreground" />
+                </CardHeader>
+                <CardContent>
+                     <div className={cn("text-2xl font-bold", getHealthScoreTextColor(averageScore))}>
+                        {averageScore !== null ? <><AnimatedCounter value={averageScore} /><span className="text-base font-normal text-muted-foreground">/100</span></> : '-'}
+                    </div>
                 </CardContent>
             </Card>
             <Card>

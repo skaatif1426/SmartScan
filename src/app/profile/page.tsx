@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2 } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,18 +28,13 @@ import { useDiscovery } from '@/hooks/useDiscovery';
 import type { Language, AiVerbosity, HealthGoal, DataRetention } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Achievements from '@/components/dashboard/Achievements';
+import { useGamification } from '@/hooks/useGamification';
+import { Progress } from '@/components/ui/progress';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 const verbosityLevels: AiVerbosity[] = ['concise', 'detailed'];
 const healthGoals: HealthGoal[] = ['general', 'weight-loss', 'muscle-gain'];
 const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
-
-const getHealthScoreTextColor = (score: number | null) => {
-    if (score === null) return '';
-    if (score >= 75) return 'text-green-600';
-    if (score >= 50) return 'text-yellow-600';
-    return 'text-red-600';
-};
 
 const ProfileStatCard = ({ title, value, icon: Icon, valueClassName, isLoading }: { title: string, value: React.ReactNode, icon: React.ElementType, valueClassName?: string, isLoading: boolean }) => (
     <Card>
@@ -65,13 +60,7 @@ export default function ProfilePage() {
   const { analytics, resetErrorCount, isLoaded: isAnalyticsLoaded } = useAnalytics();
   const { discoveryCount, contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
   const [isClearing, setIsClearing] = useState(false);
-
-  const averageScore = useMemo(() => {
-    const scores = history.map(item => item.healthScore).filter(score => score !== undefined) as number[];
-    if (scores.length === 0) return null;
-    const sum = scores.reduce((a, b) => a + b, 0);
-    return Math.round(sum / scores.length);
-  }, [history]);
+  const { level, xp, getLevelProgress, isLoaded: isGamificationLoaded } = useGamification();
 
   const handleAllergyChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
@@ -99,24 +88,28 @@ export default function ProfilePage() {
   return (
     <div className="p-4 md:p-6 space-y-6">
         {/* Profile Header */}
-        <div className="animate-in fade-in duration-300 space-y-1">
-            {isDiscoveryLoaded ? (
+        <div className="animate-in fade-in duration-300 space-y-2">
+            {(isDiscoveryLoaded && isGamificationLoaded) ? (
                 <>
-                    <h1 className="text-3xl font-bold flex items-center gap-2">
-                        {contributorLevel.title} {contributorLevel.icon}
-                    </h1>
-                    <p className="text-lg text-muted-foreground">Building smarter food choices</p>
+                    <div className="flex justify-between items-center">
+                         <h1 className="text-3xl font-bold flex items-center gap-2">
+                            {contributorLevel.title} {contributorLevel.icon}
+                        </h1>
+                        <div className="font-bold text-lg">Level {level}</div>
+                    </div>
+                    <Progress value={getLevelProgress()} className="h-2" />
+                    <p className="text-sm text-muted-foreground text-right">{Math.floor(xp % 200)} / 200 XP</p>
                 </>
             ) : (
                 <>
                     <Skeleton className="h-9 w-48" />
-                    <Skeleton className="h-7 w-64" />
+                    <Skeleton className="h-2 w-full mt-2" />
                 </>
             )}
         </div>
 
         {/* User Info Stats */}
-        <div className="grid gap-4 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
+        <div className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
              <ProfileStatCard 
                 title="Total Scans"
                 value={history.length}
@@ -129,16 +122,18 @@ export default function ProfilePage() {
                 icon={Compass}
                 isLoading={!isDiscoveryLoaded}
              />
-             <ProfileStatCard 
-                title="Avg. Health Score"
-                value={averageScore !== null ? <>{averageScore}<span className="text-base font-normal text-muted-foreground">/100</span></> : '-'}
-                icon={HeartPulse}
-                isLoading={!isHistoryLoaded}
-                valueClassName={getHealthScoreTextColor(averageScore)}
-             />
         </div>
 
         <Separator className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200" />
+
+        <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+            <CardHeader>
+                <CardTitle className="flex items-center gap-2"><Award /> {t('achievements')}</CardTitle>
+            </CardHeader>
+            <CardContent>
+                <Achievements history={history} />
+            </CardContent>
+        </Card>
       
         {/* Settings Section */}
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">

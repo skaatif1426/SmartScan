@@ -10,7 +10,7 @@ import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ScanHistoryItem } from '@/lib/types';
 import { useDiscovery } from '@/hooks/useDiscovery';
-import Achievements from '@/components/dashboard/Achievements';
+import Recommendations from '@/components/dashboard/Recommendations';
 
 const CategoryChart = dynamic(() => import('@/components/dashboard/CategoryChart'), {
     loading: () => <Skeleton className="h-[250px] w-full" />,
@@ -83,13 +83,9 @@ export default function DashboardPage() {
                     <LayoutGrid className="text-primary" />
                     Dashboard
                 </h1>
-                {isDiscoveryLoaded ? (
-                    <p className="text-muted-foreground">
-                        Welcome back, {contributorLevel.title}. Here's your activity overview.
-                    </p>
-                ): (
-                    <Skeleton className="h-6 w-72" />
-                )}
+                <p className="text-muted-foreground">
+                    Your activity overview and insights.
+                </p>
             </div>
             
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
@@ -98,14 +94,7 @@ export default function DashboardPage() {
 
             <div className="grid grid-cols-1 gap-6">
                 <DashboardSummary history={history} />
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Sparkles /> {t('achievements')}</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <Achievements history={history} />
-                    </CardContent>
-                </Card>
+                <Recommendations />
                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
                     <CardHeader>
                         <CardTitle>{t('scannedCategories')}</CardTitle>

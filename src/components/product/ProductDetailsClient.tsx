@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package } from 'lucide-react';
+import { Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package, AlertTriangle, Shield, CheckCircle } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Skeleton } from '@/components/ui/skeleton';
 import { calculateLocalScore } from '@/lib/scoring';
 import { cn } from '@/lib/utils';
+import { useGamification } from '@/hooks/useGamification';
 
 const ProductChatbot = dynamic(() => import('./ProductChatbot'), {
     loading: () => <Skeleton className="h-96 w-full" />,
@@ -40,28 +41,9 @@ export default function ProductDetailsClient({ product: productData }: { product
     const { preferences } = usePreferences();
     const [imageError, setImageError] = useState(false);
     const isProblematicDomain = product.image_front_url?.includes('images.openfoodfacts.org');
+    const { addXp, XP_PER_SCAN } = useGamification();
 
     const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
-
-    const decision = useMemo(() => {
-        const score = localAnalysis.score;
-        if (score >= 75) {
-            return {
-                text: "Good Choice 👍",
-                className: "bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700",
-            };
-        }
-        if (score >= 50) {
-            return {
-                text: "Consume Occasionally ⚖️",
-                className: "bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700",
-            };
-        }
-        return {
-            text: "Limit Consumption ⚠️",
-            className: "bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700",
-        };
-    }, [localAnalysis.score]);
 
     useEffect(() => {
         if (product) {
@@ -74,8 +56,9 @@ export default function ProductDetailsClient({ product: productData }: { product
                 healthScore: localAnalysis.score,
                 isDiscovery: false,
             });
+            addXp(XP_PER_SCAN);
         }
-    }, [addScanToHistory, product, productData.code, localAnalysis]);
+    }, [addScanToHistory, product, productData.code, localAnalysis, addXp, XP_PER_SCAN]);
     
     const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));
 
@@ -90,7 +73,6 @@ export default function ProductDetailsClient({ product: productData }: { product
     ].filter(item => item.value !== undefined && item.value !== null), [product]);
 
     if (!product) {
-        // This case should be handled by the parent page, but it's a good safeguard.
         return null; 
     }
 
@@ -106,17 +88,10 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </div>
             </div>
             
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-500 delay-100">
-                 <Badge variant="outline" className={cn('font-semibold text-base px-3 py-1 border-2 w-full justify-center whitespace-normal h-auto text-center', decision.className)}>
-                    {decision.text}
-                </Badge>
-            </div>
-
             <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-200">
                 <div className="p-0 relative h-64 bg-muted rounded-t-lg flex items-center justify-center">
                     {(product.image_front_url && !imageError) ? (
                         isProblematicDomain ? (
-                            // eslint-disable-next-line @next/next/no-img-element
                             <img
                                 src={product.image_front_url}
                                 alt={product.product_name}
@@ -141,7 +116,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                         </div>
                     )}
                 </div>
-                <CardContent className="pt-6">
+                <CardContent className="p-6">
                     <div className="flex flex-wrap gap-2">
                         {product.nutriscore_grade && <Badge variant="outline">Nutri-Score: {product.nutriscore_grade.toUpperCase()}</Badge>}
                         {product.nova_group && <Badge variant="outline">NOVA: {product.nova_group}</Badge>}
@@ -150,17 +125,43 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </CardContent>
             </Card>
 
-             <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
-                <CardHeader>
-                    <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Health Analysis</CardTitle>
-                </CardHeader>
-                <CardContent>
-                    <NutritionInsight product={product} barcode={productData.code} localAnalysis={localAnalysis} />
-                </CardContent>
-            </Card>
-
-            <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="nutrition-facts">
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
+             <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="ai-analysis">
+                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+                    <AccordionItem value="ai-analysis" className="border-none">
+                         <AccordionTrigger className="p-6 hover:no-underline">
+                             <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Health Analysis</CardTitle>
+                         </AccordionTrigger>
+                         <AccordionContent className="px-6 pt-0 pb-6">
+                             <NutritionInsight product={product} barcode={productData.code} localAnalysis={localAnalysis} />
+                         </AccordionContent>
+                    </AccordionItem>
+                </Card>
+                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
+                    <AccordionItem value="score-breakdown" className="border-none">
+                         <AccordionTrigger className="p-6 hover:no-underline">
+                             <CardTitle className="flex items-center gap-2"><Shield className="text-primary" /> Score Breakdown</CardTitle>
+                         </AccordionTrigger>
+                         <AccordionContent className="px-6 pt-0 pb-6 space-y-2">
+                            <p className="text-sm text-muted-foreground">This score is based on the following factors:</p>
+                             {localAnalysis.warnings.length > 0 ? (
+                                 <ul className="list-disc list-inside space-y-1">
+                                    {localAnalysis.warnings.map((warning, i) => (
+                                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
+                                            <AlertTriangle className="h-4 w-4 mt-0.5 text-yellow-500 flex-shrink-0" />
+                                            <span>{warning}</span>
+                                        </li>
+                                    ))}
+                                 </ul>
+                             ) : (
+                                <div className="flex items-center gap-2 text-green-600">
+                                    <CheckCircle className="h-4 w-4" />
+                                    <p className="text-sm font-medium">No significant negative factors found.</p>
+                                </div>
+                             )}
+                         </AccordionContent>
+                    </AccordionItem>
+                </Card>
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
                     <AccordionItem value="nutrition-facts" className="border-none">
                         <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
@@ -178,7 +179,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     </AccordionItem>
                 </Card>
 
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
                     <AccordionItem value="ingredients" className="border-none">
                          <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
@@ -195,7 +196,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Accordion>
             
             {preferences.aiChatEnabled && (
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-700">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
                     </CardHeader>

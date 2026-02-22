@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Alert, AlertTitle } from '@/components/ui/alert';
 import { cn } from '@/lib/utils';
+import AnimatedCounter from '../ui/AnimatedCounter';
 
 const getHealthScoreColor = (score: number) => {
     if (score >= 75) return 'bg-green-500';
@@ -29,7 +30,9 @@ const AnalysisDisplay = ({ title, score, risks, recommendation, summary, isLocal
         <div>
             <div className="flex justify-between items-center mb-1">
                 <Label className="text-sm font-medium">{title}</Label>
-                <span className={cn('font-bold text-lg', getHealthScoreTextColor(score))}>{score}/100</span>
+                <span className={cn('font-bold text-lg', getHealthScoreTextColor(score))}>
+                    <AnimatedCounter value={score} />/100
+                </span>
             </div>
             <Progress value={score} className="h-2" indicatorClassName={getHealthScoreColor(score)} />
         </div>

@@ -12,6 +12,7 @@ import AnalysisDisplay from './AnalysisDisplay';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useDiscovery } from '@/hooks/useDiscovery';
 import { useScanHistory } from '@/hooks/useScanHistory';
+import { useGamification } from '@/hooks/useGamification';
 
 export default function ProductNotFound({ barcode }: { barcode: string }) {
     const router = useRouter();
@@ -20,6 +21,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const [error, setError] = useState<string | null>(null);
     const { addDiscovery } = useDiscovery();
     const { addScanToHistory } = useScanHistory();
+    const { addXp, XP_PER_DISCOVERY } = useGamification();
 
     useEffect(() => {
         if (barcode) {
@@ -30,8 +32,9 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                 brand: 'Unknown Product',
                 isDiscovery: true,
             });
+            addXp(XP_PER_DISCOVERY);
         }
-    }, [barcode, addDiscovery, addScanToHistory]);
+    }, [barcode, addDiscovery, addScanToHistory, addXp, XP_PER_DISCOVERY]);
 
     const handleGetEstimate = async () => {
         setIsEstimating(true);
