@@ -10,13 +10,13 @@
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
 
-export const CategorizeProductInputSchema = z.object({
+const CategorizeProductInputSchema = z.object({
   productName: z.string(),
   ingredients: z.string().optional(),
 });
 export type CategorizeProductInput = z.infer<typeof CategorizeProductInputSchema>;
 
-export const CategorizeProductOutputSchema = z.object({
+const CategorizeProductOutputSchema = z.object({
   category: z.string().describe("A single, general food category like 'Snacks', 'Beverages', 'Dairy', 'Bakery', 'Canned Goods', 'Produce', 'Meat & Seafood', 'Frozen Foods', 'Condiments & Sauces', or 'Other'."),
 });
 export type CategorizeProductOutput = z.infer<typeof CategorizeProductOutputSchema>;
