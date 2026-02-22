@@ -18,7 +18,7 @@ export default function BottomNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-4 inset-x-6 z-50 h-14 bg-card/80 backdrop-blur-xl border rounded-full shadow-2xl animate-in slide-in-from-bottom-8 duration-500 ease-in-out">
+    <nav className="fixed bottom-4 inset-x-6 z-50 h-14 bg-card/80 backdrop-blur-xl border rounded-full shadow-2xl animate-in slide-in-from-bottom-8 duration-300 ease-in-out">
       <div className="flex justify-around items-center h-full max-w-lg mx-auto p-1">
         {navItems.map((item) => {
           const isActive = pathname === item.href;

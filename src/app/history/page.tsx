@@ -142,7 +142,7 @@ export default function HistoryPage() {
         </CardHeader>
         <CardContent>
           {history.length === 0 ? (
-            <div className="text-center py-10 animate-in fade-in zoom-in-95">
+            <div className="text-center py-10 animate-in fade-in zoom-in-95 duration-300">
               <ScanLine className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">{t('historyEmpty')}</p>
               <Link href="/" className="mt-4 inline-block">
@@ -175,8 +175,8 @@ export default function HistoryPage() {
                      return (
                         <li 
                         key={`${item.barcode}-${item.scanDate}`}
-                        className="animate-in fade-in slide-in-from-bottom-4 duration-500"
-                        style={{ animationDelay: `${Math.min(index * 80, 800)}ms` }}
+                        className="animate-in fade-in slide-in-from-bottom-4 duration-300"
+                        style={{ animationDelay: `${Math.min(index * 50, 400)}ms` }}
                         >
                         <Link 
                             href={`/product/${item.barcode}`} 

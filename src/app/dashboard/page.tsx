@@ -63,7 +63,7 @@ const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
     }, [history, averageScore]);
     
     return (
-        <div className="text-center animate-in fade-in duration-500">
+        <div className="text-center animate-in fade-in duration-300">
             <h1 className="text-2xl font-bold">{greetingText}</h1>
             <p className="text-muted-foreground mt-1">{message}</p>
             
@@ -229,7 +229,7 @@ export default function DashboardPage() {
 
     if (history.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-500">
+            <div className="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-300">
                 <div className="mb-6">
                     <Sparkles className="mx-auto h-16 w-16 text-primary" />
                 </div>
@@ -251,7 +251,7 @@ export default function DashboardPage() {
         <div className="p-4 md:p-6 space-y-8">
             <HealthOverview history={history} />
             
-            <div className="text-center animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
+            <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-300 delay-50">
                 <Link href="/">
                     <Button size="lg" className="rounded-full h-14 px-12 text-lg shadow-lg">
                        <ScanLine className="mr-2 h-5 w-5" />
@@ -260,15 +260,15 @@ export default function DashboardPage() {
                 </Link>
             </div>
 
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100">
                 {lastScan && <ContinueWhereYouLeft lastScan={lastScan} />}
             </div>
 
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-150">
                 <SmartActions history={history} />
             </div>
             
-            <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200">
                 <QuickStats history={history} />
             </div>
         </div>

@@ -15,7 +15,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <AppProviders>
       <div className="flex flex-col h-svh bg-background">
-        <main key={pathname} className={cn('flex-1 overflow-y-auto animate-in fade-in-0 slide-in-from-bottom-4 duration-300 ease-out', showNav ? 'pb-28' : '')}>
+        <main key={pathname} className={cn('flex-1 overflow-y-auto animate-in fade-in-0 duration-200 ease-out', showNav ? 'pb-28' : '')}>
             {children}
         </main>
         {showNav && <BottomNav />}

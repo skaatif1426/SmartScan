@@ -58,7 +58,7 @@ export default function ProfilePage() {
             )}
         </div>
 
-        <div className="grid gap-4 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
+        <div className="grid gap-4 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-4 duration-300 delay-50">
              <ProfileStatCard 
                 title="Total Scans"
                 value={history.length}
@@ -79,9 +79,9 @@ export default function ProfilePage() {
              />
         </div>
 
-        <Separator className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200" />
+        <Separator className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-100" />
       
-        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
+        <div className="space-y-4 animate-in fade-in slide-in-from-bottom-4 duration-300 delay-150">
             <Accordion type="multiple" className="w-full space-y-4" defaultValue={['achievements']}>
                 <Card>
                     <AccordionItem value="achievements" className="border-b-0">
