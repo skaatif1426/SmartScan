@@ -4,10 +4,11 @@ import { useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useScanHistory } from '@/hooks/useScanHistory';
+import { useDiscovery } from '@/hooks/useDiscovery';
 import { usePreferences } from '@/contexts/AppProviders';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Lightbulb, Activity, Scan, Flame, HeartPulse, Sparkles, ScanLine, Target } from 'lucide-react';
+import { ArrowRight, Lightbulb, Activity, Scan, Flame, Sparkles, ScanLine, Target, Compass, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
 import Loading from './loading';
 import { getScoreInfo } from '@/lib/scoring';
@@ -15,8 +16,7 @@ import { cn } from '@/lib/utils';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 
 
-// 1. DYNAMIC GREETING + CONTEXT
-const Greeting = ({ history }: { history: ScanHistoryItem[] }) => {
+const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
     const greetingText = useMemo(() => {
         const hour = new Date().getHours();
         if (hour < 12) return 'Good Morning';
@@ -24,27 +24,63 @@ const Greeting = ({ history }: { history: ScanHistoryItem[] }) => {
         return 'Good Evening';
     }, []);
 
-    const contextualMessage = useMemo(() => {
-        if (history.length < 3) return "Start scanning to unlock personalized insights.";
+    const { averageScore, trendIcon: TrendIcon, trendColor } = useMemo(() => {
+        const scores = history.map(item => item.healthScore).filter(score => score !== undefined) as number[];
+        if (scores.length === 0) return { averageScore: null, trendIcon: null, trendColor: 'text-muted-foreground' };
 
-        const recentScans = history.slice(0, 5);
-        const avgScore = recentScans.map(s => s.healthScore ?? 0).reduce((a, b) => a + b, 0) / recentScans.length;
-
-        if (avgScore > 75) return "You're making consistently smart food choices. Keep it up! ✨";
-        if (avgScore < 45) return "Let's focus on improving your food habits today. You can do it!";
+        const averageScore = Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
         
-        return "Log your meals by scanning to track your progress.";
+        let trendIcon = Minus;
+        let trendColor = 'text-muted-foreground';
+
+        if (scores.length >= 2) {
+            const lastScore = scores[0];
+            const secondLastScore = scores[1];
+            if (lastScore > secondLastScore + 2) {
+                trendIcon = ArrowUp;
+                trendColor = 'text-green-500';
+            } else if (lastScore < secondLastScore - 2) {
+                trendIcon = ArrowDown;
+                trendColor = 'text-red-500';
+            }
+        }
+        
+        return { averageScore, trendIcon, trendColor };
     }, [history]);
     
+    const { message, scoreInfo } = useMemo(() => {
+        const scoreInfo = getScoreInfo(averageScore);
+        let message = "Start scanning to unlock personalized insights.";
+
+        if (history.length < 3) return { message, scoreInfo };
+        
+        if (averageScore! > 75) message = "You're making consistently smart food choices. Keep it up! ✨";
+        else if (averageScore! < 45) message = "Let's focus on improving your food habits today. You can do it!";
+        else message = "Log your meals by scanning to track your progress.";
+        
+        return { message, scoreInfo };
+
+    }, [history, averageScore]);
+    
     return (
-        <div className="animate-in fade-in duration-500">
-            <h1 className="text-3xl font-bold">{greetingText}</h1>
-            <p className="text-muted-foreground mt-1">{contextualMessage}</p>
+        <div className="text-center animate-in fade-in duration-500">
+            <h1 className="text-2xl font-bold">{greetingText}</h1>
+            <p className="text-muted-foreground mt-1">{message}</p>
+            
+            <div className="mt-6">
+                <p className="text-sm text-muted-foreground">Your Food Score</p>
+                <div className="flex items-center justify-center gap-2">
+                    <div className={cn("text-7xl font-bold tracking-tighter", scoreInfo.textClassName)}>
+                         {averageScore !== null ? <AnimatedCounter value={averageScore} /> : '-'}
+                    </div>
+                    {TrendIcon && <TrendIcon className={cn("h-8 w-8", trendColor)} />}
+                </div>
+                <div className={cn("text-lg font-semibold", scoreInfo.textClassName)}>{scoreInfo.label}</div>
+            </div>
         </div>
     );
 };
 
-// 2. CONTINUE WHERE YOU LEFT
 const ContinueWhereYouLeft = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
     const scoreInfo = getScoreInfo(lastScan.healthScore);
     return (
@@ -73,7 +109,6 @@ const ContinueWhereYouLeft = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
     );
 };
 
-// 3. SMART RECOMMENDATIONS / NEXT BEST ACTION
 const SmartActions = ({ history }: { history: ScanHistoryItem[] }) => {
     const { preferences } = usePreferences();
 
@@ -154,53 +189,41 @@ const SmartActions = ({ history }: { history: ScanHistoryItem[] }) => {
     );
 };
 
-// 4. QUICK STATS
 const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
     const { scanStreak } = useScanHistory();
-    const averageScore = useMemo(() => {
-        const scores = history.map(item => item.healthScore).filter(score => score !== undefined) as number[];
-        if (scores.length === 0) return null;
-        return Math.round(scores.reduce((a, b) => a + b, 0) / scores.length);
-    }, [history]);
-
-    const scoreInfo = getScoreInfo(averageScore);
-
+    const { discoveryCount } = useDiscovery();
+    
     return (
         <div className="space-y-3">
             <h2 className="font-semibold text-lg">Your Progress</h2>
-            <div className="grid grid-cols-3 gap-4">
-                <Card>
-                    <CardContent className="p-3 text-center sm:p-4">
+            <Card>
+                <CardContent className="p-4 grid grid-cols-3 divide-x divide-border text-center">
+                    <div>
                         <Scan className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
                         <div className="text-xl font-bold">{history.length}</div>
                         <p className="text-xs text-muted-foreground">Total Scans</p>
-                    </CardContent>
-                </Card>
-                 <Card>
-                    <CardContent className="p-3 text-center sm:p-4">
-                        <HeartPulse className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
-                        <div className={cn("text-xl font-bold", scoreInfo.textClassName)}>
-                            {averageScore !== null ? <AnimatedCounter value={averageScore} /> : '-'}
-                        </div>
-                        <p className="text-xs text-muted-foreground">Avg. Score</p>
-                    </CardContent>
-                </Card>
-                <Card>
-                    <CardContent className="p-3 text-center sm:p-4">
+                    </div>
+                    <div>
                         <Flame className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
                         <div className="text-xl font-bold">{scanStreak}</div>
                         <p className="text-xs text-muted-foreground">Day Streak</p>
-                    </CardContent>
-                </Card>
-            </div>
+                    </div>
+                    <div>
+                        <Compass className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
+                        <div className="text-xl font-bold">{discoveryCount}</div>
+                        <p className="text-xs text-muted-foreground">Discoveries</p>
+                    </div>
+                </CardContent>
+            </Card>
         </div>
     )
 };
 
 export default function DashboardPage() {
     const { history, isLoaded } = useScanHistory();
+    const { isLoaded: isDiscoveryLoaded } = useDiscovery();
 
-    if (!isLoaded) {
+    if (!isLoaded || !isDiscoveryLoaded) {
         return <Loading />;
     }
 
@@ -226,7 +249,7 @@ export default function DashboardPage() {
 
     return (
         <div className="p-4 md:p-6 space-y-8">
-            <Greeting history={history} />
+            <HealthOverview history={history} />
             
             <div className="text-center animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
                 <Link href="/">
