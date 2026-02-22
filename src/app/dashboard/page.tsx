@@ -236,7 +236,7 @@ export default function DashboardPage() {
                 <h2 className="mt-4 text-2xl font-bold">Start your smart food journey</h2>
                 <p className="mt-2 max-w-md text-muted-foreground">Scan your first product to unlock personalized insights, track your habits, and achieve your health goals.</p>
                 <Link href="/" className="mt-8">
-                    <Button size="lg" className="rounded-full h-14 px-10 text-lg shadow-lg animate-shadow-pulse">
+                    <Button size="lg" className="rounded-full h-14 px-10 text-lg shadow-lg">
                         <ScanLine className="mr-2 h-5 w-5" />
                         Scan Your First Item
                     </Button>
@@ -253,7 +253,7 @@ export default function DashboardPage() {
             
             <div className="text-center animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
                 <Link href="/">
-                    <Button size="lg" className="rounded-full h-14 px-12 text-lg shadow-primary/30 shadow-lg animate-shadow-pulse">
+                    <Button size="lg" className="rounded-full h-14 px-12 text-lg shadow-lg">
                        <ScanLine className="mr-2 h-5 w-5" />
                         Scan a New Item
                     </Button>
