@@ -6,7 +6,7 @@ import { AppProviders } from '@/contexts/AppProviders';
 import BottomNav from './BottomNav';
 import { cn } from '@/lib/utils';
 
-const pathsWithNav = ['/', '/history', '/dashboard', '/profile'];
+const pathsWithNav = ['/', '/history', '/dashboard', '/profile', '/settings'];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();

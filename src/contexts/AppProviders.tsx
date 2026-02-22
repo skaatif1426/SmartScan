@@ -1,7 +1,7 @@
 'use client';
 
-import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
-import type { UserSettings, Language, UserPreferences } from '@/lib/types';
+import { createContext, useContext, ReactNode, useMemo, useCallback, useEffect } from 'react';
+import type { UserSettings, Language, UserPreferences, Theme } from '@/lib/types';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { translations } from '@/lib/translations';
 
@@ -25,6 +25,7 @@ export function useLanguage() {
 // --- Preferences Context ---
 type PreferencesContextType = {
   preferences: UserPreferences & { 
+      theme: Theme;
       advancedUiMode: boolean;
       aiChatEnabled: boolean;
       aiInsightsEnabled: boolean;
@@ -48,6 +49,34 @@ export function usePreferences() {
 // --- Combined Provider ---
 export function AppProviders({ children }: { children: ReactNode }) {
   const { settings, saveSettings, isLoaded } = useUserSettings();
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const root = window.document.documentElement;
+    root.classList.remove('light', 'dark');
+
+    if (settings.theme === 'system') {
+      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      root.classList.add(systemTheme);
+    } else {
+      root.classList.add(settings.theme);
+    }
+  }, [settings.theme]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined' || settings.theme !== 'system') {
+      return;
+    }
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
+    const handleChange = () => {
+      const root = window.document.documentElement;
+      root.classList.remove('light', 'dark');
+      root.classList.add(mediaQuery.matches ? 'dark' : 'light');
+    };
+    mediaQuery.addEventListener('change', handleChange);
+    return () => mediaQuery.removeEventListener('change', handleChange);
+  }, [settings.theme]);
 
   const t = useMemo(() => (key: keyof typeof translations): string => {
     const translationSet = translations[key];
@@ -79,6 +108,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
         healthFocus: settings.healthFocus,
         aiVerbosity: settings.aiVerbosity,
         strictMode: settings.strictMode,
+        theme: settings.theme,
         advancedUiMode: settings.advancedUiMode,
         aiChatEnabled: settings.aiChatEnabled,
         aiInsightsEnabled: settings.aiInsightsEnabled,

@@ -1,6 +1,6 @@
 'use client';
 import { useState } from 'react';
-import { Settings as SettingsIcon, Languages, Leaf, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X, Vegan, Beef, Donut, Salad, Dumbbell, Car, CircleDollarSign, Target, EggFried, Wallet, Recycle, BookOpen, HeartHandshake, ShieldCheck, Bookmark, Bell, ArrowRight, Flame } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X, Vegan, Beef, Donut, Salad, Dumbbell, Car, CircleDollarSign, Target, EggFried, Wallet, Recycle, BookOpen, HeartHandshake, ShieldCheck, Bookmark, Bell, ArrowRight, Flame, ChevronRight } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,18 +15,15 @@ import {
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Card, CardHeader, CardTitle, CardContent, CardDescription } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { useLanguage, usePreferences } from '@/contexts/AppProviders';
-import { useAiUsage } from '@/hooks/useAiUsage';
+import { usePreferences } from '@/contexts/AppProviders';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import { useAnalytics } from '@/hooks/useAnalytics';
 import { useDiscovery } from '@/hooks/useDiscovery';
-import type { Language, AiVerbosity, HealthGoal, DataRetention, DietType, HealthFocus } from '@/lib/types';
+import type { DietType, HealthFocus } from '@/lib/types';
 import { cn } from '@/lib/utils';
 import Achievements from '@/components/dashboard/Achievements';
 import { useGamification } from '@/hooks/useGamification';
@@ -34,12 +31,6 @@ import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import Link from 'next/link';
 
-const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
-const verbosityLevels: {id: AiVerbosity, label: string}[] = [
-    {id: 'concise', label: 'Concise'},
-    {id: 'balanced', label: 'Balanced'},
-    {id: 'detailed', label: 'Detailed'},
-];
 const dietTypes: {id: DietType, label: string, icon: React.ElementType}[] = [
     {id: 'none', label: 'None', icon: UtensilsCrossed},
     {id: 'vegetarian', label: 'Vegetarian', icon: Leaf},
@@ -49,7 +40,7 @@ const dietTypes: {id: DietType, label: string, icon: React.ElementType}[] = [
     {id: 'keto', label: 'Keto', icon: Donut},
     {id: 'paleo', label: 'Paleo', icon: Salad},
 ]
-const healthGoals: {id: HealthGoal, label: string}[] = [
+const healthGoals: {id: any, label: string}[] = [
     {id: 'general', label: 'General Wellness'},
     {id: 'weight-loss', label: 'Weight Loss'},
     {id: 'muscle-gain', label: 'Muscle Gain'},
@@ -71,8 +62,6 @@ const healthFocuses: {id: HealthFocus, label: string, icon: React.ElementType}[]
     {id: 'clean-ingredients', label: 'Clean Ingredients', icon: BookOpen },
     {id: 'eco-friendly', label: 'Eco-Friendly', icon: Recycle },
 ]
-const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
-
 const ProfileStatCard = ({ title, value, icon: Icon, isLoading }: { title: string, value: React.ReactNode, icon: React.ElementType, isLoading: boolean }) => (
     <Card>
         <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -99,13 +88,9 @@ const commonAllergies = [
 ];
 
 export default function ProfilePage() {
-  const { language, setLanguage, t } = useLanguage();
   const { preferences, savePreferences } = usePreferences();
-  const { usage, resetAiCallCount, isLoaded: isAiUsageLoaded } = useAiUsage();
-  const { history, clearHistory, isLoaded: isHistoryLoaded, scanStreak } = useScanHistory();
-  const { analytics, resetErrorCount, isLoaded: isAnalyticsLoaded } = useAnalytics();
+  const { history, isLoaded: isHistoryLoaded, scanStreak } = useScanHistory();
   const { discoveryCount, contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
-  const [isClearing, setIsClearing] = useState(false);
   const { level, xp, getLevelProgress, isLoaded: isGamificationLoaded } = useGamification();
   const [customAllergyInput, setCustomAllergyInput] = useState('');
 
@@ -139,23 +124,12 @@ export default function ProfilePage() {
       savePreferences({ allergies: newAllergies });
   };
   
-  const handleClearHistory = () => {
-    setIsClearing(true);
-    clearHistory();
-  }
-
   const handleHealthFocusToggle = (focus: HealthFocus) => {
       const newFocuses = preferences.healthFocus.includes(focus)
           ? preferences.healthFocus.filter(f => f !== focus)
           : [...preferences.healthFocus, focus];
       savePreferences({ healthFocus: newFocuses });
   }
-
-  const retentionLabels: { [key in DataRetention]: string } = {
-    '30d': t('retention30d'),
-    '90d': t('retention90d'),
-    'forever': t('retentionForever'),
-  };
 
   return (
     <div className="p-4 md:p-6 space-y-6">
@@ -201,43 +175,18 @@ export default function ProfilePage() {
         </div>
 
         <Separator className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200" />
-        
-        <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-200">
-            <CardHeader>
-                <CardTitle className="flex items-center gap-2"><Award /> {t('achievements')}</CardTitle>
-            </CardHeader>
-            <CardContent>
-                <Achievements history={history} />
-            </CardContent>
-        </Card>
       
         <div className="space-y-4 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
-            <h2 className="text-2xl font-bold flex items-center gap-2">
-                <SettingsIcon className="text-primary" /> {t('settingsTitle')}
-            </h2>
-
-             <Accordion type="multiple" className="w-full space-y-4">
+            <Accordion type="multiple" className="w-full space-y-4" defaultValue={['achievements']}>
                 <Card>
-                  <AccordionItem value="language-settings" className="border-b-0">
-                      <AccordionTrigger className="p-6 hover:no-underline">
-                        <CardTitle className="flex items-center gap-2"><Languages /> {t('language')}</CardTitle>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-6 pt-0 pb-6">
-                        <Select
-                            value={language}
-                            onValueChange={(value: Language) => setLanguage(value)}
-                        >
-                            <SelectTrigger aria-label={t('language')}>
-                            <SelectValue placeholder={t('language')} />
-                            </SelectTrigger>
-                            <SelectContent>
-                            {languages.map(lang => (
-                                <SelectItem key={lang} value={lang}>{lang}</SelectItem>
-                            ))}
-                            </SelectContent>
-                        </Select>
-                      </AccordionContent>
-                  </AccordionItem>
+                    <AccordionItem value="achievements" className="border-b-0">
+                        <AccordionTrigger className="p-6 hover:no-underline">
+                            <CardTitle className="flex items-center gap-2"><Award /> Achievements</CardTitle>
+                        </AccordionTrigger>
+                        <AccordionContent className="px-6 pb-6">
+                            <Achievements history={history} />
+                        </AccordionContent>
+                    </AccordionItem>
                 </Card>
 
                 <Card>
@@ -310,22 +259,12 @@ export default function ProfilePage() {
                 <Card>
                   <AccordionItem value="ai-personalization" className="border-b-0">
                       <AccordionTrigger className="p-6 hover:no-underline text-left">
-                        <CardTitle className="flex items-center gap-2"><Sparkles /> {t('personalizationTitle')}</CardTitle>
-                        <CardDescription className="!mt-1">Customize the AI's personality and focus.</CardDescription>
+                        <CardTitle className="flex items-center gap-2"><Sparkles /> AI Personalization</CardTitle>
+                        <CardDescription className="!mt-1">Customize the AI's analysis for your goals.</CardDescription>
                       </AccordionTrigger>
                       <AccordionContent className="px-6 pt-0 pb-6 space-y-6">
                           <div>
-                              <Label>{t('aiVerbosity')}</Label>
-                              <div className="grid grid-cols-1 sm:grid-cols-3 gap-2 mt-2">
-                                  {verbosityLevels.map(({ id, label }) => (
-                                      <Button key={id} variant={preferences.aiVerbosity === id ? 'default' : 'outline'} onClick={() => savePreferences({ aiVerbosity: id })}>
-                                          {label}
-                                      </Button>
-                                  ))}
-                              </div>
-                          </div>
-                          <div>
-                              <Label>{t('healthGoal')}</Label>
+                              <Label>Primary Goal</Label>
                               <div className="grid grid-cols-1 md:grid-cols-2 gap-2 mt-2">
                                   {healthGoals.map(({ id, label }) => (
                                       <Button key={id} variant={preferences.healthGoal === id ? 'default' : 'outline'} onClick={() => savePreferences({ healthGoal: id })}>
@@ -352,195 +291,25 @@ export default function ProfilePage() {
                       </AccordionContent>
                   </AccordionItem>
                 </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><Bookmark /> Saved Items</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <p className="text-sm text-muted-foreground text-center py-4">You have no saved items yet.</p>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <AccordionItem value="notifications" className="border-b-0">
-                        <AccordionTrigger className="p-6 hover:no-underline text-left">
-                            <CardTitle className="flex items-center gap-2"><Bell /> Notifications</CardTitle>
-                            <CardDescription className="!mt-1">Manage app alerts and reminders.</CardDescription>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-6 pt-0 pb-6 space-y-4">
-                            <div className="flex items-center justify-between">
-                                <div>
-                                    <Label htmlFor="goal-reminders-switch">Goal Reminders</Label>
-                                    <p className="text-sm text-muted-foreground">Receive encouragement for your goals.</p>
-                                </div>
-                                <Switch
-                                    id="goal-reminders-switch"
-                                    checked={preferences.notifications.goalReminders}
-                                    onCheckedChange={(checked) => savePreferences({ notifications: { ...preferences.notifications, goalReminders: checked } })}
-                                    aria-label="Goal Reminders"
-                                />
-                            </div>
-                             <div className="flex items-center justify-between">
-                                <div>
-                                    <Label htmlFor="scan-reminders-switch">Scan Reminders</Label>
-                                    <p className="text-sm text-muted-foreground">Get reminded to maintain your streak.</p>
-                                </div>
-                                <Switch
-                                    id="scan-reminders-switch"
-                                    checked={preferences.notifications.scanReminders}
-                                    onCheckedChange={(checked) => savePreferences({ notifications: { ...preferences.notifications, scanReminders: checked } })}
-                                    aria-label="Scan Reminders"
-                                />
-                            </div>
-                             <div className="flex items-center justify-between">
-                                <div>
-                                    <Label htmlFor="insight-alerts-switch">New Insight Alerts</Label>
-                                    <p className="text-sm text-muted-foreground">Be notified when new insights are found.</p>
-                                </div>
-                                <Switch
-                                    id="insight-alerts-switch"
-                                    checked={preferences.notifications.insightAlerts}
-                                    onCheckedChange={(checked) => savePreferences({ notifications: { ...preferences.notifications, insightAlerts: checked } })}
-                                    aria-label="New Insight Alerts"
-                                />
-                            </div>
-                        </AccordionContent>
-                    </AccordionItem>
-                </Card>
-
-                <Card>
-                  <AccordionItem value="data-privacy" className="border-b-0">
-                      <AccordionTrigger className="p-6 hover:no-underline text-left">
-                        <CardTitle className="flex items-center gap-2"><History />{t('dataPrivacy')}</CardTitle>
-                        <CardDescription className="!mt-1">{t('dataPrivacyDescription')}</CardDescription>
-                      </AccordionTrigger>
-                      <AccordionContent className="px-6 pt-0 pb-6 space-y-6">
-                           <div>
-                              <Label htmlFor="data-retention-select">{t('dataRetention')}</Label>
-                              <Select
-                                  value={preferences.dataRetention}
-                                  onValueChange={(value: DataRetention) => savePreferences({ dataRetention: value })}
-                              >
-                                  <SelectTrigger id="data-retention-select" aria-label={t('dataRetention')}>
-                                      <SelectValue placeholder={t('dataRetention')} />
-                                  </SelectTrigger>
-                                  <SelectContent>
-                                      {retentionPeriods.map(period => (
-                                          <SelectItem key={period} value={period}>{retentionLabels[period]}</SelectItem>
-                                      ))}
-                                  </SelectContent>
-                              </Select>
-                          </div>
-                          <AlertDialog>
-                              <AlertDialogTrigger asChild>
-                                  <Button variant="destructive" className="w-full sm:w-auto">
-                                      <Trash2 className="mr-2 h-4 w-4" />
-                                      {t('clearHistory')}
-                                  </Button>
-                              </AlertDialogTrigger>
-                              <AlertDialogContent>
-                                  <AlertDialogHeader>
-                                  <AlertDialogTitle>{t('clearHistoryConfirmTitle')}</AlertDialogTitle>
-                                  <AlertDialogDescription>
-                                    {t('clearHistoryConfirmDescription')}
-                                  </AlertDialogDescription>
-                                  </AlertDialogHeader>
-                                  <AlertDialogFooter>
-                                  <AlertDialogCancel disabled={isClearing}>{t('cancel')}</AlertDialogCancel>
-                                  <AlertDialogAction onClick={handleClearHistory} disabled={isClearing}>
-                                      {isClearing ? t('clearing') : t('confirm')}
-                                  </AlertDialogAction>
-                                  </AlertDialogFooter>
-                              </AlertDialogContent>
-                          </AlertDialog>
-                      </AccordionContent>
-                  </AccordionItem>
-                </Card>
-
-                <Card>
-                    <AccordionItem value="advanced" className="border-b-0">
-                        <AccordionTrigger className="p-6 hover:no-underline">
-                           <CardTitle className="flex items-center gap-2"><Zap /> {t('advancedSettings')}</CardTitle>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-6 pt-0 pb-6 space-y-6">
-                          <div className="flex items-center justify-between">
-                              <div>
-                                  <Label htmlFor="advanced-ui-switch">{t('advancedUiMode')}</Label>
-                                  <p className="text-sm text-muted-foreground">{t('advancedUiModeDescription')}</p>
-                              </div>
-                              <Switch
-                                  id="advanced-ui-switch"
-                                  checked={preferences.advancedUiMode}
-                                  onCheckedChange={(checked) => savePreferences({ advancedUiMode: Boolean(checked) })}
-                                  aria-label={t('advancedUiMode')}
-                              />
-                          </div>
-                          {preferences.advancedUiMode && (
-                              <>
-                              <div className="border-t pt-6 space-y-4">
-                                  <div className="flex items-center justify-between">
-                                      <Label htmlFor="ai-insights-switch" className="flex items-center gap-2"><Sparkles /> {t('aiInsights')}</Label>
-                                      <Switch
-                                      id="ai-insights-switch"
-                                      checked={preferences.aiInsightsEnabled}
-                                      onCheckedChange={(checked) => savePreferences({ aiInsightsEnabled: Boolean(checked) })}
-                                      aria-label={t('aiInsights')}
-                                      />
-                                  </div>
-                                  <div className="flex items-center justify-between">
-                                      <Label htmlFor="ai-chat-switch" className="flex items-center gap-2"><MessageCircle /> {t('aiChat')}</Label>
-                                      <Switch
-                                      id="ai-chat-switch"
-                                      checked={preferences.aiChatEnabled}
-                                      onCheckedChange={(checked) => savePreferences({ aiChatEnabled: Boolean(checked) })}
-                                      aria-label={t('aiChat')}
-                                      />
-                                  </div>
-                              </div>
-                              <div className="border-t pt-6">
-                                  <div className="flex items-center justify-between">
-                                      <div>
-                                          <Label htmlFor="ai-usage-stats" className="flex items-center gap-2"><BrainCircuit /> {t('aiUsage')}</Label>
-                                          <p className="text-sm text-muted-foreground">{t('aiUsageDescription')}</p>
-                                      </div>
-                                      <Button variant="ghost" size="sm" onClick={resetAiCallCount}>{t('reset')}</Button>
-                                  </div>
-                                  {isAiUsageLoaded ? (
-                                      <div id="ai-usage-stats" className="mt-2 text-lg font-semibold">{usage.callCount} <span className="text-sm text-muted-foreground font-normal">{t('aiApiCalls')}</span></div>
-                                  ) : (
-                                      <Skeleton className="h-7 w-32 mt-2" />
-                                  )}
-                              </div>
-                              <div className="border-t pt-6">
-                                      <div className="flex items-center justify-between">
-                                          <div>
-                                              <Label htmlFor="analytics-stats" className="flex items-center gap-2"><BarChart2 /> {t('analytics')}</Label>
-                                              <p className="text-sm text-muted-foreground">{t('analyticsDescription')}</p>
-                                          </div>
-                                          <Button variant="ghost" size="sm" onClick={resetErrorCount}>{t('resetErrors')}</Button>
-                                      </div>
-                                      {(isHistoryLoaded && isAnalyticsLoaded) ? (
-                                          <div id="analytics-stats" className="mt-2 grid grid-cols-2 gap-4 text-center">
-                                              <div>
-                                                  <p className="text-lg font-semibold">{history.length}</p>
-                                                  <p className="text-sm text-muted-foreground font-normal">{t('totalScans')}</p>
-                                              </div>
-                                              <div>
-                                                  <p className="text-lg font-semibold">{analytics.errorCount}</p>
-                                                  <p className="text-sm text-muted-foreground font-normal">{t('errorsTracked')}</p>
-                                              </div>
-                                          </div>
-                                      ) : (
-                                          <Skeleton className="h-12 w-full mt-2" />
-                                      )}
-                                  </div>
-                              </>
-                          )}
-                        </AccordionContent>
-                    </AccordionItem>
-                </Card>
             </Accordion>
+
+            <Card>
+                <CardHeader>
+                    <CardTitle className="flex items-center gap-2"><Bookmark /> Saved Items</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <p className="text-sm text-muted-foreground text-center py-4">You have no saved items yet.</p>
+                </CardContent>
+            </Card>
+
+            <Link href="/settings" className="block">
+                <Card className="hover:bg-muted/50 active:scale-[0.98] transition-all">
+                    <CardHeader className="flex-row items-center justify-between p-4">
+                        <CardTitle className="flex items-center gap-2 text-lg"><SettingsIcon /> System Settings</CardTitle>
+                        <ChevronRight />
+                    </CardHeader>
+                </Card>
+            </Link>
         </div>
     </div>
   );
