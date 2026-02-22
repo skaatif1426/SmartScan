@@ -78,6 +78,7 @@ export function useDiscovery() {
         try {
             const newDiscovery: DiscoveryItem = { barcode, date: new Date().toISOString() };
             const newDiscoveries = [...discoveries, newDiscovery];
+            const prevCount = discoveries.length;
             
             setDiscoveries(newDiscoveries);
             window.localStorage.setItem(DISCOVERY_KEY, JSON.stringify(newDiscoveries));
@@ -85,14 +86,14 @@ export function useDiscovery() {
             const newCount = newDiscoveries.length;
             let achievementToast: { title: string; description: string } | null = null;
             
-            if (newCount === 1) {
-                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "Explorer 🧭" achievement.` };
-            } else if (newCount === 5) {
-                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "Pathfinder 🗺️" achievement.` };
-            } else if (newCount === 10) {
-                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "Data Builder 🧠" achievement.` };
-            } else if (newCount === 25) {
-                achievementToast = { title: '🎉 Achievement Unlocked!', description: `You've earned the "AI Trainer 🤖" achievement.` };
+            if (newCount === 1 && prevCount < 1) {
+                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "Explorer"` };
+            } else if (newCount === 5 && prevCount < 5) {
+                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "Pathfinder"` };
+            } else if (newCount === 10 && prevCount < 10) {
+                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "Data Contributor"` };
+            } else if (newCount === 25 && prevCount < 25) {
+                achievementToast = { title: 'Achievement Unlocked', description: `You've earned "AI Trainer"` };
             }
             
             if (achievementToast) {

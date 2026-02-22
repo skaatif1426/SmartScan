@@ -77,12 +77,11 @@ export function useScanHistory() {
 
         const oldStreak = calculateScanStreak(prev);
         const newStreak = calculateScanStreak(updatedHistory);
-
         if (newStreak > oldStreak) {
             if (newStreak === 3) {
-                toast({ title: '🔥 On Fire!', description: "You've maintained a 3-day scan streak!" });
+                toast({ title: 'Achievement Unlocked', description: "On Fire: Maintained a 3-day scan streak!" });
             } else if (newStreak === 7) {
-                toast({ title: '🔥 Inferno!', description: "A 7-day scan streak! You're unstoppable." });
+                toast({ title: 'Achievement Unlocked', description: "Inferno: Maintained a 7-day scan streak!" });
             }
         }
         
@@ -91,9 +90,9 @@ export function useScanHistory() {
             const newHealthyCount = updatedHistory.filter(h => h.healthScore && h.healthScore > 75).length;
             if (newHealthyCount > oldHealthyCount) {
                 if (newHealthyCount === 10) {
-                    toast({ title: '🏅 Healthy Choice!', description: 'You scanned 10 healthy items. Keep it up!' });
+                    toast({ title: 'Achievement Unlocked', description: 'Good Start: Scanned 10 healthy items.' });
                 } else if (newHealthyCount === 25) {
-                    toast({ title: '🏅 Health Advocate!', description: 'You scanned 25 healthy items. Amazing!' });
+                    toast({ title: 'Achievement Unlocked', description: 'Health Advocate: Scanned 25 healthy items.' });
                 }
             }
         }
