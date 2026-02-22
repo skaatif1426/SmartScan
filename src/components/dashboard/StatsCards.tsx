@@ -8,13 +8,7 @@ import { useDiscovery } from '@/hooks/useDiscovery';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { cn } from '@/lib/utils';
 import AnimatedCounter from '../ui/AnimatedCounter';
-
-const getHealthScoreTextColor = (score: number | null) => {
-    if (score === null) return '';
-    if (score >= 75) return 'text-green-600';
-    if (score >= 50) return 'text-yellow-600';
-    return 'text-red-600';
-};
+import { getScoreInfo } from '@/lib/scoring';
 
 function StatsCards() {
     const { t } = useLanguage();
@@ -29,6 +23,7 @@ function StatsCards() {
         return Math.round(sum / scores.length);
     }, [history]);
 
+    const scoreInfo = getScoreInfo(averageScore);
 
     return (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
@@ -47,7 +42,7 @@ function StatsCards() {
                     <HeartPulse className="h-4 w-4 text-muted-foreground" />
                 </CardHeader>
                 <CardContent>
-                     <div className={cn("text-2xl font-bold", getHealthScoreTextColor(averageScore))}>
+                     <div className={cn("text-2xl font-bold", scoreInfo.textClassName)}>
                         {averageScore !== null ? <><AnimatedCounter value={averageScore} /><span className="text-base font-normal text-muted-foreground">/100</span></> : '-'}
                     </div>
                 </CardContent>

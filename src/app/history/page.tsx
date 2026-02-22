@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { formatDistanceToNow } from 'date-fns';
-import { History as HistoryIcon, ScanLine, Package, CheckCircle, AlertTriangle, ShieldQuestion, Rocket } from 'lucide-react';
+import { History as HistoryIcon, ScanLine, Package, CheckCircle, AlertTriangle, ShieldQuestion, Rocket, Shield } from 'lucide-react';
 import { useState, useMemo } from 'react';
 
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -12,6 +12,7 @@ import { useLanguage } from '@/contexts/AppProviders';
 import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
+import { getScoreInfo } from '@/lib/scoring';
 
 function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
     const [imageError, setImageError] = useState(false);
@@ -50,27 +51,17 @@ function HistoryImage({ item }: { item: { imageUrl?: string | null, productName:
     );
 }
 
-const getHealthScoreBadgeClass = (score: number) => {
-    if (score >= 75) return 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700';
-    if (score >= 50) return 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700';
-    return 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700';
+const SimpleHealthScore = ({ score }: { score: number }) => {
+    const scoreInfo = getScoreInfo(score);
+    return (
+        <div className={cn(
+            "inline-flex items-center justify-center rounded-full h-12 w-12 border-2 font-bold text-lg",
+            scoreInfo.badgeClassName
+        )}>
+            <AnimatedCounter value={score} />
+        </div>
+    );
 };
-
-const getDecision = (score: number) => {
-    if (score >= 75) return { text: "Good Choice 👍", icon: CheckCircle, className: "text-green-600" };
-    if (score >= 50) return { text: "Consume Occasionally ⚖️", icon: AlertTriangle, className: "text-yellow-600" };
-    return { text: "Limit Consumption ⚠️", icon: ShieldQuestion, className: "text-red-600" };
-};
-
-
-const SimpleHealthScore = ({ score }: { score: number }) => (
-    <div className={cn(
-        "inline-flex items-center justify-center rounded-full h-12 w-12 border-2 font-bold text-lg",
-        getHealthScoreBadgeClass(score)
-    )}>
-        <AnimatedCounter value={score} />
-    </div>
-);
 
 const HistorySummary = ({ history }: { history: { healthScore?: number }[] }) => {
     const summary = useMemo(() => {
@@ -175,7 +166,7 @@ export default function HistoryPage() {
 
                 <ul className="space-y-4">
                   {filteredHistory.map((item, index) => {
-                     const decision = item.healthScore !== undefined ? getDecision(item.healthScore) : null;
+                     const itemScoreInfo = item.healthScore !== undefined ? getScoreInfo(item.healthScore) : null;
                      return (
                         <li 
                         key={`${item.barcode}-${item.scanDate}`}
@@ -199,10 +190,10 @@ export default function HistoryPage() {
                                         <Rocket className="h-4 w-4 text-primary" />
                                         <span className="text-xs font-semibold text-primary">Discovered by you</span>
                                     </div>
-                                ) : decision && (
+                                ) : itemScoreInfo && (
                                     <div className="flex items-center gap-1.5 mt-1.5">
-                                        <decision.icon className={cn("h-4 w-4", decision.className)} />
-                                        <span className={cn("text-xs font-semibold", decision.className)}>{decision.text}</span>
+                                        <itemScoreInfo.icon className={cn("h-4 w-4", itemScoreInfo.textClassName)} />
+                                        <span className={cn("text-xs font-semibold", itemScoreInfo.textClassName)}>{itemScoreInfo.label} Choice</span>
                                     </div>
                                 )}
                                 <p className="text-xs text-muted-foreground mt-1">
