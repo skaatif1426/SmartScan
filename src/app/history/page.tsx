@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
 import { getScoreInfo } from '@/lib/scoring';
+import type { ScanHistoryItem } from '@/lib/types';
 
 function HistoryImage({ item }: { item: { imageUrl?: string | null, productName: string } }) {
     const [imageError, setImageError] = useState(false);
@@ -63,7 +64,7 @@ const SimpleHealthScore = ({ score }: { score: number }) => {
     );
 };
 
-const HistorySummary = ({ history }: { history: { healthScore?: number }[] }) => {
+const HistorySummary = ({ history }: { history: ScanHistoryItem[] }) => {
     const summary = useMemo(() => {
         const scores = history.map(item => item.healthScore).filter((score): score is number => score !== undefined);
         if (scores.length < 3) return null;
@@ -143,6 +144,9 @@ export default function HistoryPage() {
             <div className="text-center py-10 animate-in fade-in zoom-in-95">
               <ScanLine className="mx-auto h-12 w-12 text-muted-foreground" />
               <p className="mt-2 text-sm text-muted-foreground">{t('historyEmpty')}</p>
+              <Link href="/" className="mt-4 inline-block">
+                <Button>Scan Your First Product</Button>
+              </Link>
             </div>
           ) : (
             <>
@@ -176,8 +180,8 @@ export default function HistoryPage() {
                         <Link 
                             href={`/product/${item.barcode}`} 
                             className={cn(
-                                "block p-4 border rounded-lg hover:bg-muted transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-lg active:scale-[0.99]",
-                                item.isDiscovery && "border-primary/50 bg-primary/5 hover:bg-primary/10"
+                                "block p-4 border rounded-lg transition-all duration-200 ease-in-out active:scale-[0.98] hover:shadow-md",
+                                item.isDiscovery ? "border-primary/50 bg-primary/5 hover:bg-primary/10" : "hover:bg-muted/50"
                             )}
                         >
                             <div className="flex items-center gap-4">
