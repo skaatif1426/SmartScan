@@ -18,6 +18,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { calculateLocalScore } from '@/lib/scoring';
 import { cn } from '@/lib/utils';
 import { useGamification } from '@/hooks/useGamification';
+import { getAICategory } from '@/lib/actions';
 
 const ProductChatbot = dynamic(() => import('./ProductChatbot'), {
     loading: () => <Skeleton className="h-96 w-full" />,
@@ -46,18 +47,30 @@ export default function ProductDetailsClient({ product: productData }: { product
     const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
 
     useEffect(() => {
-        if (product) {
-            addScanToHistory({
-                barcode: productData.code,
-                productName: product.product_name,
-                brand: product.brands,
-                imageUrl: product.image_front_url,
-                categories: product.categories,
-                healthScore: localAnalysis.score,
-                isDiscovery: false,
-            });
-            addXp(XP_PER_SCAN);
-        }
+        const addScanWithCategory = async () => {
+            if (product) {
+                let productCategory = product.categories;
+                if (!productCategory || productCategory.trim() === '') {
+                    productCategory = await getAICategory({
+                        productName: product.product_name,
+                        ingredients: product.ingredients_text_with_allergens,
+                    });
+                }
+
+                addScanToHistory({
+                    barcode: productData.code,
+                    productName: product.product_name,
+                    brand: product.brands,
+                    imageUrl: product.image_front_url,
+                    categories: productCategory,
+                    healthScore: localAnalysis.score,
+                    isDiscovery: false,
+                });
+                addXp(XP_PER_SCAN);
+            }
+        };
+
+        addScanWithCategory();
     }, [addScanToHistory, product, productData.code, localAnalysis, addXp, XP_PER_SCAN]);
     
     const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));

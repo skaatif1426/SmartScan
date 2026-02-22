@@ -19,7 +19,7 @@ export type EstimateInput = z.infer<typeof EstimateInputSchema>;
 
 
 const estimateFromBarcodePrompt = ai.definePrompt({
-  name: 'estimateFromBarcodePrompt_v2',
+  name: 'estimateFromBarcodePrompt_v3',
   input: { schema: EstimateInputSchema },
   output: { schema: NutritionInsightOutputSchema },
   prompt: `You are a creative nutrition analyst AI. You've been given a barcode: {{{barcode}}}. You cannot look up barcodes on the internet.
@@ -27,12 +27,14 @@ Your task is to generate a plausible, hypothetical nutritional analysis for a co
 
 Your entire response MUST be in the specified language: {{{language}}}.
 
-Crucially, you MUST make it clear in your response that this is an estimate.
-- In the 'summary', start with a phrase like "As an AI estimate, this product could be...".
-- In the 'recommendation', include a sentence like "This is a hypothetical analysis; scan the actual product for accurate information."
-- Generate a plausible healthScore, risks, and a full analysis based on your hypothetical product choice.
+1.  **Choose a hypothetical product** (e.g., "Potato Chips", "Cola Soda").
+2.  **Assign a general category** for this product (e.g., 'Snacks', 'Beverages').
+3.  **Generate a plausible analysis**: healthScore, risks, summary, and recommendation.
+4.  **Crucially, make it clear this is an estimate**:
+    - In the 'summary', start with a phrase like "As an AI estimate, this product could be...".
+    - In the 'recommendation', include a sentence like "This is a hypothetical analysis; scan the actual product for accurate information."
 
-Your entire response must be in the required JSON format. Do not add any other text.
+Your entire response must be in the required JSON format, including the new 'category' field. Do not add any other text.
 `,
 });
 

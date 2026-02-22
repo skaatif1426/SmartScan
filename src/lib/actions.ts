@@ -3,6 +3,7 @@
 import { generateNutritionInsights, NutritionInsightInput } from '@/ai/flows/ai-nutrition-insights';
 import { multilingualProductChatbot, MultilingualProductChatbotInput } from '@/ai/flows/multilingual-product-chatbot';
 import { generateEstimateFromBarcode, EstimateInput } from '@/ai/flows/estimate-from-barcode';
+import { categorizeProduct, CategorizeProductInput } from '@/ai/flows/categorize-product';
 import { fetchProductFromApi } from './openfoodfacts-api';
 import { Product, NutritionInsightOutput, Language } from './types';
 import { sanitizeInput } from '@/ai/prompt-firewall';
@@ -89,4 +90,20 @@ export async function getAIEstimate(input: EstimateInput): Promise<NutritionInsi
         }, null, 2));
         return null;
     }
+}
+
+export async function getAICategory(input: CategorizeProductInput): Promise<string> {
+  try {
+    const result = await categorizeProduct(input);
+    return result.category;
+  } catch (error: unknown) {
+    console.error(JSON.stringify({
+        level: 'error',
+        action: 'getAICategory',
+        message: 'AI category generation failed',
+        productName: input.productName,
+        error: error instanceof Error ? error.message : String(error),
+    }, null, 2));
+    return 'Other'; // Fallback
+  }
 }

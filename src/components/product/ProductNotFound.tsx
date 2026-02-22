@@ -33,6 +33,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                 productName: `Discovery: #${barcode.slice(-4)}`,
                 brand: 'Unknown Product',
                 isDiscovery: true,
+                categories: 'Other', // Default category
             });
             addXp(XP_PER_DISCOVERY);
         }
@@ -44,6 +45,18 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
         const result = await getAIEstimate({ barcode, language });
         if (result) {
             setEstimate(result);
+            // If the AI returned a category, update the history item.
+            if (result.category) {
+                addScanToHistory({
+                    barcode,
+                    productName: `Discovery: ${result.category}`,
+                    brand: 'AI Estimate',
+                    imageUrl: null, // No image for discoveries
+                    categories: result.category,
+                    healthScore: result.healthScore,
+                    isDiscovery: true,
+                });
+            }
         } else {
             setError('Could not generate an AI estimate at this time.');
         }
