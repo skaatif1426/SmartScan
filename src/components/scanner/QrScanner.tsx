@@ -78,8 +78,14 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
 
     return () => {
       isMounted.current = false;
-      if (scannerRef.current && scannerRef.current.isScanning) {
-        scannerRef.current.stop().catch(err => console.error("Failed to stop scanner", err));
+      const scanner = scannerRef.current;
+      if (scanner) {
+        // Stop scanning, and ignore any errors. This is often necessary
+        // to prevent race conditions when the component unmounts
+        // while the scanner is still starting up.
+        scanner.stop().catch(() => {
+            // We can safely ignore this error on unmount.
+        });
       }
     };
   }, [onScanSuccess, onScanFailure, onCameraPermissionError]);
