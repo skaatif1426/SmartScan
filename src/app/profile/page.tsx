@@ -1,5 +1,4 @@
 'use client';
-import { useMemo } from 'react';
 import { Settings as SettingsIcon, Languages, Leaf, Drumstick, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -21,13 +20,6 @@ const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 const verbosityLevels: AiVerbosity[] = ['concise', 'detailed'];
 const healthGoals: HealthGoal[] = ['general', 'weight-loss', 'muscle-gain'];
 const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
-
-const getHealthScoreTextColor = (score: number | null) => {
-    if (score === null) return '';
-    if (score >= 75) return 'text-green-600';
-    if (score >= 50) return 'text-yellow-600';
-    return 'text-red-600';
-};
 
 const ProfileStatCard = ({ title, value, icon: Icon, valueClassName, isLoading }: { title: string, value: React.ReactNode, icon: React.ElementType, valueClassName?: string, isLoading: boolean }) => (
     <Card>
@@ -57,13 +49,6 @@ export default function ProfilePage() {
     const allergies = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
     savePreferences({ allergies });
   };
-  
-  const averageScore = useMemo(() => {
-    const scores = history.map(item => item.healthScore).filter(score => score !== undefined) as number[];
-    if (scores.length === 0) return null;
-    const sum = scores.reduce((a, b) => a + b, 0);
-    return Math.round(sum / scores.length);
-  }, [history]);
 
   const healthGoalLabels: { [key in HealthGoal]: string } = {
     'general': t('generalWellness'),
@@ -97,7 +82,7 @@ export default function ProfilePage() {
         </div>
 
         {/* User Info Stats */}
-        <div className="grid gap-4 md:grid-cols-3 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
+        <div className="grid gap-4 md:grid-cols-2 animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
              <ProfileStatCard 
                 title="Total Scans"
                 value={history.length}
@@ -109,15 +94,6 @@ export default function ProfilePage() {
                 value={discoveryCount}
                 icon={Compass}
                 isLoading={!isDiscoveryLoaded}
-             />
-             <ProfileStatCard 
-                title="Avg. Score"
-                value={averageScore !== null ? (
-                    <>{averageScore}<span className="text-sm font-normal text-muted-foreground">/100</span></>
-                ) : '-'}
-                icon={HeartPulse}
-                valueClassName={getHealthScoreTextColor(averageScore)}
-                isLoading={!isHistoryLoaded}
              />
         </div>
 
@@ -310,6 +286,7 @@ export default function ProfilePage() {
                             <div className="border-t pt-6">
                             <div>
                                 <Label htmlFor="data-retention-select" className="flex items-center gap-2"><History />{t('dataPrivacy')}</Label>
+
                                 <p className="text-sm text-muted-foreground">{t('dataRetention')}</p>
                             </div>
                             <Select

@@ -9,7 +9,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { ScanHistoryItem } from '@/lib/types';
-import { useDiscovery } from '@/hooks/useDiscovery';
 
 const Achievements = dynamic(() => import('@/components/dashboard/Achievements'), { 
     loading: () => <Skeleton className="h-24 w-full" />,
@@ -65,7 +64,6 @@ const DashboardSummary = ({ history }: { history: ScanHistoryItem[] }) => {
 export default function DashboardPage() {
     const { history, isLoaded: isHistoryLoaded } = useScanHistory();
     const { t } = useLanguage();
-    const { contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
 
     if (isHistoryLoaded && history.length === 0) {
         return (
@@ -79,20 +77,14 @@ export default function DashboardPage() {
 
     return (
         <div className="p-4 md:p-6 space-y-6">
-            <div className="animate-in fade-in duration-300">
-                {isDiscoveryLoaded ? (
-                    <>
-                        <p className="text-lg text-muted-foreground">Welcome back,</p>
-                        <h1 className="text-3xl font-bold flex items-center gap-2">
-                            {contributorLevel.title} {contributorLevel.icon}
-                        </h1>
-                    </>
-                ) : (
-                    <>
-                        <Skeleton className="h-7 w-32" />
-                        <Skeleton className="h-9 w-48 mt-1" />
-                    </>
-                )}
+            <div className="animate-in fade-in duration-300 space-y-1">
+                <h1 className="text-3xl font-bold flex items-center gap-2">
+                    <LayoutGrid className="text-primary" />
+                    Dashboard
+                </h1>
+                <p className="text-muted-foreground">
+                    An overview of your scanning activity and insights.
+                </p>
             </div>
             
             <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-100">
