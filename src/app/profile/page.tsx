@@ -1,6 +1,6 @@
 'use client';
 import { useState, useMemo } from 'react';
-import { Settings as SettingsIcon, Languages, Leaf, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X, Vegan, Beef, Donut, Salad, Protein, Car, CircleDollarSign, Target } from 'lucide-react';
+import { Settings as SettingsIcon, Languages, Leaf, ShieldAlert, Zap, BrainCircuit, MessageCircle, Sparkles, BarChart2, HeartPulse, History, Scan, Compass, Trash2, Award, Nut, Wheat, Milk, Egg, Fish, Bean, UtensilsCrossed, X, Vegan, Beef, Donut, Salad, Dumbbell, Car, CircleDollarSign, Target } from 'lucide-react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -56,7 +56,7 @@ const healthGoals: {id: HealthGoal, label: string}[] = [
 const healthFocuses: {id: HealthFocus, label: string, icon: React.ElementType}[] = [
     {id: 'low-sugar', label: 'Low Sugar', icon: Donut},
     {id: 'low-fat', label: 'Low Fat', icon: Donut},
-    {id: 'high-protein', label: 'High Protein', icon: Protein},
+    {id: 'high-protein', label: 'High Protein', icon: Dumbbell},
     {id: 'low-carb', label: 'Low Carb', icon: Car},
     {id: 'high-fiber', label: 'High Fiber', icon: Leaf},
     {id: 'low-sodium', label: 'Low Sodium', icon: Donut},
@@ -464,3 +464,5 @@ export default function ProfilePage() {
         </div>
     </div>
   );
+
+    
