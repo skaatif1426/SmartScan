@@ -360,7 +360,8 @@ export const translations: Translations = {
     Hinglish: 'AI Chat',
   },
   aiInsights: {
-    English: 'AI अंतर्दृष्टि',
+    English: 'AI Insights',
+    Hindi: 'एआई अंतर्दृष्टि',
     Marathi: 'एआय अंतर्दृष्टी',
     Hinglish: 'AI Insights',
   },
@@ -437,7 +438,8 @@ export const translations: Translations = {
     Hinglish: 'Weight Loss',
   },
   muscleGain: {
-    English: 'मांसपेशियों का निर्माण',
+    English: 'Muscle Gain',
+    Hindi: 'मांसपेशियों का निर्माण',
     Marathi: 'स्नायू वाढवणे',
     Hinglish: 'Muscle Gain',
   },
@@ -490,7 +492,8 @@ export const translations: Translations = {
     Hinglish: '90 Days',
   },
   retentionForever: {
-    English: 'हमेशा',
+    English: 'Forever',
+    Hindi: 'हमेशा',
     Marathi: 'कायमचे',
     Hinglish: 'Forever',
   },
