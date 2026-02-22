@@ -20,7 +20,7 @@ const MultilingualProductChatbotInputSchema = z.object({
   language: z
     .enum(['English', 'Hindi', 'Marathi', 'Hinglish'])
     .describe("The user's preferred language setting (for context). The AI will auto-detect the question's language for its response."),
-  userPreferences: UserPreferencesSchema.optional().describe("The user's dietary and personalization preferences."),
+  userPreferences: UserPreferencesSchema.optional().describe("The user's dietary and personalization preferences. This includes diet, allergies, health goals, and strict mode settings."),
 });
 export type MultilingualProductChatbotInput = z.infer<
   typeof MultilingualProductChatbotInputSchema
@@ -55,7 +55,10 @@ Based on the provided product information AND the user's preferences, answer the
 - Health Goal: {{{userPreferences.healthGoal}}}
 - Diet: {{{userPreferences.diet}}}
 - Known Allergies: {{{userPreferences.allergies}}}
+- Allergy Strict Mode: {{{userPreferences.strictMode}}}
 ---
+
+When answering about allergies, if 'Strict Mode' is enabled, your warnings should be more direct and cautious.
 
 When asked if a product is "good for a child", analyze the nutritional information (especially sugar, fat, and Nutri-score) and explain it in simple terms.
 For example, you could say something like: "This product is quite high in sugar, which might not be ideal for a child's daily diet. It's best enjoyed as an occasional treat."
@@ -64,7 +67,7 @@ Your advice should be helpful guidance. If you suggest consulting an expert, do 
 Never give direct medical advice or use phrases like "I am an AI". You're a helpful buddy.`;
 
 const prompt = ai.definePrompt({
-  name: 'multilingualProductChatbotPrompt_v4',
+  name: 'multilingualProductChatbotPrompt_v5',
   input: {schema: MultilingualProductChatbotInputSchema},
   output: {schema: MultilingualProductChatbotOutputSchema},
   prompt: `--- SYSTEM INSTRUCTIONS (LOCKED) ---

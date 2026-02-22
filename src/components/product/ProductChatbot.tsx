@@ -11,7 +11,7 @@ import { getAIChatResponse } from '@/lib/actions';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
 import { cn } from '@/lib/utils';
-import type { UserPreferences } from '@/lib/types';
+import type { UserPreferences, UserSettings } from '@/lib/types';
 
 interface Message {
   sender: 'user' | 'bot';
@@ -46,7 +46,7 @@ export default function ProductChatbot({ productData }: { productData: string })
     try {
         incrementAiCallCount();
         
-        const userPrefs: UserPreferences = {
+        const userPrefs: Omit<UserPreferences, 'strictMode'> & { strictMode?: boolean } = {
             diet: preferences.diet,
             allergies: preferences.allergies,
             healthGoal: preferences.healthGoal,

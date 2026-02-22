@@ -46,8 +46,8 @@ export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
 export const LanguageSchema = z.enum(['English', 'Hindi', 'Marathi', 'Hinglish']);
 export type AiVerbosity = 'concise' | 'balanced' | 'detailed';
 export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain' | 'maintain-weight' | 'improve-diet' | 'manage-condition';
-export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' | 'high-fiber' | 'low-sodium' | 'organic' | 'budget-friendly';
-export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo';
+export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' | 'high-fiber' | 'low-sodium' | 'organic' | 'budget-friendly' | 'overall-health' | 'price-conscious' | 'clean-ingredients' | 'eco-friendly';
+export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo' | 'eggetarian';
 export type DataRetention = '30d' | '90d' | 'forever';
 
 
@@ -62,6 +62,12 @@ export interface UserSettings {
   aiChatEnabled: boolean;
   aiInsightsEnabled: boolean;
   dataRetention: DataRetention;
+  strictMode: boolean;
+  notifications: {
+    goalReminders: boolean;
+    scanReminders: boolean;
+    insightAlerts: boolean;
+  };
   // Deprecated, for migration only
   isVeg?: boolean;
   isNonVeg?: boolean;
@@ -75,6 +81,7 @@ export const UserPreferencesSchema = z.object({
     'non-vegetarian': 'non-vegetarian',
     keto: 'keto',
     paleo: 'paleo',
+    eggetarian: 'eggetarian'
   }),
   allergies: z.array(z.string()),
   healthGoal: z.nativeEnum({
@@ -94,8 +101,13 @@ export const UserPreferencesSchema = z.object({
     'low-sodium': 'low-sodium',
     organic: 'organic',
     'budget-friendly': 'budget-friendly',
+    'overall-health': 'overall-health',
+    'price-conscious': 'price-conscious',
+    'clean-ingredients': 'clean-ingredients',
+    'eco-friendly': 'eco-friendly',
   })),
   aiVerbosity: z.enum(['concise', 'balanced', 'detailed']),
+  strictMode: z.boolean(),
 });
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo, useCallback } from 'react';
-import type { UserSettings, Language } from '@/lib/types';
+import type { UserSettings, Language, UserPreferences } from '@/lib/types';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { translations } from '@/lib/translations';
 
@@ -24,8 +24,14 @@ export function useLanguage() {
 
 // --- Preferences Context ---
 type PreferencesContextType = {
-  preferences: Omit<UserSettings, 'language' | 'isVeg' | 'isNonVeg'>;
-  savePreferences: (newPreferences: Partial<Omit<UserSettings, 'language'>>) => void;
+  preferences: UserPreferences & { 
+      advancedUiMode: boolean;
+      aiChatEnabled: boolean;
+      aiInsightsEnabled: boolean;
+      dataRetention: UserSettings['dataRetention'];
+      notifications: UserSettings['notifications'];
+  };
+  savePreferences: (newPreferences: Partial<UserSettings>) => void;
   isSettingsLoaded: boolean;
 };
 
@@ -55,7 +61,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     saveSettings({ language });
   }, [saveSettings]);
 
-  const savePreferences = useCallback((newPreferences: Partial<Omit<UserSettings, 'language'>>) => {
+  const savePreferences = useCallback((newPreferences: Partial<UserSettings>) => {
     saveSettings(newPreferences);
   }, [saveSettings]);
 
@@ -72,10 +78,12 @@ export function AppProviders({ children }: { children: ReactNode }) {
         healthGoal: settings.healthGoal,
         healthFocus: settings.healthFocus,
         aiVerbosity: settings.aiVerbosity,
+        strictMode: settings.strictMode,
         advancedUiMode: settings.advancedUiMode,
         aiChatEnabled: settings.aiChatEnabled,
         aiInsightsEnabled: settings.aiInsightsEnabled,
         dataRetention: settings.dataRetention,
+        notifications: settings.notifications,
     },
     savePreferences,
     isSettingsLoaded: isLoaded,

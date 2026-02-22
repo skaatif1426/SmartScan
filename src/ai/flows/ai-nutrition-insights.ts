@@ -36,7 +36,7 @@ const NutritionInsightInputSchema = z.object({
 export type NutritionInsightInput = z.infer<typeof NutritionInsightInputSchema>;
 
 const nutritionInsightPrompt = ai.definePrompt({
-  name: 'nutritionInsightPrompt_v4',
+  name: 'nutritionInsightPrompt_v5',
   input: { schema: NutritionInsightInputSchema },
   output: { schema: NutritionInsightOutputSchema },
   prompt: `You are an expert AI nutrition analyst. Your task is to explain a pre-calculated health score for a food product, PERSONALIZED for the user and delivered in their chosen language.
@@ -48,18 +48,19 @@ Your entire response (summary, recommendation, and risk names) MUST be in the la
 - Specific Focus Areas: {{{userPreferences.healthFocus}}}
 - Diet: {{{userPreferences.diet}}}
 - Known Allergies: {{{userPreferences.allergies}}}
+- Allergy Strict Mode: {{{userPreferences.strictMode}}}
 - Desired AI Style: {{{userPreferences.aiVerbosity}}}
 ---
 
 Based on ALL the provided information, your task is:
 1.  Use the provided 'healthScore' as the final 'healthScore' in your output. DO NOT change it.
 2.  Use the provided 'warnings' list as the primary basis for the 'risks' in your output. You can add more risks if you identify them from the ingredients or based on the user's preferences (e.g., if a product is high in sugar and the user's focus is 'low-sugar', add a risk for it).
-3.  **PRIORITY 1 (Allergies):** If any of the user's known allergies are present in the product's allergens list, you MUST add a specific risk for it (e.g., "Contains nuts, which you are allergic to").
+3.  **PRIORITY 1 (Allergies):** If any of the user's known allergies are present in the product's allergens list, you MUST add a specific risk for it (e.g., "Contains nuts, which you are allergic to"). If strict mode is on, be more emphatic.
 4.  **PRIORITY 2 (Diet):** If the user's diet (e.g., 'vegetarian', 'vegan') conflicts with the product ingredients, you MUST add a risk.
 5.  Write a 'summary' that explains IN SIMPLE TERMS why the product received its score, referencing the main warnings.
 6.  Write a 'recommendation' that is PERSONALLY tailored to the user's 'Primary Health Goal' and 'Specific Focus Areas'. For example, if their goal is 'weight-loss' and focus is 'low-carb', explain if this product fits that goal. If the product is high in protein and their goal is 'muscle-gain', mention that.
 7.  Adjust the length and detail of your 'summary' and 'recommendation' based on the user's 'Desired AI Style' ('concise', 'balanced', 'detailed').
-8.  If a user has a 'budget-friendly' focus, you cannot know the price, so your recommendation could say "Check the price to see if it fits your budget."
+8.  If a user has a 'budget-friendly' or 'price-conscious' focus, you cannot know the price, so your recommendation could say "Check the price to see if it fits your budget."
 
 Product Information:
 - Name: {{{productName}}}

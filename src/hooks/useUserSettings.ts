@@ -17,6 +17,12 @@ const defaultSettings: Omit<UserSettings, 'isVeg' | 'isNonVeg'> = {
   aiChatEnabled: true,
   aiInsightsEnabled: true,
   dataRetention: 'forever',
+  strictMode: false,
+  notifications: {
+    goalReminders: true,
+    scanReminders: false,
+    insightAlerts: true,
+  },
 };
 
 export function useUserSettings() {
@@ -53,6 +59,7 @@ export function useUserSettings() {
         window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...defaultSettings, ...settingsToLoad }));
       } else {
         setSettings(defaultSettings as UserSettings);
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
       }
     } catch (error) {
       console.warn('Error reading user settings from localStorage', error);
