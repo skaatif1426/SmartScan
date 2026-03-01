@@ -35,6 +35,8 @@ export interface ScanHistoryItem {
   categories?: string | null;
   healthScore?: number;
   isDiscovery?: boolean;
+  type?: 'barcode' | 'image';
+  imageAnalysis?: ImageAnalysisOutput;
 }
 
 export interface DiscoveryItem {
@@ -129,3 +131,23 @@ export const NutritionInsightOutputSchema = z.object({
   category: z.string().optional().describe("A plausible product category (e.g., 'Snacks', 'Beverages').")
 });
 export type NutritionInsightOutput = z.infer<typeof NutritionInsightOutputSchema>;
+
+export const ImageAnalysisOutputSchema = z.object({
+  productName: z.string().describe('The identified name of the food item.'),
+  summary: z.string().describe('A 1-2 line smart insight summary.'),
+  confidence: z.enum(['Low', 'Medium', 'High']).describe('AI confidence level in detection.'),
+  healthScore: z.number().min(0).max(100),
+  nutrition: z.object({
+    calories: z.number().describe('Estimated calories per serving.'),
+    sugar: z.number().describe('Estimated sugar in grams.'),
+    fat: z.number().describe('Estimated fat in grams.'),
+    protein: z.number().describe('Estimated protein in grams.'),
+  }),
+  insights: z.object({
+    ingredients: z.string().describe('Breakdown of likely ingredients.'),
+    healthImpact: z.string().describe('General health impact analysis.'),
+    whoShouldAvoid: z.string().describe('Who should avoid this food.'),
+    betterAlternatives: z.string().describe('Healthier alternatives.'),
+  })
+});
+export type ImageAnalysisOutput = z.infer<typeof ImageAnalysisOutputSchema>;

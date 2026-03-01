@@ -4,8 +4,9 @@ import { generateNutritionInsights, NutritionInsightInput } from '@/ai/flows/ai-
 import { multilingualProductChatbot, MultilingualProductChatbotInput } from '@/ai/flows/multilingual-product-chatbot';
 import { generateEstimateFromBarcode, EstimateInput } from '@/ai/flows/estimate-from-barcode';
 import { categorizeProduct, CategorizeProductInput } from '@/ai/flows/categorize-product';
+import { analyzeFoodImage, ImageAnalysisInput } from '@/ai/flows/analyze-food-image';
 import { fetchProductFromApi } from './openfoodfacts-api';
-import { Product, NutritionInsightOutput, Language } from './types';
+import { Product, NutritionInsightOutput, Language, ImageAnalysisOutput } from './types';
 import { sanitizeInput } from '@/ai/prompt-firewall';
 
 type GetProductResult = { status: 'success', product: Product | null } | { status: 'error' };
@@ -15,15 +16,8 @@ export async function getProduct(barcode: string): Promise<GetProductResult> {
     const product = await fetchProductFromApi(barcode);
     return { status: 'success', product: product };
   } catch (error: unknown) {
-    // A 'fetch failed' TypeError occurs during network errors (e.g., no internet).
-    // This is an expected condition, not an application bug. The UI handles it 
-    // by showing a network error message, so we don't need to log a scary 
-    // console error and trigger the Next.js dev overlay.
     if (error instanceof TypeError && error.message.includes('fetch failed')) {
-        // Silently return the error status for the UI to handle.
     } else {
-        // For all other errors (e.g., API server errors, data validation issues), 
-        // log them for debugging purposes.
         console.error(JSON.stringify({
             level: 'error',
             action: 'getProduct',
@@ -104,6 +98,21 @@ export async function getAICategory(input: CategorizeProductInput): Promise<stri
         productName: input.productName,
         error: error instanceof Error ? error.message : String(error),
     }, null, 2));
-    return 'Other'; // Fallback
+    return 'Other';
+  }
+}
+
+export async function getFoodImageAnalysis(input: ImageAnalysisInput): Promise<ImageAnalysisOutput | null> {
+  try {
+    const result = await analyzeFoodImage(input);
+    return result;
+  } catch (error: unknown) {
+    console.error(JSON.stringify({
+        level: 'error',
+        action: 'getFoodImageAnalysis',
+        message: 'AI image analysis failed',
+        error: error instanceof Error ? error.message : String(error),
+    }, null, 2));
+    return null;
   }
 }
