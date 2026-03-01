@@ -101,6 +101,7 @@ export default function SettingsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // 2MB limit
       if (file.size > 2 * 1024 * 1024) {
         toast({
           variant: 'destructive',
