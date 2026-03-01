@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, Camera } from 'lucide-react';
+import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import {
