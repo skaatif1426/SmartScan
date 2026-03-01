@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle } from 'lucide-react';
+import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle, Smartphone } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -48,6 +48,7 @@ const aiFocusOptions: {id: AiFocusPriority, label: string}[] = [
 const themes: {id: Theme, label: string, icon: any}[] = [
     { id: 'light', label: 'Light', icon: Sun },
     { id: 'dark', label: 'Dark', icon: Moon },
+    { id: 'dark-pro', label: 'AMOLED', icon: Smartphone },
     { id: 'system', label: 'System', icon: Laptop },
 ];
 const unitSystems: {id: UnitSystem, label: string}[] = [
@@ -301,8 +302,8 @@ export default function SettingsPage() {
             </div>
             <div className="space-y-3">
               <Label>Appearance</Label>
-              <div className="grid grid-cols-3 gap-2">{themes.map(({ id, label, icon: Icon }) => (
-                  <Button key={id} variant={preferences.theme === id ? 'default' : 'outline'} onClick={() => handleSettingChange('theme', id)} className="h-10 text-xs"><Icon className="mr-2 h-3 w-3" /> {label}</Button>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">{themes.map(({ id, label, icon: Icon }) => (
+                  <Button key={id} variant={preferences.theme === id ? 'default' : 'outline'} onClick={() => handleSettingChange('theme', id)} className="h-10 text-xs px-2"><Icon className="mr-2 h-3 w-3" /> {label}</Button>
               ))}</div>
             </div>
              <div className="space-y-3">

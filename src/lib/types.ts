@@ -50,7 +50,7 @@ export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain' | 'maintain-w
 export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' | 'high-fiber' | 'low-sodium' | 'organic' | 'budget-friendly' | 'overall-health' | 'price-conscious' | 'clean-ingredients' | 'eco-friendly';
 export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo' | 'eggetarian';
 export type DataRetention = '30d' | '90d' | 'forever';
-export type Theme = 'light' | 'dark' | 'system';
+export type Theme = 'light' | 'dark' | 'dark-pro' | 'system';
 export type UnitSystem = 'metric' | 'imperial';
 
 
@@ -80,9 +80,6 @@ export interface UserSettings {
     scanReminders: boolean;
     insightAlerts: boolean;
   };
-  // Deprecated, for migration only
-  isVeg?: boolean;
-  isNonVeg?: boolean;
 }
 
 export const UserPreferencesSchema = z.object({
@@ -124,7 +121,6 @@ export const UserPreferencesSchema = z.object({
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 
 
-// New AI Output Schema
 export const NutritionInsightOutputSchema = z.object({
   summary: z.string().describe("A one-line, easy-to-understand summary of the product's nutritional profile."),
   healthScore: z.number().min(0).max(100).describe('An overall health score from 0 (unhealthy) to 100 (very healthy), based on all available data.'),

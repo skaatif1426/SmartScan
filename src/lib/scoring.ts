@@ -74,9 +74,9 @@ export const getScoreInfo = (score: number | null | undefined) => {
 
     if (score >= 80) return { 
         label: 'Excellent',
-        badgeClassName: 'bg-green-100 text-green-800 border-green-200 dark:bg-green-900/50 dark:text-green-300 dark:border-green-700',
-        progressClassName: 'bg-green-500',
-        textClassName: 'text-green-600 dark:text-green-400',
+        badgeClassName: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800',
+        progressClassName: 'bg-emerald-500',
+        textClassName: 'text-emerald-600 dark:text-emerald-400',
         icon: CheckCircle
     };
     if (score >= 60) return { 
@@ -88,16 +88,16 @@ export const getScoreInfo = (score: number | null | undefined) => {
     };
     if (score >= 40) return { 
         label: 'Moderate', 
-        badgeClassName: 'bg-yellow-100 text-yellow-800 border-yellow-200 dark:bg-yellow-900/50 dark:text-yellow-300 dark:border-yellow-700',
-        progressClassName: 'bg-yellow-500',
-        textClassName: 'text-yellow-600 dark:text-yellow-400',
+        badgeClassName: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800',
+        progressClassName: 'bg-amber-500',
+        textClassName: 'text-amber-600 dark:text-amber-400',
         icon: AlertTriangle
     };
     return { 
         label: 'Poor', 
-        badgeClassName: 'bg-red-100 text-red-800 border-red-200 dark:bg-red-900/50 dark:text-red-300 dark:border-red-700',
-        progressClassName: 'bg-red-500',
-        textClassName: 'text-red-600 dark:text-red-400',
+        badgeClassName: 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/20 dark:text-destructive dark:border-destructive/30',
+        progressClassName: 'bg-destructive',
+        textClassName: 'text-destructive',
         icon: ShieldQuestion
     };
 };

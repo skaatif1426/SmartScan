@@ -60,7 +60,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark');
+    root.classList.remove('light', 'dark', 'dark-pro');
 
     if (settings.theme === 'system') {
       const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -77,7 +77,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
     const handleChange = () => {
       const root = window.document.documentElement;
-      root.classList.remove('light', 'dark');
+      root.classList.remove('light', 'dark', 'dark-pro');
       root.classList.add(mediaQuery.matches ? 'dark' : 'light');
     };
     mediaQuery.addEventListener('change', handleChange);
