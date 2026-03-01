@@ -50,7 +50,7 @@ export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain' | 'maintain-w
 export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' | 'high-fiber' | 'low-sodium' | 'organic' | 'budget-friendly' | 'overall-health' | 'price-conscious' | 'clean-ingredients' | 'eco-friendly';
 export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo' | 'eggetarian';
 export type DataRetention = '30d' | '90d' | 'forever';
-export type Theme = 'light' | 'dark' | 'dark-pro' | 'system';
+export type Theme = 'light' | 'dark';
 export type UnitSystem = 'metric' | 'imperial';
 
 

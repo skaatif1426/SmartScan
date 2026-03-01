@@ -11,7 +11,7 @@ const defaultSettings: UserSettings = {
   email: '',
   profilePicUrl: null,
   language: 'English',
-  theme: 'system',
+  theme: 'light',
   units: 'metric',
   diet: 'none',
   allergies: [],
@@ -53,6 +53,11 @@ export function useUserSettings() {
           profilePicUrl: storedImage || settingsToLoad.profilePicUrl 
         };
         
+        // Ensure theme is only light or dark
+        if (merged.theme !== 'light' && merged.theme !== 'dark') {
+          merged.theme = 'light';
+        }
+
         setSettings(merged);
         
         // Ensure settings are synced to localStorage (excluding the large image)

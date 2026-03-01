@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle, Smartphone } from 'lucide-react';
+import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -26,10 +26,11 @@ import { Separator } from '@/components/ui/separator';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import type { Language, DataRetention, Theme, AiVerbosity, UnitSystem, HealthGoal, DietType, AiFocusPriority } from '@/lib/types';
+import type { Language, DataRetention, AiVerbosity, UnitSystem, HealthGoal, DietType, AiFocusPriority, Theme } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { ThemeToggle } from '@/components/settings/ThemeToggle';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
@@ -44,12 +45,6 @@ const aiFocusOptions: {id: AiFocusPriority, label: string}[] = [
     {id: 'ingredients', label: 'Ingredients'},
     {id: 'eco', label: 'Eco'},
     {id: 'performance', label: 'Performance'},
-];
-const themes: {id: Theme, label: string, icon: any}[] = [
-    { id: 'light', label: 'Light', icon: Sun },
-    { id: 'dark', label: 'Dark', icon: Moon },
-    { id: 'dark-pro', label: 'AMOLED', icon: Smartphone },
-    { id: 'system', label: 'System', icon: Laptop },
 ];
 const unitSystems: {id: UnitSystem, label: string}[] = [
     { id: 'metric', label: 'Metric' },
@@ -253,6 +248,33 @@ export default function SettingsPage() {
             </CardContent>
         </Card>
 
+        {/* APP PREFERENCES */}
+        <Card className="border shadow-sm">
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Palette className="h-5 w-5 text-primary" /> App Preferences</CardTitle></CardHeader>
+          <CardContent className="space-y-6">
+            <div className="space-y-3">
+              <Label>Theme</Label>
+              <ThemeToggle 
+                theme={preferences.theme} 
+                onThemeChange={(t: Theme) => handleSettingChange('theme', t)} 
+              />
+            </div>
+            <div className="space-y-3">
+              <Label>Interface Language</Label>
+              <Select value={language} onValueChange={(l: Language) => { setLanguage(l); toast({ title: `Language set to ${l}` }); }}>
+                <SelectTrigger><SelectValue /></SelectTrigger>
+                <SelectContent>{languages.map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}</SelectContent>
+              </Select>
+            </div>
+             <div className="space-y-3">
+              <Label>Measurement Units</Label>
+               <div className="grid grid-cols-2 gap-2">{unitSystems.map(({ id, label }) => (
+                  <Button key={id} variant={preferences.units === id ? 'default' : 'outline'} onClick={() => handleSettingChange('units', id)} className="h-10">{label}</Button>
+              ))}</div>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* AI CONFIGURATION */}
         <Card id="ai" className="border shadow-sm">
           <CardHeader>
@@ -285,32 +307,6 @@ export default function SettingsPage() {
                 <p className="text-xs text-muted-foreground">Show extra technical details on scans.</p>
               </div>
               <Switch checked={preferences.advancedUiMode} onCheckedChange={(c) => handleSettingChange('advancedUiMode', c)} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* APP PREFERENCES */}
-        <Card className="border shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Palette className="h-5 w-5 text-primary" /> App Preferences</CardTitle></CardHeader>
-          <CardContent className="space-y-6">
-            <div className="space-y-3">
-              <Label>Interface Language</Label>
-              <Select value={language} onValueChange={(l: Language) => { setLanguage(l); toast({ title: `Language set to ${l}` }); }}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{languages.map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-3">
-              <Label>Appearance</Label>
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">{themes.map(({ id, label, icon: Icon }) => (
-                  <Button key={id} variant={preferences.theme === id ? 'default' : 'outline'} onClick={() => handleSettingChange('theme', id)} className="h-10 text-xs px-2"><Icon className="mr-2 h-3 w-3" /> {label}</Button>
-              ))}</div>
-            </div>
-             <div className="space-y-3">
-              <Label>Measurement Units</Label>
-               <div className="grid grid-cols-2 gap-2">{unitSystems.map(({ id, label }) => (
-                  <Button key={id} variant={preferences.units === id ? 'default' : 'outline'} onClick={() => handleSettingChange('units', id)} className="h-10">{label}</Button>
-              ))}</div>
             </div>
           </CardContent>
         </Card>

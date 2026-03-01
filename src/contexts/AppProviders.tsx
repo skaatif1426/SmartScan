@@ -60,28 +60,8 @@ export function AppProviders({ children }: { children: ReactNode }) {
     if (typeof window === 'undefined') return;
 
     const root = window.document.documentElement;
-    root.classList.remove('light', 'dark', 'dark-pro');
-
-    if (settings.theme === 'system') {
-      const systemTheme = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-      root.classList.add(systemTheme);
-    } else {
-      root.classList.add(settings.theme);
-    }
-  }, [settings.theme]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined' || settings.theme !== 'system') {
-      return;
-    }
-    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)');
-    const handleChange = () => {
-      const root = window.document.documentElement;
-      root.classList.remove('light', 'dark', 'dark-pro');
-      root.classList.add(mediaQuery.matches ? 'dark' : 'light');
-    };
-    mediaQuery.addEventListener('change', handleChange);
-    return () => mediaQuery.removeEventListener('change', handleChange);
+    root.classList.remove('light', 'dark');
+    root.classList.add(settings.theme);
   }, [settings.theme]);
 
   const t = useMemo(() => (key: keyof typeof translations): string => {
