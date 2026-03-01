@@ -27,6 +27,7 @@ type PreferencesContextType = {
   preferences: UserPreferences & { 
       name: string;
       email: string;
+      profilePicUrl: string | null;
       theme: Theme;
       advancedUiMode: boolean;
       aiChatEnabled: boolean;
@@ -109,6 +110,7 @@ export function AppProviders({ children }: { children: ReactNode }) {
     preferences: {
         name: settings.name,
         email: settings.email,
+        profilePicUrl: settings.profilePicUrl,
         diet: settings.diet,
         allergies: settings.allergies,
         healthGoal: settings.healthGoal,
@@ -127,7 +129,6 @@ export function AppProviders({ children }: { children: ReactNode }) {
     },
     savePreferences,
     isSettingsLoaded: isLoaded,
-  // eslint-disable-next-line react-hooks/exhaustive-deps
   }), [settings, savePreferences, isLoaded]);
 
   return (
