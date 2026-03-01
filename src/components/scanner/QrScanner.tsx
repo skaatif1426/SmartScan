@@ -31,19 +31,27 @@ const QrScanner = ({
   const isStarting = useRef(false);
   const [isReady, setIsReady] = useState(false);
   const lastHintRef = useRef<string>('');
+  const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   const updateHint = useCallback((hint: string) => {
     if (hint !== lastHintRef.current) {
       lastHintRef.current = hint;
       onStatusChange?.(hint);
+
+      // Auto-hide hint after 2 seconds
+      if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
+      hintTimeoutRef.current = setTimeout(() => {
+        if (isMounted.current) {
+          lastHintRef.current = '';
+          onStatusChange?.('');
+        }
+      }, 2000);
     }
   }, [onStatusChange]);
 
   const startScanner = useCallback(async (cameraId: string) => {
-    // Prevent concurrent initialization attempts
     if (!isMounted.current || !scannerRef.current || isStarting.current) return;
     
-    // Ensure the DOM element exists before doing anything
     const container = document.getElementById(qrcodeRegionId);
     if (!container) return;
 
@@ -51,23 +59,18 @@ const QrScanner = ({
     try {
       const state = scannerRef.current.getState();
       
-      // If already scanning with the correct camera, don't restart
       if (state === Html5QrcodeScannerState.SCANNING && activeCameraId === cameraId) {
         return;
       }
 
-      // If scanning another camera or paused, stop first
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         try {
           await scannerRef.current.stop();
         } catch (stopError) {
-          // This catches the 'removeChild' TypeError often thrown by html5-qrcode 
-          // when nodes are missing or during hot-reloads.
           console.warn('Recoverable error stopping scanner:', stopError);
         }
       }
 
-      // Hardware release delay
       await new Promise(resolve => setTimeout(resolve, 300));
 
       if (!isMounted.current) return;
@@ -78,15 +81,13 @@ const QrScanner = ({
           fps: 15,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
             const size = Math.min(viewfinderWidth, viewfinderHeight);
-            // Ensure minimum 50px as required by the library
             const boxSize = Math.max(Math.floor(size * 0.7), 200); 
-            return { width: boxSize, height: Math.floor(boxSize * 0.8) };
+            return { width: boxSize, height: Math.floor(boxSize * 0.75) };
           },
           aspectRatio: 1.0,
         },
         (decodedText: string) => {
           if (isAutoScan || isCapturing) {
-            if (window.navigator.vibrate) window.navigator.vibrate([50, 30, 50]);
             onScanSuccess(decodedText);
           }
         },
@@ -103,7 +104,6 @@ const QrScanner = ({
       setIsReady(true);
     } catch (err) {
       console.error('Scanner start error:', err);
-      // Ignore "Cannot stop" errors as they are non-fatal state mismatches
       if (err instanceof Error && err.message.includes('Cannot stop')) {
         return;
       }
@@ -117,9 +117,8 @@ const QrScanner = ({
   useEffect(() => {
     isMounted.current = true;
 
-    // Check for Secure Context
     if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-      onCameraPermissionError(new Error('Camera requires HTTPS for security.'));
+      onCameraPermissionError(new Error('Camera requires HTTPS.'));
       return;
     }
 
@@ -136,9 +135,7 @@ const QrScanner = ({
 
     const initialize = async () => {
       try {
-        // Enforce a small delay before first initialization to ensure DOM is stable
-        await new Promise(r => setTimeout(r, 500));
-        
+        await new Promise(r => setTimeout(r, 400));
         if (!isMounted.current) return;
 
         if (activeCameraId) {
@@ -153,12 +150,12 @@ const QrScanner = ({
             );
             await startScanner(backCamera?.id || cameras[0].id);
           } else {
-            throw new Error('No cameras found. Please check your connection.');
+            throw new Error('No cameras found.');
           }
         }
       } catch (err) {
         if (isMounted.current) {
-          const error = err instanceof Error ? err : new Error('Failed to access camera list');
+          const error = err instanceof Error ? err : new Error('Camera access failed');
           onCameraPermissionError(error);
         }
       }
@@ -168,6 +165,7 @@ const QrScanner = ({
 
     return () => {
       isMounted.current = false;
+      if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
       if (scannerRef.current) {
         const state = scannerRef.current.getState();
         if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
@@ -183,37 +181,30 @@ const QrScanner = ({
         id={qrcodeRegionId} 
         className={cn(
           "w-full h-full object-cover transition-opacity duration-500",
-          isReady ? "opacity-100" : "opacity-0",
-          isCapturing && "brightness-125 contrast-125"
+          isReady ? "opacity-100" : "opacity-0"
         )}
       />
       {!isReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-black">
           <Skeleton className="w-full h-full bg-neutral-900" />
           <div className="absolute flex flex-col items-center gap-4">
-            <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="text-sm text-neutral-500 font-medium tracking-wide">Connecting to Camera...</p>
+            <div className="w-10 h-10 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
+            <p className="text-xs text-neutral-500 font-medium">Starting Camera...</p>
           </div>
         </div>
       )}
       
-      {/* Dynamic Scan Frame */}
+      {/* Dynamic Scan Frame - Simplified */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         <div className={cn(
-          "w-[75vw] aspect-[1.2/1] rounded-3xl border-2 transition-all duration-500",
-          isReady ? "opacity-100 scale-100" : "opacity-0 scale-110",
-          isCapturing ? "border-white scale-95" : "border-primary/40 scan-frame-pulse"
-        )}>
-          {/* Corner Decorations */}
-          <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-primary rounded-tl-2xl -translate-x-1 -translate-y-1" />
-          <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-primary rounded-tr-2xl translate-x-1 -translate-y-1" />
-          <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-primary rounded-bl-2xl -translate-x-1 translate-y-1" />
-          <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-primary rounded-br-2xl translate-x-1 translate-y-1" />
-        </div>
+          "w-[70vw] aspect-[1.3/1] rounded-2xl border-2 transition-all duration-300",
+          isReady ? "opacity-80 scale-100" : "opacity-0 scale-110",
+          isCapturing ? "border-white scale-95" : "border-white/30 scan-frame-pulse"
+        )} />
       </div>
 
       {/* Capture Flash Overlay */}
-      {isCapturing && <div className="absolute inset-0 bg-white/40 flash-capture z-50 pointer-events-none" />}
+      {isCapturing && <div className="absolute inset-0 bg-white/50 flash-capture z-50 pointer-events-none" />}
     </div>
   );
 };
