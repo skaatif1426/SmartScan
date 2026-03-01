@@ -43,6 +43,10 @@ const QrScanner = ({
     // Prevent concurrent initialization attempts
     if (!isMounted.current || !scannerRef.current || isStarting.current) return;
     
+    // Ensure the DOM element exists before doing anything
+    const container = document.getElementById(qrcodeRegionId);
+    if (!container) return;
+
     isStarting.current = true;
     try {
       const state = scannerRef.current.getState();
@@ -54,7 +58,13 @@ const QrScanner = ({
 
       // If scanning another camera or paused, stop first
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
-        await scannerRef.current.stop();
+        try {
+          await scannerRef.current.stop();
+        } catch (stopError) {
+          // This catches the 'removeChild' TypeError often thrown by html5-qrcode 
+          // when nodes are missing or during hot-reloads.
+          console.warn('Recoverable error stopping scanner:', stopError);
+        }
       }
 
       // Hardware release delay
@@ -68,7 +78,8 @@ const QrScanner = ({
           fps: 15,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
             const size = Math.min(viewfinderWidth, viewfinderHeight);
-            const boxSize = Math.max(Math.floor(size * 0.7), 200); // Increased minimum size for stability
+            // Ensure minimum 50px as required by the library
+            const boxSize = Math.max(Math.floor(size * 0.7), 200); 
             return { width: boxSize, height: Math.floor(boxSize * 0.8) };
           },
           aspectRatio: 1.0,
@@ -92,6 +103,7 @@ const QrScanner = ({
       setIsReady(true);
     } catch (err) {
       console.error('Scanner start error:', err);
+      // Ignore "Cannot stop" errors as they are non-fatal state mismatches
       if (err instanceof Error && err.message.includes('Cannot stop')) {
         return;
       }
