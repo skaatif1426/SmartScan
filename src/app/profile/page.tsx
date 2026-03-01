@@ -1,11 +1,12 @@
 'use client';
 
-import { Settings as SettingsIcon, Award, Leaf, Sparkles, Scan, Compass, Flame, ChevronRight, User as UserIcon, Mail } from 'lucide-react';
+import { useRef } from 'react';
+import { Settings as SettingsIcon, Award, Leaf, Sparkles, Scan, Compass, Flame, ChevronRight, User as UserIcon, Mail, Camera } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Separator } from '@/components/ui/separator';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { usePreferences } from '@/contexts/AppProviders';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { useDiscovery } from '@/hooks/useDiscovery';
@@ -13,7 +14,7 @@ import { useGamification } from '@/hooks/useGamification';
 import { Progress } from '@/components/ui/progress';
 import Link from 'next/link';
 import Achievements from '@/components/dashboard/Achievements';
-import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
 
 const StatBox = ({ label, value, icon: Icon, isLoading }: { label: string, value: string | number, icon: any, isLoading: boolean }) => (
     <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-xl border">
@@ -45,10 +46,12 @@ const PreviewSection = ({ title, icon: Icon, value, href }: { title: string, ico
 );
 
 export default function ProfilePage() {
-  const { preferences, isSettingsLoaded } = usePreferences();
+  const { preferences, savePreferences, isSettingsLoaded } = usePreferences();
   const { history, isLoaded: isHistoryLoaded, scanStreak } = useScanHistory();
   const { discoveryCount, contributorLevel, isLoaded: isDiscoveryLoaded } = useDiscovery();
-  const { level, xp, getLevelProgress, isLoaded: isGamificationLoaded } = useGamification();
+  const { level, xp, getLevelProgress } = useGamification();
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
 
   const dietaryPreview = [
     preferences.diet !== 'none' ? preferences.diet : 'No diet set',
@@ -60,19 +63,60 @@ export default function ProfilePage() {
     `${preferences.aiFocusPriority} focus`
   ].join(' • ');
 
+  const handleAvatarClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          variant: 'destructive',
+          title: 'Image too large',
+          description: 'Please select an image smaller than 2MB.',
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        savePreferences({ profilePicUrl: reader.result as string });
+        toast({
+          title: 'Profile updated',
+          description: 'Your profile picture has been saved.',
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6">
         {/* IDENTITY BLOCK */}
         <div className="flex flex-col items-center text-center space-y-4 pt-2">
-            <div className="relative">
-                <Avatar className="h-24 w-24 border-4 border-background shadow-xl">
+            <div className="relative group cursor-pointer" onClick={handleAvatarClick}>
+                <Avatar className="h-24 w-24 border-4 border-background shadow-xl group-hover:opacity-90 transition-opacity">
+                    <AvatarImage src={preferences.profilePicUrl || undefined} className="object-cover" />
                     <AvatarFallback className="bg-primary text-primary-foreground text-3xl font-bold">
                         {preferences.name?.charAt(0) || <UserIcon />}
                     </AvatarFallback>
                 </Avatar>
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <div className="bg-black/40 rounded-full p-2">
+                        <Camera className="w-6 h-6 text-white" />
+                    </div>
+                </div>
                 <div className="absolute -bottom-2 -right-2 bg-primary text-primary-foreground text-[10px] font-bold px-2 py-1 rounded-full border-2 border-background">
                     LVL {level}
                 </div>
+                <input 
+                  type="file" 
+                  ref={fileInputRef} 
+                  className="hidden" 
+                  accept="image/*" 
+                  onChange={handleFileChange}
+                />
             </div>
             <div>
                 <h1 className="text-2xl font-bold">{preferences.name || 'User'}</h1>

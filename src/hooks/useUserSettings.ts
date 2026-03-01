@@ -9,6 +9,7 @@ const SETTINGS_KEY = 'smartscan-settings';
 const defaultSettings: UserSettings = {
   name: 'User',
   email: '',
+  profilePicUrl: null,
   language: 'English',
   theme: 'system',
   units: 'metric',

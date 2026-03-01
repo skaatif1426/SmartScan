@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, CheckCircle2, AlertCircle } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, Sun, Moon, Laptop, ChevronLeft, Target, Mail, Edit3, Camera } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -29,6 +29,7 @@ import { useScanHistory } from '@/hooks/useScanHistory';
 import type { Language, DataRetention, Theme, AiVerbosity, UnitSystem, HealthGoal, DietType, AiFocusPriority } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
 const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
@@ -71,6 +72,7 @@ export default function SettingsPage() {
   const { clearHistory } = useScanHistory();
   const [isClearing, setIsClearing] = useState(false);
   const { toast } = useToast();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleClearHistory = () => {
     setIsClearing(true);
@@ -96,6 +98,30 @@ export default function SettingsPage() {
     });
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      if (file.size > 2 * 1024 * 1024) {
+        toast({
+          variant: 'destructive',
+          title: 'Image too large',
+          description: 'Please select an image smaller than 2MB.',
+        });
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        savePreferences({ profilePicUrl: reader.result as string });
+        toast({
+          title: 'Photo updated',
+          description: 'Your profile picture has been saved.',
+        });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
   return (
     <div className="p-4 md:p-6 space-y-6 pb-20">
       <div className="flex items-center gap-4">
@@ -111,7 +137,33 @@ export default function SettingsPage() {
         {/* ACCOUNT */}
         <Card id="account" className="border shadow-sm">
           <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><User className="h-5 w-5 text-primary" /> Account</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-6">
+             <div className="flex flex-col items-center gap-4">
+                <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                    <Avatar className="h-20 w-20 border-2 border-primary/20 group-hover:opacity-90 transition-opacity">
+                        <AvatarImage src={preferences.profilePicUrl || undefined} className="object-cover" />
+                        <AvatarFallback className="bg-primary/10 text-primary text-2xl">
+                            {preferences.name?.charAt(0) || 'U'}
+                        </AvatarFallback>
+                    </Avatar>
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="bg-black/40 rounded-full p-1.5">
+                            <Camera className="w-4 h-4 text-white" />
+                        </div>
+                    </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*" 
+                      onChange={handleFileChange}
+                    />
+                </div>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
+                    Change Photo
+                </Button>
+             </div>
+
              <div className="grid gap-4">
                 <div className="space-y-2">
                     <Label htmlFor="user-name">Display Name</Label>

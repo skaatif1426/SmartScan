@@ -57,6 +57,7 @@ export type UnitSystem = 'metric' | 'imperial';
 export interface UserSettings {
   name: string;
   email: string;
+  profilePicUrl: string | null;
   language: Language;
   theme: Theme;
   units: UnitSystem;
