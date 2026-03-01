@@ -80,12 +80,13 @@ const QrScanner = ({ onScanSuccess, onScanFailure, onCameraPermissionError }: Qr
       isMounted.current = false;
       const scanner = scannerRef.current;
       if (scanner) {
-        // Stop scanning, and ignore any errors. This is often necessary
-        // to prevent race conditions when the component unmounts
-        // while the scanner is still starting up.
-        scanner.stop().catch(() => {
-            // We can safely ignore this error on unmount.
-        });
+        // Only stop if the scanner is actually running or paused
+        const currentState = scanner.getState();
+        if (currentState === Html5QrcodeScannerState.SCANNING || currentState === Html5QrcodeScannerState.PAUSED) {
+            scanner.stop().catch(() => {
+                // We can safely ignore this error on unmount as it's likely a race condition.
+            });
+        }
       }
     };
   }, [onScanSuccess, onScanFailure, onCameraPermissionError]);
