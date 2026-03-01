@@ -411,7 +411,7 @@ export default function SettingsPage() {
             </Card>
             <div className="text-center space-y-1">
                 <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">SmartScan AI • v1.0.0</p>
-                <p className="text-[10px] text-muted-foreground">Built for healthier choices • 2024</p>
+                <p className="text-[10px] text-muted-foreground">Built for healthier choices • 2026</p>
             </div>
         </div>
       </div>
