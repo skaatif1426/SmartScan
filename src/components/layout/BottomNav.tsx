@@ -18,8 +18,8 @@ export default function BottomNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-4 inset-x-6 z-50 h-14 bg-card/80 backdrop-blur-xl border rounded-full shadow-2xl animate-in slide-in-from-bottom-8 duration-300 ease-in-out">
-      <div className="flex justify-around items-center h-full max-w-lg mx-auto p-1">
+    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card/80 backdrop-blur-xl border-2 rounded-full shadow-2xl animate-in slide-in-from-bottom-8 duration-300 ease-in-out">
+      <div className="flex justify-around items-center h-full max-w-lg mx-auto p-1.5">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const label = t(item.labelKey);
@@ -29,12 +29,14 @@ export default function BottomNav() {
               href={item.href}
               aria-label={label}
               className={cn(
-                'flex items-center justify-center p-2 rounded-full transition-all duration-300 ease-in-out h-11',
-                 isActive ? 'bg-primary text-primary-foreground shadow-lg gap-2 px-3' : 'text-muted-foreground w-11 hover:bg-muted/50'
+                'flex items-center justify-center p-2 rounded-full transition-all duration-300 ease-in-out h-12',
+                 isActive 
+                  ? 'bg-primary text-primary-foreground shadow-lg gap-2 px-4 scale-105' 
+                  : 'text-muted-foreground w-12 hover:bg-muted/50 active:scale-90'
               )}
             >
-              <item.icon className="h-5 w-5 shrink-0" />
-              {isActive && <span className="text-sm font-medium whitespace-nowrap" aria-hidden="true">{label}</span>}
+              <item.icon className={cn("shrink-0", isActive ? "h-5 w-5" : "h-6 w-6")} />
+              {isActive && <span className="text-sm font-bold whitespace-nowrap" aria-hidden="true">{label}</span>}
             </Link>
           );
         })}

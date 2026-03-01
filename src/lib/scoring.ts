@@ -65,7 +65,7 @@ export const getScoreInfo = (score: number | null | undefined) => {
     if (score === null || score === undefined) {
         return { 
             label: 'N/A', 
-            badgeClassName: 'bg-muted text-muted-foreground',
+            badgeClassName: 'bg-muted text-muted-foreground border-transparent',
             progressClassName: 'bg-muted',
             textClassName: 'text-muted-foreground',
             icon: ShieldQuestion
@@ -74,7 +74,7 @@ export const getScoreInfo = (score: number | null | undefined) => {
 
     if (score >= 80) return { 
         label: 'Excellent',
-        badgeClassName: 'bg-emerald-100 text-emerald-800 border-emerald-200 dark:bg-emerald-900/30 dark:text-emerald-400 dark:border-emerald-800',
+        badgeClassName: 'bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400',
         progressClassName: 'bg-emerald-500',
         textClassName: 'text-emerald-600 dark:text-emerald-400',
         icon: CheckCircle
@@ -88,14 +88,14 @@ export const getScoreInfo = (score: number | null | undefined) => {
     };
     if (score >= 40) return { 
         label: 'Moderate', 
-        badgeClassName: 'bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-900/30 dark:text-amber-400 dark:border-amber-800',
+        badgeClassName: 'bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400',
         progressClassName: 'bg-amber-500',
         textClassName: 'text-amber-600 dark:text-amber-400',
         icon: AlertTriangle
     };
     return { 
         label: 'Poor', 
-        badgeClassName: 'bg-destructive/10 text-destructive border-destructive/20 dark:bg-destructive/20 dark:text-destructive dark:border-destructive/30',
+        badgeClassName: 'bg-destructive/10 text-destructive border-destructive/20 dark:text-destructive-foreground dark:bg-destructive/20',
         progressClassName: 'bg-destructive',
         textClassName: 'text-destructive',
         icon: ShieldQuestion
