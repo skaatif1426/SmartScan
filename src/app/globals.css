@@ -80,6 +80,18 @@
   .animate-shadow-pulse {
     animation: shadow-pulse 2s infinite;
   }
+
+  .camera-flip {
+    animation: flip-360 0.4s ease-in-out;
+  }
+
+  .flash-capture {
+    animation: flash-animation 0.5s ease-out;
+  }
+
+  .scan-frame-pulse {
+    animation: border-pulse 2s infinite ease-in-out;
+  }
 }
 
 @keyframes scan {
@@ -96,4 +108,21 @@
 @keyframes shadow-pulse {
   0% { box-shadow: 0 0 0 0px hsl(var(--primary) / 0.7); }
   100% { box-shadow: 0 0 0 15px hsl(var(--primary) / 0); }
+}
+
+@keyframes flip-360 {
+  0% { transform: rotateY(0deg); }
+  100% { transform: rotateY(180deg); }
+}
+
+@keyframes flash-animation {
+  0% { opacity: 0; }
+  25% { opacity: 0.8; }
+  100% { opacity: 0; }
+}
+
+@keyframes border-pulse {
+  0% { border-color: hsl(var(--primary) / 0.4); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.2); }
+  50% { border-color: hsl(var(--primary) / 0.8); box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
+  100% { border-color: hsl(var(--primary) / 0.4); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.2); }
 }

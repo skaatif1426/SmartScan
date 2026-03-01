@@ -104,10 +104,10 @@ export const translations: Translations = {
     Hinglish: 'Phir se try karo',
   },
   uploadImage: {
-    English: 'Upload Image',
-    Hindi: 'छवि अपलोड करें',
-    Marathi: 'प्रतिमा अपलोड करा',
-    Hinglish: 'Image upload karo',
+    English: 'Gallery',
+    Hindi: 'गैलरी',
+    Marathi: 'गॅलरी',
+    Hinglish: 'Gallery',
   },
   uploading: {
     English: 'Processing...',
@@ -116,16 +116,66 @@ export const translations: Translations = {
     Hinglish: 'Processing...',
   },
   noBarcodeInImage: {
-    English: 'No barcode was found in the uploaded image.',
-    Hindi: 'अपलोड की गई छवि में कोई बारकोड नहीं मिला।',
-    Marathi: 'अपलोड केलेल्या प्रतिमेमध्ये कोणताही बारकोड आढळला नाही।',
-    Hinglish: 'Uploaded image mein barcode nahi mila.',
+    English: 'No barcode found.',
+    Hindi: 'कोई बारकोड नहीं मिला।',
+    Marathi: 'कोणताही बारकोड आढळला नाही।',
+    Hinglish: 'Barcode nahi mila.',
   },
   uploadError: {
-    English: 'Could not read barcode from the image file.',
-    Hindi: 'छवि फ़ाइल से बारकोड नहीं पढ़ा जा सका।',
-    Marathi: 'प्रतिमा फाइलमधून बारकोड वाचता आला नाही।',
-    Hinglish: 'Image file se barcode nahi padha jaa saka.',
+    English: 'Could not read barcode.',
+    Hindi: 'बारकोड नहीं पढ़ा जा सका।',
+    Marathi: 'बारकोड वाचता आला नाही।',
+    Hinglish: 'Barcode nahi padha jaa saka.',
+  },
+  // Camera Hints
+  hintAlign: {
+    English: 'Align barcode inside frame',
+    Hindi: 'फ्रेम के अंदर बारकोड संरेखित करें',
+    Marathi: 'फ्रेमच्या आत बारकोड संरेखित करा',
+    Hinglish: 'Barcode ko frame ke andar rakho',
+  },
+  hintCloser: {
+    English: 'Move closer',
+    Hindi: 'थोड़ा पास लाएं',
+    Marathi: 'थोडे जवळ आणा',
+    Hinglish: 'Thoda paas lao',
+  },
+  hintSteady: {
+    English: 'Hold steady',
+    Hindi: 'स्थिर रखें',
+    Marathi: 'स्थिर धरा',
+    Hinglish: 'Steady pakdo',
+  },
+  hintLowLight: {
+    English: 'Low light detected',
+    Hindi: 'कम रोशनी का पता चला',
+    Marathi: 'कमी प्रकाश आढळला',
+    Hinglish: 'Roshni kam hai',
+  },
+  // Loading Steps
+  loadingCapture: {
+    English: 'Capturing image...',
+    Hindi: 'छवि कैप्चर कर रहा है...',
+    Marathi: 'प्रतिमा कॅप्चर करत आहे...',
+    Hinglish: 'Image capture ho raha hai...',
+  },
+  loadingRead: {
+    English: 'Reading barcode...',
+    Hindi: 'बारकोड पढ़ रहा है...',
+    Marathi: 'बारकोड वाचत आहे...',
+    Hinglish: 'Barcode read ho raha hai...',
+  },
+  loadingIngredients: {
+    English: 'Analyzing ingredients...',
+    Hindi: 'सामग्री का विश्लेषण कर रहा है...',
+    Marathi: 'घटकांचे विश्लेषण करत आहे...',
+    Hinglish: 'Ingredients analyze ho rahe hain...',
+  },
+  loadingInsights: {
+    English: 'Generating insights...',
+    Hindi: 'जानकारी उत्पन्न कर रहा है...',
+    Marathi: 'अंतर्दृष्टी तयार करत आहे...',
+    Hinglish: 'Insights generate ho rahe hain...',
   },
   // Product Page
   productNotFoundTitle: {
