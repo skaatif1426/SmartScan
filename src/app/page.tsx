@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { 
   ScanLine, 
-  FileImage, 
   Loader2, 
   ChevronLeft, 
   Zap, 
@@ -15,7 +14,8 @@ import {
   Keyboard,
   CheckCircle2,
   Camera,
-  QrCode
+  QrCode,
+  Sparkles
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -61,8 +61,6 @@ export default function ScannerPage() {
   const [manualBarcode, setManualBarcode] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
   useEffect(() => {
     if (showScanner && mode === 'barcode') {
       Html5Qrcode.getCameras().then(setCameras).catch(trackError);
@@ -74,7 +72,7 @@ export default function ScannerPage() {
     setAnalysisStep(0);
 
     for (let i = 1; i < LOADING_STEPS.length; i++) {
-      await new Promise(r => setTimeout(r, 600));
+      await new Promise(r => setTimeout(r, 800));
       setAnalysisStep(i);
     }
     
@@ -112,26 +110,37 @@ export default function ScannerPage() {
 
   if (isAnalyzing) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-background animate-in fade-in duration-500">
-        <div className="relative mb-12">
-          <div className="w-20 h-20 rounded-full border-4 border-primary/10 flex items-center justify-center">
-            <Loader2 className="w-8 h-8 text-primary animate-spin" />
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background animate-in fade-in duration-500">
+        <div className="relative mb-16">
+          <div className="w-32 h-32 rounded-full border-4 border-primary/10 flex items-center justify-center">
+             <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center animate-shadow-pulse">
+                <Sparkles className="w-12 h-12 text-primary animate-pulse" />
+             </div>
           </div>
+          <Loader2 className="absolute -bottom-2 -right-2 w-10 h-10 text-primary animate-spin" />
         </div>
         
-        <div className="space-y-4 w-full max-w-xs">
+        <div className="space-y-6 w-full max-w-xs">
+          <h2 className="text-xl font-bold text-center mb-4">Processing Scan...</h2>
           {LOADING_STEPS.map((step, idx) => (
             <div 
               key={step} 
               className={cn(
-                "flex items-center gap-3 transition-all duration-300",
-                analysisStep > idx ? "text-green-500 opacity-100" : 
-                analysisStep === idx ? "text-foreground scale-105 opacity-100 font-semibold" : 
-                "text-muted-foreground opacity-30"
+                "flex items-center gap-4 transition-all duration-500",
+                analysisStep > idx ? "text-primary opacity-100" : 
+                analysisStep === idx ? "text-foreground scale-105 opacity-100 font-bold" : 
+                "text-muted-foreground opacity-20"
               )}
             >
-              {analysisStep > idx ? <CheckCircle2 className="w-4 h-4" /> : <div className="w-4 h-4 rounded-full border-2 border-current" />}
-              <p className="text-sm">{t(step)}</p>
+              {analysisStep > idx ? (
+                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+              ) : (
+                <div className={cn(
+                  "w-5 h-5 rounded-full border-2 flex items-center justify-center",
+                  analysisStep === idx ? "border-primary border-t-transparent animate-spin" : "border-current"
+                )} />
+              )}
+              <p className="text-base">{t(step)}</p>
             </div>
           ))}
         </div>
@@ -143,13 +152,13 @@ export default function ScannerPage() {
     <div className="flex flex-col h-full bg-background">
       {/* Top Mode Switcher */}
       {!showScanner && (
-        <div className="pt-6 px-6 flex justify-center z-10">
-          <div className="bg-muted p-1 rounded-2xl flex gap-1 shadow-sm border">
+        <div className="pt-8 px-6 flex justify-center z-10">
+          <div className="bg-muted p-1.5 rounded-full flex gap-1 shadow-inner border">
             <button 
               onClick={() => setMode('barcode')}
               className={cn(
-                "flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all",
-                mode === 'barcode' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+                "flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all duration-300",
+                mode === 'barcode' ? "bg-background text-primary shadow-lg scale-105" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <QrCode className="h-4 w-4" />
@@ -158,8 +167,8 @@ export default function ScannerPage() {
             <button 
               onClick={() => setMode('photo')}
               className={cn(
-                "flex items-center gap-2 px-6 py-2 rounded-xl text-sm font-bold transition-all",
-                mode === 'photo' ? "bg-background text-primary shadow-sm" : "text-muted-foreground hover:text-foreground"
+                "flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all duration-300",
+                mode === 'photo' ? "bg-background text-primary shadow-lg scale-105" : "text-muted-foreground hover:text-foreground"
               )}
             >
               <Camera className="h-4 w-4" />
@@ -172,39 +181,37 @@ export default function ScannerPage() {
       <div className="flex-1 overflow-auto flex flex-col justify-center">
         {mode === 'barcode' ? (
           !showScanner ? (
-            <div className="flex flex-col items-center p-6 space-y-8 animate-in zoom-in-95 duration-500">
-              <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
-                <ScanLine className="w-12 h-12 text-primary" />
+            <div className="flex flex-col items-center p-6 space-y-12 animate-in zoom-in-95 duration-500">
+              <div className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
+                <ScanLine className="w-14 h-14 text-primary" />
               </div>
               
-              <div className="text-center space-y-2">
-                <h1 className="text-2xl font-bold tracking-tight">{t('scannerTitle')}</h1>
-                <p className="text-muted-foreground text-sm px-4">{t('scannerPrompt')}</p>
+              <div className="text-center space-y-3">
+                <h1 className="text-3xl font-black tracking-tight">{t('scannerTitle')}</h1>
+                <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">{t('scannerPrompt')}</p>
               </div>
 
               <div className="w-full max-w-sm space-y-4">
-                <Button size="lg" className="w-full rounded-2xl h-14 text-lg font-semibold shadow-xl" onClick={() => setShowScanner(true)}>
-                  <Scan className="mr-2 h-5 w-5" />
+                <Button size="lg" className="w-full rounded-2xl h-16 text-lg font-bold shadow-xl active:scale-95" onClick={() => setShowScanner(true)}>
+                  <Scan className="mr-2 h-6 w-6" />
                   {t('startScanning')}
                 </Button>
                 
-                <div className="grid grid-cols-1 gap-3">
-                  <Button variant="outline" className="rounded-xl h-12" onClick={() => setShowManualInput(true)}>
-                    <Keyboard className="mr-2 h-4 w-4" />
-                    Manual Barcode
-                  </Button>
-                </div>
+                <Button variant="ghost" className="w-full h-12 text-muted-foreground font-bold" onClick={() => setShowManualInput(true)}>
+                  <Keyboard className="mr-2 h-4 w-4" />
+                  Manual Entry
+                </Button>
               </div>
             </div>
           ) : (
             <div className="fixed inset-0 bg-black z-[100] flex flex-col h-svh overflow-hidden text-white animate-in slide-in-from-bottom-full duration-500">
-              {/* Top Bar - Minimal */}
-              <div className="flex items-center justify-between px-4 py-6 z-10">
-                <Button variant="ghost" size="icon" className="text-white bg-black/20 hover:bg-white/10 rounded-full" onClick={() => setShowScanner(false)}>
-                  <ChevronLeft className="h-6 w-6" />
+              {/* Top Bar */}
+              <div className="flex items-center justify-between px-6 py-8 z-10">
+                <Button variant="ghost" size="icon" className="text-white bg-black/40 backdrop-blur-md hover:bg-white/10 rounded-full h-12 w-12" onClick={() => setShowScanner(false)}>
+                  <ChevronLeft className="h-7 w-7" />
                 </Button>
-                <Button variant="ghost" size="icon" className="text-white bg-black/20 hover:bg-white/10 rounded-full" onClick={() => setIsFlashOn(!isFlashOn)}>
-                  {isFlashOn ? <Zap className="h-5 w-5 fill-yellow-400 text-yellow-400" /> : <ZapOff className="h-5 w-5" />}
+                <Button variant="ghost" size="icon" className="text-white bg-black/40 backdrop-blur-md hover:bg-white/10 rounded-full h-12 w-12" onClick={() => setIsFlashOn(!isFlashOn)}>
+                  {isFlashOn ? <Zap className="h-6 w-6 fill-yellow-400 text-yellow-400" /> : <ZapOff className="h-6 w-6" />}
                 </Button>
               </div>
 
@@ -221,24 +228,25 @@ export default function ScannerPage() {
                 />
                 
                 {hint && (
-                  <div className="absolute top-8 inset-x-0 flex justify-center pointer-events-none">
-                    <div className="bg-black/60 backdrop-blur-md px-4 py-2 rounded-full border border-white/10 animate-in fade-in slide-in-from-top-4 duration-300">
-                      <p className="text-xs font-medium tracking-wide">{t(hint)}</p>
+                  <div className="absolute top-12 inset-x-0 flex justify-center pointer-events-none px-6">
+                    <div className="bg-black/70 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 animate-in fade-in slide-in-from-top-6 duration-300">
+                      <p className="text-sm font-bold tracking-tight text-white">{t(hint)}</p>
                     </div>
                   </div>
                 )}
               </div>
 
               {/* Bottom Controls */}
-              <div className="px-6 pb-12 pt-4 bg-gradient-to-t from-black to-transparent space-y-6">
+              <div className="px-8 pb-16 pt-6 bg-gradient-to-t from-black to-transparent space-y-8">
                 <div className="flex justify-end pr-2">
-                  <Button variant="secondary" size="icon" className="h-10 w-10 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 border border-white/10" onClick={switchCamera}>
-                    <RefreshCw className="h-5 w-5" />
+                  <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 border border-white/10 shadow-2xl active:scale-90" onClick={switchCamera}>
+                    <RefreshCw className="h-6 w-6 text-white" />
                   </Button>
                 </div>
 
-                <div className="flex justify-center">
-                   <p className="text-[10px] uppercase tracking-widest font-black opacity-50">Point at barcode to scan</p>
+                <div className="flex flex-col items-center gap-2">
+                   <div className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                   <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-60">Auto-Detect Active</p>
                 </div>
               </div>
             </div>
@@ -249,12 +257,12 @@ export default function ScannerPage() {
       </div>
 
       {showManualInput && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-[100] flex items-end sm:items-center justify-center p-4">
-          <Card className="w-full max-w-md animate-in slide-in-from-bottom-10">
-            <CardContent className="pt-6 space-y-4">
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-[200] flex items-end sm:items-center justify-center p-6">
+          <Card className="w-full max-w-md animate-in slide-in-from-bottom-10 shadow-2xl border-2">
+            <CardContent className="pt-8 space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-lg font-bold">Manual Entry</h2>
-                <Button variant="ghost" size="sm" onClick={() => setShowManualInput(false)}>Close</Button>
+                <h2 className="text-xl font-black">Manual Entry</h2>
+                <Button variant="ghost" size="sm" className="rounded-full h-8 px-4" onClick={() => setShowManualInput(false)}>Close</Button>
               </div>
               <form onSubmit={onManualSubmit} className="space-y-4">
                 <Input 
@@ -263,8 +271,9 @@ export default function ScannerPage() {
                   onChange={e => setManualBarcode(e.target.value)}
                   type="number"
                   autoFocus
+                  className="h-14 text-lg font-mono tracking-widest text-center"
                 />
-                <Button className="w-full rounded-xl" disabled={!manualBarcode}>Search</Button>
+                <Button className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg" disabled={!manualBarcode}>Search Database</Button>
               </form>
             </CardContent>
           </Card>

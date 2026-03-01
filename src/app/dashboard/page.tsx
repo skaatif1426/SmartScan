@@ -5,10 +5,9 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { useDiscovery } from '@/hooks/useDiscovery';
-import { usePreferences } from '@/contexts/AppProviders';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { ArrowRight, Scan, Flame, Sparkles, ScanLine, Target, Lightbulb, Compass, ArrowUp, ArrowDown, Minus } from 'lucide-react';
+import { ArrowRight, Scan, Flame, Sparkles, ScanLine, Compass, ArrowUp, ArrowDown, Minus } from 'lucide-react';
 import type { ScanHistoryItem } from '@/lib/types';
 import Loading from './loading';
 import { getScoreInfo } from '@/lib/scoring';
@@ -53,28 +52,28 @@ const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
 
         if (history.length < 3) return { message, scoreInfo };
         
-        if (averageScore! > 75) message = "You're making consistently smart food choices. ✨";
-        else if (averageScore! < 45) message = "Let's focus on healthier choices today!";
-        else message = "Keep scanning to track your nutritional progress.";
+        if (averageScore! > 75) message = "You're making consistently smart choices! ✨";
+        else if (averageScore! < 45) message = "Let's aim for healthier options today.";
+        else message = "Tracking your progress beautifully.";
         
         return { message, scoreInfo };
 
     }, [history, averageScore]);
     
     return (
-        <div className="text-center animate-in fade-in duration-300">
-            <h1 className="text-2xl font-bold">{greetingText}</h1>
-            <p className="text-muted-foreground mt-1">{message}</p>
+        <div className="text-center animate-in fade-in slide-in-from-top-4 duration-500">
+            <h1 className="text-3xl font-black tracking-tight">{greetingText}</h1>
+            <p className="text-muted-foreground font-bold mt-1">{message}</p>
             
-            <div className="mt-8">
-                <p className="text-xs text-muted-foreground uppercase tracking-widest font-bold mb-2">Health Index</p>
+            <div className="mt-12">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-black mb-2">Health Index</p>
                 <div className="flex items-center justify-center gap-2">
-                    <div className={cn("text-7xl font-bold tracking-tighter", scoreInfo.textClassName)}>
+                    <div className={cn("text-8xl font-black tracking-tighter", scoreInfo.textClassName)}>
                          {averageScore !== null ? <AnimatedCounter value={averageScore} /> : '-'}
                     </div>
                     {TrendIcon && <TrendIcon className={cn("h-8 w-8", trendColor)} />}
                 </div>
-                <div className={cn("text-lg font-semibold", scoreInfo.textClassName)}>{scoreInfo.label}</div>
+                <div className={cn("text-xl font-black mt-2", scoreInfo.textClassName)}>{scoreInfo.label}</div>
             </div>
         </div>
     );
@@ -85,23 +84,23 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
     const { discoveryCount } = useDiscovery();
     
     return (
-        <div className="space-y-3">
-            <h2 className="font-bold text-lg">Your Performance</h2>
-            <Card className="border shadow-sm">
-                <CardContent className="p-4 grid grid-cols-3 divide-x divide-border text-center">
-                    <div>
-                        <Scan className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-                        <div className="text-lg font-black">{history.length}</div>
+        <div className="space-y-4">
+            <h2 className="font-black text-lg uppercase tracking-widest text-muted-foreground text-center">Your Stats</h2>
+            <Card className="border-2 shadow-sm rounded-3xl">
+                <CardContent className="p-6 grid grid-cols-3 divide-x-2 divide-border text-center">
+                    <div className="space-y-1">
+                        <Scan className="mx-auto h-5 w-5 text-muted-foreground" />
+                        <div className="text-2xl font-black">{history.length}</div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">Scans</p>
                     </div>
-                    <div>
-                        <Flame className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-                        <div className="text-lg font-black">{scanStreak}</div>
+                    <div className="space-y-1">
+                        <Flame className="mx-auto h-5 w-5 text-muted-foreground" />
+                        <div className="text-2xl font-black">{scanStreak}</div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">Streak</p>
                     </div>
-                    <div>
-                        <Compass className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
-                        <div className="text-lg font-black">{discoveryCount}</div>
+                    <div className="space-y-1">
+                        <Compass className="mx-auto h-5 w-5 text-muted-foreground" />
+                        <div className="text-2xl font-black">{discoveryCount}</div>
                         <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">Found</p>
                     </div>
                 </CardContent>
@@ -110,29 +109,29 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
     )
 };
 
-const ContinueWhereYouLeft = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
+const RecentScan = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
     const scoreInfo = getScoreInfo(lastScan.healthScore);
     return (
-        <div className="space-y-3">
-            <h2 className="font-bold text-lg">Recent Scan</h2>
-            <Link href={`/product/${lastScan.barcode}`} passHref className="block transition-all duration-200 ease-in-out hover:scale-[1.01] active:scale-[0.99] rounded-2xl">
-                <Card className="hover:bg-muted/50 border shadow-sm overflow-hidden">
-                    <CardContent className="p-4 flex items-center gap-4">
+        <div className="space-y-4">
+            <h2 className="font-black text-lg uppercase tracking-widest text-muted-foreground">Latest Analysis</h2>
+            <Link href={lastScan.type === 'image' && lastScan.imageAnalysis ? '#' : `/product/${lastScan.barcode}`} passHref className="block transition-all active:scale-[0.98] rounded-3xl">
+                <Card className="hover:bg-muted/50 border-2 shadow-sm rounded-3xl overflow-hidden">
+                    <CardContent className="p-5 flex items-center gap-5">
                         {lastScan.imageUrl ? (
-                            <div className="relative w-14 h-14 bg-white rounded-xl border p-1">
-                                <Image src={lastScan.imageUrl} alt={lastScan.productName} fill className="object-contain p-1" />
+                            <div className="relative w-16 h-16 bg-white rounded-2xl border p-1 shadow-sm">
+                                <Image src={lastScan.imageUrl} alt={lastScan.productName} fill className="object-contain p-2" />
                             </div>
                         ) : (
-                            <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center"><ScanLine className="w-6 h-6 text-muted-foreground" /></div>
+                            <div className="w-16 h-16 rounded-2xl bg-secondary flex items-center justify-center"><ScanLine className="w-8 h-8 text-muted-foreground" /></div>
                         )}
                         <div className="flex-1 min-w-0">
-                            <p className="font-bold truncate">{lastScan.productName}</p>
-                            <div className="flex items-center gap-2 mt-1">
+                            <p className="font-black text-lg truncate leading-none mb-1">{lastScan.productName}</p>
+                            <div className="flex items-center gap-2">
                                 <div className={cn("text-sm font-black", scoreInfo.textClassName)}>{lastScan.healthScore} / 100</div>
-                                <div className={cn("text-[10px] uppercase font-black px-2 py-0.5 rounded-full", scoreInfo.badgeClassName)}>{scoreInfo.label}</div>
+                                <div className={cn("text-[10px] uppercase font-black px-3 py-0.5 rounded-full border-2", scoreInfo.badgeClassName)}>{scoreInfo.label}</div>
                             </div>
                         </div>
-                        <ArrowRight className="text-muted-foreground w-5 h-5 flex-shrink-0" />
+                        <ArrowRight className="text-muted-foreground w-6 h-6 flex-shrink-0" />
                     </CardContent>
                 </Card>
             </Link>
@@ -150,16 +149,17 @@ export default function DashboardPage() {
 
     if (history.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center h-full p-6 text-center animate-in fade-in duration-500">
-                <div className="mb-6">
-                    <Sparkles className="mx-auto h-16 w-16 text-primary" />
+            <div className="flex flex-col items-center justify-center min-h-[80vh] p-8 text-center animate-in fade-in slide-in-from-bottom-10 duration-700">
+                <div className="mb-8 p-10 bg-primary/5 rounded-full relative">
+                    <Sparkles className="h-20 w-20 text-primary animate-pulse" />
+                    <Scan className="absolute -bottom-2 -right-2 h-10 w-10 text-primary animate-bounce" />
                 </div>
-                <h2 className="mt-4 text-3xl font-black">Your Health Journey</h2>
-                <p className="mt-2 max-w-md text-muted-foreground">Scan your first product to unlock personalized insights and achieve your health goals.</p>
-                <Link href="/" className="mt-8">
-                    <Button size="lg" className="rounded-full h-16 px-12 text-lg font-bold shadow-xl active:scale-95 transition-transform">
-                        <ScanLine className="mr-2 h-6 w-6" />
-                        Start First Scan
+                <h2 className="text-4xl font-black tracking-tight">Ready to Start?</h2>
+                <p className="mt-4 max-w-xs text-muted-foreground font-bold leading-relaxed">Scan your first product to unlock AI-powered health insights and personalized recommendations.</p>
+                <Link href="/" className="mt-12 w-full max-w-xs">
+                    <Button size="lg" className="w-full rounded-2xl h-18 text-xl font-bold shadow-2xl active:scale-95 transition-transform">
+                        <ScanLine className="mr-3 h-7 w-7" />
+                        Scan Now
                     </Button>
                 </Link>
             </div>
@@ -169,25 +169,21 @@ export default function DashboardPage() {
     const lastScan = history[0];
 
     return (
-        <div className="p-4 md:p-6 space-y-10 max-w-2xl mx-auto pb-24">
+        <div className="p-6 space-y-12 max-w-2xl mx-auto pb-32 animate-in fade-in duration-500">
             <HealthOverview history={history} />
             
-            <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-500 delay-50">
+            <div className="text-center">
                 <Link href="/">
-                    <Button size="lg" className="rounded-full h-16 px-14 text-lg font-bold shadow-xl active:scale-95 transition-transform">
-                       <ScanLine className="mr-2 h-6 w-6" />
-                        Scan Now
+                    <Button size="lg" className="rounded-2xl h-20 px-16 text-xl font-bold shadow-2xl active:scale-95 transition-all bg-primary hover:shadow-primary/20">
+                       <ScanLine className="mr-3 h-8 w-8" />
+                        Analyze Product
                     </Button>
                 </Link>
             </div>
 
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-500 delay-100">
-                <QuickStats history={history} />
-            </div>
+            <QuickStats history={history} />
 
-            <div className="animate-in fade-in slide-in-from-bottom-6 duration-500 delay-150">
-                {lastScan && <ContinueWhereYouLeft lastScan={lastScan} />}
-            </div>
+            <RecentScan lastScan={lastScan} />
         </div>
     );
 }

@@ -1,12 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { AlertCircle, Sparkles, RefreshCcw } from 'lucide-react';
+import { Sparkles, RefreshCcw } from 'lucide-react';
 import { getAINutritionInsight } from '@/lib/actions';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import type { Product, NutritionInsightOutput, UserPreferences, UserSettings } from '@/lib/types';
+import type { Product, NutritionInsightOutput, UserPreferences } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -15,7 +13,7 @@ import type { LocalAnalysis } from '@/lib/scoring';
 import type { NutritionInsightInput } from '@/ai/flows/ai-nutrition-insights';
 
 const CACHE_KEY = 'smartscan-ai-cache';
-const CACHE_TTL = 24 * 60 * 60 * 1000; // 24 hours
+const CACHE_TTL = 24 * 60 * 60 * 1000;
 
 interface CacheItem {
   timestamp: number;
@@ -68,10 +66,9 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
               }
           }
         } catch (e) {
-            console.warn("Failed to read AI cache", e);
+            console.warn("Cache read failed", e);
         }
     }
-
 
     try {
       incrementAiCallCount();
@@ -106,7 +103,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
             cache[cacheKey] = { timestamp: Date.now(), data: result };
             localStorage.setItem(CACHE_KEY, JSON.stringify(cache));
         } catch (e) {
-            console.warn("Failed to write to AI cache", e);
+            console.warn("Cache write failed", e);
         }
       } else {
         trackError();
@@ -114,63 +111,71 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
       }
     } catch (e) {
         trackError();
-        console.error("AI Insight fetch failed", e);
         setAiError(t('generatingInsightError'));
     } finally {
       setIsLoading(false);
     }
   }, [product, barcode, language, preferences, t, incrementAiCallCount, trackError, localAnalysis]);
 
-
   useEffect(() => {
     fetchInsight();
   }, [fetchInsight]);
   
-  if (!preferences.aiInsightsEnabled) {
-      return (
-          <div className='min-h-[210px]'>
-              <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true}/>
-          </div>
-      );
-  }
-
+  const nutritionGrid = {
+    calories: product.nutriments?.['energy-kcal_100g'] || 0,
+    sugar: product.nutriments?.sugars_100g || 0,
+    fat: product.nutriments?.fat_100g || 0,
+    protein: product.nutriments?.proteins_100g || 0,
+  };
 
   return (
-    <div className='min-h-[210px]'>
+    <div className='min-h-[400px]'>
         {isLoading ? (
-            <div>
-                <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true} />
-                <div className="mt-4 space-y-2 animate-pulse">
-                    <div className="flex items-center gap-2 text-primary text-sm font-medium">
-                        <Sparkles className="h-4 w-4" />
-                        <p>Generating personalized AI explanation...</p>
+            <div className="space-y-12">
+                <div className="p-8 rounded-3xl border-2 border-dashed flex flex-col items-center justify-center text-center gap-6 animate-pulse">
+                    <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
+                        <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+                    </div>
+                    <div>
+                        <h3 className="text-xl font-black">AI is Thinking...</h3>
+                        <p className="text-muted-foreground font-bold">Generating personalized health insights.</p>
                     </div>
                 </div>
+                <AnalysisDisplay 
+                    title="Quick Score" 
+                    score={localAnalysis.score} 
+                    risks={localAnalysis.warnings} 
+                    isLocal={true} 
+                    nutrition={nutritionGrid}
+                />
             </div>
         ) : aiInsight ? (
             <AnalysisDisplay 
-                title="AI Health Score"
+                title="AI Health Profile"
                 score={aiInsight.healthScore}
                 summary={aiInsight.summary}
                 recommendation={aiInsight.recommendation}
                 risks={aiInsight.risks}
+                nutrition={nutritionGrid}
             />
         ) : (
-            <>
-                <AnalysisDisplay title="Nutritional Score" score={localAnalysis.score} risks={localAnalysis.warnings} isLocal={true}/>
+            <div className="space-y-6">
+                <AnalysisDisplay 
+                    title="Nutritional Score" 
+                    score={localAnalysis.score} 
+                    risks={localAnalysis.warnings} 
+                    isLocal={true} 
+                    nutrition={nutritionGrid}
+                />
                 {aiError && (
-                    <Alert variant="destructive" className="mt-4">
-                        <AlertCircle className="h-4 w-4" />
-                        <AlertTitle>AI Analysis Unavailable</AlertTitle>
-                        <AlertDescription>
-                            An error occurred while fetching the AI insight. Showing local analysis.
-                        </AlertDescription>
-                        <Button variant="destructive" size="sm" onClick={() => fetchInsight(true)} className="mt-2 gap-2">
-                           <RefreshCcw size={14} /> Retry AI Analysis
+                    <div className="p-6 rounded-2xl border-2 border-destructive/20 bg-destructive/5 space-y-3">
+                        <p className="text-sm font-bold text-destructive">AI Analysis temporarily unavailable.</p>
+                        <Button variant="outline" size="sm" onClick={() => fetchInsight(true)} className="rounded-full gap-2 border-2 active:scale-95">
+                           <RefreshCcw size={14} /> Retry Intelligence Flow
                         </Button>
-                    </Alert>
+                    </div>
                 )}
-            </>
+            </div>
         )}
     </div>
   );

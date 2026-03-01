@@ -1,9 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Camera, Image as ImageIcon, Loader2, Sparkles, AlertCircle } from 'lucide-react';
+import { Camera, Image as ImageIcon, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { getFoodImageAnalysis } from '@/lib/actions';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
@@ -11,7 +10,14 @@ import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import { useGamification } from '@/hooks/useGamification';
 import ImageAnalysisResult from '../product/ImageAnalysisResult';
-import { Skeleton } from '@/components/ui/skeleton';
+import { cn } from '@/lib/utils';
+
+const LOADING_STEPS = [
+  "Analyzing image profile...",
+  "Detecting food content...",
+  "Calculating nutritional values...",
+  "Generating smart insights..."
+];
 
 export default function ImageScanner() {
   const { toast } = useToast();
@@ -29,13 +35,6 @@ export default function ImageScanner() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const captureInputRef = useRef<HTMLInputElement>(null);
 
-  const LOADING_STEPS = [
-    "Analyzing image...",
-    "Detecting food content...",
-    "Calculating nutrition...",
-    "Generating AI insights..."
-  ];
-
   const processImage = async (file: File) => {
     const reader = new FileReader();
     reader.onloadend = async () => {
@@ -46,7 +45,7 @@ export default function ImageScanner() {
 
       const interval = setInterval(() => {
         setLoadingStep(prev => (prev < 3 ? prev + 1 : prev));
-      }, 1500);
+      }, 1200);
 
       try {
         incrementAiCallCount();
@@ -99,18 +98,37 @@ export default function ImageScanner() {
 
   if (isAnalyzing) {
     return (
-      <div className="flex flex-col items-center justify-center p-8 space-y-8 min-h-[60vh] animate-in fade-in duration-500">
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full border-4 border-primary/20 flex items-center justify-center">
-            <Sparkles className="w-10 h-10 text-primary animate-pulse" />
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background animate-in fade-in duration-500">
+        <div className="relative mb-16">
+          <div className="w-32 h-32 rounded-full border-4 border-primary/10 flex items-center justify-center">
+             <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center animate-shadow-pulse">
+                <Sparkles className="w-12 h-12 text-primary animate-pulse" />
+             </div>
           </div>
-          <Loader2 className="absolute -bottom-2 -right-2 w-8 h-8 text-primary animate-spin" />
+          <Loader2 className="absolute -bottom-2 -right-2 w-10 h-10 text-primary animate-spin" />
         </div>
-        <div className="space-y-4 w-full max-w-xs">
+        
+        <div className="space-y-6 w-full max-w-xs">
+          <h2 className="text-xl font-bold text-center mb-4">AI Photo Analysis...</h2>
           {LOADING_STEPS.map((step, i) => (
-            <div key={i} className={`flex items-center gap-3 transition-all duration-300 ${loadingStep >= i ? "opacity-100" : "opacity-20"}`}>
-               <Skeleton className="h-4 w-4 rounded-full bg-primary" />
-               <p className={`text-sm ${loadingStep === i ? "font-bold text-foreground" : "text-muted-foreground"}`}>{step}</p>
+            <div 
+              key={i} 
+              className={cn(
+                "flex items-center gap-4 transition-all duration-500",
+                loadingStep > i ? "text-primary opacity-100" : 
+                loadingStep === i ? "text-foreground scale-105 opacity-100 font-bold" : 
+                "opacity-20"
+              )}
+            >
+               {loadingStep > i ? (
+                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+               ) : (
+                  <div className={cn(
+                    "w-5 h-5 rounded-full border-2 flex items-center justify-center",
+                    loadingStep === i ? "border-primary border-t-transparent animate-spin" : "border-current"
+                  )} />
+               )}
+               <p className="text-base">{step}</p>
             </div>
           ))}
         </div>
@@ -129,22 +147,22 @@ export default function ImageScanner() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 space-y-10 animate-in zoom-in-95 duration-500">
-      <div className="w-24 h-24 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
-        <Sparkles className="w-12 h-12 text-primary" />
+    <div className="flex flex-col items-center justify-center p-6 space-y-12 animate-in zoom-in-95 duration-500">
+      <div className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
+        <Sparkles className="w-14 h-14 text-primary" />
       </div>
 
-      <div className="text-center space-y-2">
-        <h2 className="text-2xl font-bold">AI Photo Scanner</h2>
-        <p className="text-muted-foreground text-sm max-w-[280px]">Snap a photo of your food to get instant nutritional insights.</p>
+      <div className="text-center space-y-3">
+        <h2 className="text-3xl font-black tracking-tight">AI Photo Scan</h2>
+        <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">Take a photo of any food item to get instant nutritional insights.</p>
       </div>
 
       <div className="w-full max-w-sm space-y-4">
-        <Button size="lg" className="w-full rounded-2xl h-16 text-lg font-bold shadow-xl" onClick={() => captureInputRef.current?.click()}>
-          <Camera className="mr-2 h-6 w-6" />
+        <Button size="lg" className="w-full rounded-2xl h-18 text-xl font-bold shadow-xl active:scale-95" onClick={() => captureInputRef.current?.click()}>
+          <Camera className="mr-3 h-7 w-7" />
           Capture Photo
         </Button>
-        <Button variant="outline" size="lg" className="w-full rounded-2xl h-14" onClick={() => fileInputRef.current?.click()}>
+        <Button variant="ghost" className="w-full h-14 text-muted-foreground font-bold" onClick={() => fileInputRef.current?.click()}>
           <ImageIcon className="mr-2 h-5 w-5" />
           Upload from Gallery
         </Button>
