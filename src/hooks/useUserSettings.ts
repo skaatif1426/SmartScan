@@ -6,7 +6,9 @@ import type { UserSettings } from '@/lib/types';
 const OLD_SETTINGS_KEY = 'nutriscan-settings';
 const SETTINGS_KEY = 'smartscan-settings';
 
-const defaultSettings: Omit<UserSettings, 'isVeg' | 'isNonVeg'> = {
+const defaultSettings: UserSettings = {
+  name: 'User',
+  email: '',
   language: 'English',
   theme: 'system',
   units: 'metric',
@@ -15,12 +17,16 @@ const defaultSettings: Omit<UserSettings, 'isVeg' | 'isNonVeg'> = {
   healthGoal: 'general',
   healthFocus: [],
   aiVerbosity: 'balanced',
+  aiFocusPriority: 'health',
+  autoLanguageReply: true,
   advancedUiMode: false,
   aiChatEnabled: true,
   aiInsightsEnabled: true,
   dataRetention: 'forever',
   strictMode: false,
   notifications: {
+    master: true,
+    smart: true,
     goalReminders: true,
     scanReminders: false,
     insightAlerts: true,
@@ -28,12 +34,12 @@ const defaultSettings: Omit<UserSettings, 'isVeg' | 'isNonVeg'> = {
 };
 
 export function useUserSettings() {
-  const [settings, setSettings] = useState<UserSettings>(defaultSettings as UserSettings);
+  const [settings, setSettings] = useState<UserSettings>(defaultSettings);
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
     try {
-      let settingsToLoad: UserSettings | null = null;
+      let settingsToLoad: any = null;
       
       const oldSettingsItem = window.localStorage.getItem(OLD_SETTINGS_KEY);
       if (oldSettingsItem) {
@@ -57,15 +63,16 @@ export function useUserSettings() {
         delete settingsToLoad.isNonVeg;
         
         // Merge with defaults to ensure new settings are present
-        setSettings({ ...defaultSettings, ...settingsToLoad } as UserSettings);
-        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify({ ...defaultSettings, ...settingsToLoad }));
+        const merged = { ...defaultSettings, ...settingsToLoad };
+        setSettings(merged);
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
       } else {
-        setSettings(defaultSettings as UserSettings);
+        setSettings(defaultSettings);
         window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
       }
     } catch (error) {
       console.warn('Error reading user settings from localStorage', error);
-      setSettings(defaultSettings as UserSettings);
+      setSettings(defaultSettings);
     }
     setIsLoaded(true);
   }, []);

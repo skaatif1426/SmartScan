@@ -45,6 +45,7 @@ export interface DiscoveryItem {
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
 export const LanguageSchema = z.enum(['English', 'Hindi', 'Marathi', 'Hinglish']);
 export type AiVerbosity = 'concise' | 'balanced' | 'detailed';
+export type AiFocusPriority = 'health' | 'budget' | 'ingredients' | 'eco' | 'performance';
 export type HealthGoal = 'general' | 'weight-loss' | 'muscle-gain' | 'maintain-weight' | 'improve-diet' | 'manage-condition';
 export type HealthFocus = 'low-sugar' | 'low-fat' | 'high-protein' | 'low-carb' | 'high-fiber' | 'low-sodium' | 'organic' | 'budget-friendly' | 'overall-health' | 'price-conscious' | 'clean-ingredients' | 'eco-friendly';
 export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'keto' | 'paleo' | 'eggetarian';
@@ -54,6 +55,8 @@ export type UnitSystem = 'metric' | 'imperial';
 
 
 export interface UserSettings {
+  name: string;
+  email: string;
   language: Language;
   theme: Theme;
   units: UnitSystem;
@@ -62,12 +65,16 @@ export interface UserSettings {
   healthGoal: HealthGoal;
   healthFocus: HealthFocus[];
   aiVerbosity: AiVerbosity;
+  aiFocusPriority: AiFocusPriority;
+  autoLanguageReply: boolean;
   advancedUiMode: boolean;
   aiChatEnabled: boolean;
   aiInsightsEnabled: boolean;
   dataRetention: DataRetention;
   strictMode: boolean;
   notifications: {
+    master: boolean;
+    smart: boolean;
     goalReminders: boolean;
     scanReminders: boolean;
     insightAlerts: boolean;

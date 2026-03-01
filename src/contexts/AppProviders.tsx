@@ -1,7 +1,7 @@
 'use client';
 
 import { createContext, useContext, ReactNode, useMemo, useCallback, useEffect } from 'react';
-import type { UserSettings, Language, UserPreferences, Theme } from '@/lib/types';
+import type { UserSettings, Language, UserPreferences, Theme, AiFocusPriority } from '@/lib/types';
 import { useUserSettings } from '@/hooks/useUserSettings';
 import { translations } from '@/lib/translations';
 
@@ -25,10 +25,14 @@ export function useLanguage() {
 // --- Preferences Context ---
 type PreferencesContextType = {
   preferences: UserPreferences & { 
+      name: string;
+      email: string;
       theme: Theme;
       advancedUiMode: boolean;
       aiChatEnabled: boolean;
       aiInsightsEnabled: boolean;
+      aiFocusPriority: AiFocusPriority;
+      autoLanguageReply: boolean;
       dataRetention: UserSettings['dataRetention'];
       notifications: UserSettings['notifications'];
       units: UserSettings['units'];
@@ -103,11 +107,15 @@ export function AppProviders({ children }: { children: ReactNode }) {
 
   const preferencesValue: PreferencesContextType = useMemo(() => ({
     preferences: {
+        name: settings.name,
+        email: settings.email,
         diet: settings.diet,
         allergies: settings.allergies,
         healthGoal: settings.healthGoal,
         healthFocus: settings.healthFocus,
         aiVerbosity: settings.aiVerbosity,
+        aiFocusPriority: settings.aiFocusPriority,
+        autoLanguageReply: settings.autoLanguageReply,
         strictMode: settings.strictMode,
         theme: settings.theme,
         units: settings.units,
