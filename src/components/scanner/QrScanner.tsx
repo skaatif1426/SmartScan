@@ -28,9 +28,9 @@ const QrScanner = ({
 }: QrScannerProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isMounted = useRef(true);
+  const isStarting = useRef(false);
   const [isReady, setIsReady] = useState(false);
   const lastHintRef = useRef<string>('');
-  const [initError, setInitError] = useState<string | null>(null);
 
   const updateHint = useCallback((hint: string) => {
     if (hint !== lastHintRef.current) {
@@ -40,16 +40,25 @@ const QrScanner = ({
   }, [onStatusChange]);
 
   const startScanner = useCallback(async (cameraId: string) => {
-    if (!isMounted.current || !scannerRef.current) return;
+    // Prevent concurrent initialization attempts
+    if (!isMounted.current || !scannerRef.current || isStarting.current) return;
     
+    isStarting.current = true;
     try {
       const state = scannerRef.current.getState();
+      
+      // If already scanning with the correct camera, don't restart
+      if (state === Html5QrcodeScannerState.SCANNING && activeCameraId === cameraId) {
+        return;
+      }
+
+      // If scanning another camera or paused, stop first
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         await scannerRef.current.stop();
       }
 
-      // Brief delay to allow hardware to release
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Hardware release delay
+      await new Promise(resolve => setTimeout(resolve, 300));
 
       if (!isMounted.current) return;
 
@@ -58,9 +67,9 @@ const QrScanner = ({
         {
           fps: 15,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
-            const width = Math.max(Math.floor(viewfinderWidth * 0.8), 50);
-            const height = Math.max(Math.floor(width * 0.7), 50);
-            return { width, height };
+            const size = Math.min(viewfinderWidth, viewfinderHeight);
+            const boxSize = Math.max(Math.floor(size * 0.7), 200); // Increased minimum size for stability
+            return { width: boxSize, height: Math.floor(boxSize * 0.8) };
           },
           aspectRatio: 1.0,
         },
@@ -79,23 +88,26 @@ const QrScanner = ({
           }
         }
       );
+      
       setIsReady(true);
-      setInitError(null);
     } catch (err) {
+      console.error('Scanner start error:', err);
       if (err instanceof Error && err.message.includes('Cannot stop')) {
         return;
       }
       const message = err instanceof Error ? err.message : 'Camera initialization failed';
       onCameraPermissionError(new Error(message));
+    } finally {
+      isStarting.current = false;
     }
-  }, [isAutoScan, isCapturing, onScanSuccess, onScanFailure, onCameraPermissionError, updateHint]);
+  }, [isAutoScan, isCapturing, onScanSuccess, onScanFailure, onCameraPermissionError, updateHint, activeCameraId]);
 
   useEffect(() => {
     isMounted.current = true;
 
-    // Check for Secure Context (required for camera)
+    // Check for Secure Context
     if (!window.isSecureContext && window.location.hostname !== 'localhost') {
-      onCameraPermissionError(new Error('Camera requires a secure (HTTPS) connection.'));
+      onCameraPermissionError(new Error('Camera requires HTTPS for security.'));
       return;
     }
 
@@ -112,12 +124,16 @@ const QrScanner = ({
 
     const initialize = async () => {
       try {
+        // Enforce a small delay before first initialization to ensure DOM is stable
+        await new Promise(r => setTimeout(r, 500));
+        
+        if (!isMounted.current) return;
+
         if (activeCameraId) {
           await startScanner(activeCameraId);
         } else {
           const cameras = await Html5Qrcode.getCameras();
           if (cameras && cameras.length > 0) {
-            // Prefer back camera
             const backCamera = cameras.find(c => 
               c.label.toLowerCase().includes('back') || 
               c.label.toLowerCase().includes('rear') ||
@@ -125,7 +141,7 @@ const QrScanner = ({
             );
             await startScanner(backCamera?.id || cameras[0].id);
           } else {
-            throw new Error('No cameras found on this device.');
+            throw new Error('No cameras found. Please check your connection.');
           }
         }
       } catch (err) {
@@ -164,7 +180,7 @@ const QrScanner = ({
           <Skeleton className="w-full h-full bg-neutral-900" />
           <div className="absolute flex flex-col items-center gap-4">
             <div className="w-12 h-12 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-            <p className="text-sm text-neutral-500 font-medium">Initializing Camera...</p>
+            <p className="text-sm text-neutral-500 font-medium tracking-wide">Connecting to Camera...</p>
           </div>
         </div>
       )}
