@@ -115,23 +115,23 @@
   }
   
   .success-tick {
-    animation: success-tick-animation 0.5s ease-out forwards;
+    @apply animate-[success-tick-animation_0.5s_ease-out_forwards];
   }
 
   .animate-shadow-pulse {
-    animation: shadow-pulse 2s infinite;
+    @apply animate-[shadow-pulse_2s_infinite];
   }
 
   .camera-flip {
-    animation: flip-360 0.4s ease-in-out;
+    @apply animate-[flip-360_0.4s_ease-in-out];
   }
 
   .flash-capture {
-    animation: flash-animation 0.5s ease-out;
+    @apply animate-[flash-animation_0.5s_ease-out];
   }
 
   .scan-frame-pulse {
-    animation: border-pulse 2s infinite ease-in-out;
+    @apply animate-[border-pulse_2s_infinite_ease-in-out];
   }
 }
 

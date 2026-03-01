@@ -86,22 +86,24 @@ const ContinueWhereYouLeft = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
     return (
         <div className="space-y-3">
             <h2 className="font-semibold text-lg">Continue where you left</h2>
-            <Link href={`/product/${lastScan.barcode}`} passHref className="block transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-md active:scale-[0.99] rounded-lg">
-                <Card className="hover:bg-muted/50 transition-colors">
+            <Link href={`/product/${lastScan.barcode}`} passHref className="block transition-all duration-200 ease-in-out hover:scale-[1.01] active:scale-[0.99] rounded-lg">
+                <Card className="hover:bg-muted/50">
                     <CardContent className="p-4 flex items-center gap-4">
                         {lastScan.imageUrl ? (
-                            <Image src={lastScan.imageUrl} alt={lastScan.productName} width={48} height={48} className="rounded-md bg-white object-contain" />
+                            <div className="relative w-12 h-12">
+                                <Image src={lastScan.imageUrl} alt={lastScan.productName} fill className="rounded-md bg-white object-contain" />
+                            </div>
                         ) : (
                             <div className="w-12 h-12 rounded-md bg-secondary flex items-center justify-center"><ScanLine className="w-6 h-6 text-muted-foreground" /></div>
                         )}
-                        <div className="flex-1">
-                            <p className="font-semibold">{lastScan.productName}</p>
+                        <div className="flex-1 min-w-0">
+                            <p className="font-semibold truncate">{lastScan.productName}</p>
                             <div className="flex items-center gap-2 mt-1">
                                 <div className={cn("text-sm font-bold", scoreInfo.textClassName)}>{lastScan.healthScore} / 100</div>
-                                <div className={cn("text-xs font-semibold px-2 py-0.5 rounded-full", scoreInfo.badgeClassName)}>{scoreInfo.label}</div>
+                                <div className={cn("text-[10px] uppercase font-bold px-2 py-0.5 rounded-full", scoreInfo.badgeClassName)}>{scoreInfo.label}</div>
                             </div>
                         </div>
-                        <ArrowRight className="text-muted-foreground" />
+                        <ArrowRight className="text-muted-foreground w-5 h-5 flex-shrink-0" />
                     </CardContent>
                 </Card>
             </Link>
@@ -170,14 +172,16 @@ const SmartActions = ({ history }: { history: ScanHistoryItem[] }) => {
              <h2 className="font-semibold text-lg">Today's Focus</h2>
              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {actions.map((action) => (
-                    <Link href={action.href} key={action.title} className="block transition-all duration-200 ease-in-out hover:scale-[1.01] hover:shadow-md active:scale-[0.99] rounded-lg">
+                    <Link href={action.href} key={action.title} className="block transition-all duration-200 ease-in-out hover:scale-[1.01] active:scale-[0.99] rounded-lg">
                         <Card className="h-full hover:bg-muted/50 transition-colors">
                             <CardContent className="p-4">
                                  <div className="flex items-start gap-4">
-                                    <action.icon className="text-primary w-6 h-6 flex-shrink-0 mt-1"/>
-                                    <div>
-                                        <p className="font-semibold">{action.title}</p>
-                                        <p className="text-sm text-muted-foreground">{action.description}</p>
+                                    <div className="p-2 bg-primary/10 rounded-lg shrink-0">
+                                        <action.icon className="text-primary w-5 h-5"/>
+                                    </div>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold truncate">{action.title}</p>
+                                        <p className="text-sm text-muted-foreground line-clamp-2">{action.description}</p>
                                     </div>
                                 </div>
                             </CardContent>
@@ -199,19 +203,19 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
             <Card>
                 <CardContent className="p-4 grid grid-cols-3 divide-x divide-border text-center">
                     <div>
-                        <Scan className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
-                        <div className="text-xl font-bold">{history.length}</div>
-                        <p className="text-xs text-muted-foreground">Total Scans</p>
+                        <Scan className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
+                        <div className="text-lg font-bold">{history.length}</div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Scans</p>
                     </div>
                     <div>
-                        <Flame className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
-                        <div className="text-xl font-bold">{scanStreak}</div>
-                        <p className="text-xs text-muted-foreground">Day Streak</p>
+                        <Flame className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
+                        <div className="text-lg font-bold">{scanStreak}</div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">Streak</p>
                     </div>
                     <div>
-                        <Compass className="mx-auto h-6 w-6 text-muted-foreground mb-1" />
-                        <div className="text-xl font-bold">{discoveryCount}</div>
-                        <p className="text-xs text-muted-foreground">Discoveries</p>
+                        <Compass className="mx-auto h-5 w-5 text-muted-foreground mb-1" />
+                        <div className="text-lg font-bold">{discoveryCount}</div>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">New</p>
                     </div>
                 </CardContent>
             </Card>
@@ -248,7 +252,7 @@ export default function DashboardPage() {
     const lastScan = history[0];
 
     return (
-        <div className="p-4 md:p-6 space-y-8">
+        <div className="p-4 md:p-6 space-y-8 max-w-2xl mx-auto">
             <HealthOverview history={history} />
             
             <div className="text-center animate-in fade-in slide-in-from-bottom-4 duration-300 delay-50">
@@ -268,7 +272,7 @@ export default function DashboardPage() {
                 <SmartActions history={history} />
             </div>
             
-            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200">
+            <div className="animate-in fade-in slide-in-from-bottom-4 duration-300 delay-200 pb-8">
                 <QuickStats history={history} />
             </div>
         </div>
