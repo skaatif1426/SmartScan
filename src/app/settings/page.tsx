@@ -22,6 +22,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -162,7 +163,7 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* DIETARY & GOALS - NEW SECTION */}
+        {/* DIETARY & GOALS */}
         <Card id="dietary" className="border shadow-sm">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg"><Target className="h-5 w-5 text-primary" /> Dietary & Goals</CardTitle>
@@ -306,9 +307,9 @@ export default function SettingsPage() {
             <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/10">
                 <div className="space-y-0.5">
                     <p className="text-sm font-semibold">AI Usage Transparency</p>
-                    <p className="text-xs text-muted-foreground">Tracks requests for data privacy.</p>
+                    <p className="text-xs text-muted-foreground">Tracks how often AI is used for transparency.</p>
                 </div>
-                <Badge variant="secondary" className="px-3 py-1 font-mono">{usage.callCount} requests</Badge>
+                <Badge variant="secondary" className="px-3 py-1 font-mono">AI Requests Used: {usage.callCount}</Badge>
             </div>
             <div className="flex flex-col gap-2">
                 <Button variant="outline" className="w-full h-11 justify-center gap-2"><HardDrive className="h-4 w-4" /> Export All Data</Button>
