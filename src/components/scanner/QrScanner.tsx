@@ -51,9 +51,15 @@ const QrScanner = ({
         {
           fps: 15,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
+            // Safety check: html5-qrcode requires a minimum of 50px.
+            // If the viewfinder is too small or 0 during initial load, we return the minimum.
+            if (viewfinderWidth < 50 || viewfinderHeight < 50) {
+              return { width: 50, height: 50 };
+            }
             const minEdge = Math.min(viewfinderWidth, viewfinderHeight);
-            const qrboxWidth = Math.floor(minEdge * 0.85);
-            return { width: qrboxWidth, height: Math.floor(qrboxWidth * 0.7) };
+            const qrboxWidth = Math.max(Math.floor(minEdge * 0.85), 50);
+            const qrboxHeight = Math.max(Math.floor(qrboxWidth * 0.7), 50);
+            return { width: qrboxWidth, height: qrboxHeight };
           },
           aspectRatio: 16/9,
         },
@@ -74,6 +80,10 @@ const QrScanner = ({
       );
       setIsReady(true);
     } catch (err) {
+      // Safely ignore "Cannot stop" errors during unmounting or state transitions
+      if (err instanceof Error && err.message.includes('Cannot stop')) {
+        return;
+      }
       onCameraPermissionError(err instanceof Error ? err : new Error('Unknown camera error'));
     }
   }, [isAutoScan, isCapturing, onScanSuccess, onScanFailure, onCameraPermissionError, updateHint]);
@@ -99,6 +109,9 @@ const QrScanner = ({
           const backCamera = cameras.find(c => c.label.toLowerCase().includes('back'));
           startScanner(backCamera?.id || cameras[0].id);
         }
+      }).catch(err => {
+        // Silently handle error if component unmounted while fetching cameras
+        if (isMounted.current) onCameraPermissionError(err);
       });
     }
 
@@ -111,7 +124,7 @@ const QrScanner = ({
         }
       }
     };
-  }, [activeCameraId, startScanner]);
+  }, [activeCameraId, startScanner, onCameraPermissionError]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
