@@ -64,6 +64,8 @@ const healthGoals: {id: HealthGoal, label: string}[] = [
 ];
 const dietTypes: DietType[] = ['none', 'vegetarian', 'vegan', 'non-vegetarian', 'keto', 'paleo', 'eggetarian'];
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 export default function SettingsPage() {
   const router = useRouter();
   const { language, setLanguage, t } = useLanguage();
@@ -101,12 +103,11 @@ export default function SettingsPage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // 2MB limit
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         toast({
           variant: 'destructive',
           title: 'Image too large',
-          description: 'Please select an image smaller than 2MB.',
+          description: 'Please select an image smaller than 10MB.',
         });
         return;
       }

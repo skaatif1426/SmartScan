@@ -2,8 +2,8 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import type { UserSettings } from '@/lib/types';
+import { getProfileImage, setProfileImage, deleteProfileImage } from '@/lib/idb';
 
-const OLD_SETTINGS_KEY = 'nutriscan-settings';
 const SETTINGS_KEY = 'smartscan-settings';
 
 const defaultSettings: UserSettings = {
@@ -39,54 +39,59 @@ export function useUserSettings() {
   const [isLoaded, setIsLoaded] = useState(false);
 
   useEffect(() => {
-    try {
-      let settingsToLoad: any = null;
-      
-      const oldSettingsItem = window.localStorage.getItem(OLD_SETTINGS_KEY);
-      if (oldSettingsItem) {
-          settingsToLoad = JSON.parse(oldSettingsItem);
-          window.localStorage.removeItem(OLD_SETTINGS_KEY);
-      } else {
+    const loadSettings = async () => {
+      try {
         const item = window.localStorage.getItem(SETTINGS_KEY);
-        if (item) {
-          settingsToLoad = JSON.parse(item);
-        }
-      }
+        let settingsToLoad = item ? JSON.parse(item) : defaultSettings;
 
-      if (settingsToLoad) {
-        // Migrate old isVeg/isNonVeg to new diet property
-        if (settingsToLoad.isNonVeg) {
-          settingsToLoad.diet = 'non-vegetarian';
-        } else if (settingsToLoad.isVeg) {
-          settingsToLoad.diet = 'vegetarian';
-        }
-        delete settingsToLoad.isVeg;
-        delete settingsToLoad.isNonVeg;
+        // Load large profile image from IndexedDB
+        const storedImage = await getProfileImage();
         
-        // Merge with defaults to ensure new settings are present
-        const merged = { ...defaultSettings, ...settingsToLoad };
+        const merged = { 
+          ...defaultSettings, 
+          ...settingsToLoad,
+          profilePicUrl: storedImage || settingsToLoad.profilePicUrl 
+        };
+        
         setSettings(merged);
-        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(merged));
-      } else {
+        
+        // Ensure settings are synced to localStorage (excluding the large image)
+        const { profilePicUrl, ...rest } = merged;
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(rest));
+
+      } catch (error) {
+        console.warn('Error reading user settings', error);
         setSettings(defaultSettings);
-        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(defaultSettings));
       }
-    } catch (error) {
-      console.warn('Error reading user settings from localStorage', error);
-      setSettings(defaultSettings);
-    }
-    setIsLoaded(true);
+      setIsLoaded(true);
+    };
+
+    loadSettings();
   }, []);
 
-  const saveSettings = useCallback((newSettings: Partial<UserSettings>) => {
+  const saveSettings = useCallback(async (newSettings: Partial<UserSettings>) => {
     try {
+      // If updating the profile pic, save it to IndexedDB separately
+      if (newSettings.profilePicUrl !== undefined) {
+        if (newSettings.profilePicUrl) {
+          await setProfileImage(newSettings.profilePicUrl);
+        } else {
+          await deleteProfileImage();
+        }
+      }
+
       setSettings((prev) => {
         const updatedSettings = { ...prev, ...newSettings };
-        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(updatedSettings));
+        
+        // Save only small settings to localStorage
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { profilePicUrl, ...rest } = updatedSettings;
+        window.localStorage.setItem(SETTINGS_KEY, JSON.stringify(rest));
+        
         return updatedSettings;
       });
     } catch (error) {
-      console.warn('Error saving user settings to localStorage', error);
+      console.warn('Error saving user settings', error);
     }
   }, []);
 

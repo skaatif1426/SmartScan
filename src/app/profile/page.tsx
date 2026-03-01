@@ -16,6 +16,8 @@ import Link from 'next/link';
 import Achievements from '@/components/dashboard/Achievements';
 import { useToast } from '@/hooks/use-toast';
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 const StatBox = ({ label, value, icon: Icon, isLoading }: { label: string, value: string | number, icon: any, isLoading: boolean }) => (
     <div className="flex flex-col items-center justify-center p-3 bg-muted/30 rounded-xl border">
         <Icon className="h-4 w-4 text-muted-foreground mb-1" />
@@ -70,12 +72,11 @@ export default function ProfilePage() {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      // 2MB limit
-      if (file.size > 2 * 1024 * 1024) {
+      if (file.size > MAX_FILE_SIZE) {
         toast({
           variant: 'destructive',
           title: 'Image too large',
-          description: 'Please select an image smaller than 2MB.',
+          description: 'Please select an image smaller than 10MB.',
         });
         return;
       }
