@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle } from 'lucide-react';
+import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle, ShieldAlert } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -93,6 +93,14 @@ export default function SettingsPage() {
         title,
         description: "This feature is coming soon. Stay tuned!",
         icon: <Info className="h-4 w-4 text-blue-500" />
+    });
+  };
+
+  const handleDeletionRequest = () => {
+    toast({
+      title: "Deletion request submitted",
+      description: "Our team will review your request and process it within 48 hours.",
+      icon: <Trash2 className="h-4 w-4 text-destructive" />
     });
   };
 
@@ -192,23 +200,6 @@ export default function SettingsPage() {
              <Separator />
              <div className="flex flex-col gap-2">
                 <Button variant="outline" className="w-full justify-start gap-2 h-11"><LogOut className="h-4 w-4" /> Logout</Button>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild>
-                        <Button variant="ghost" className="w-full justify-start gap-2 text-destructive hover:text-destructive hover:bg-destructive/10 h-11">
-                            <Trash2 className="h-4 w-4" /> Delete Account
-                        </Button>
-                    </AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader>
-                            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-                            <AlertDialogDescription>This action is permanent and will instantly erase your profile, history, and achievements. This cannot be undone.</AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                            <AlertDialogCancel>Cancel</AlertDialogCancel>
-                            <AlertDialogAction className="bg-destructive text-destructive-foreground hover:bg-destructive/90">Confirm Delete</AlertDialogAction>
-                        </AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
              </div>
           </CardContent>
         </Card>
@@ -391,6 +382,31 @@ export default function SettingsPage() {
                         <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Terms & Conditions</div>
                         <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
                      </Button>
+                     <AlertDialog>
+                        <AlertDialogTrigger asChild>
+                           <Button variant="ghost" className="w-full justify-between h-12 text-destructive hover:bg-destructive/10">
+                              <div className="flex items-center gap-2"><ShieldAlert className="h-4 w-4" /> Request Account Deletion</div>
+                              <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
+                           </Button>
+                        </AlertDialogTrigger>
+                        <AlertDialogContent>
+                           <AlertDialogHeader>
+                              <AlertDialogTitle>Request Account Deletion</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                 Your account and all associated data will be permanently deleted after review. This action cannot be undone once processed.
+                              </AlertDialogDescription>
+                           </AlertDialogHeader>
+                           <AlertDialogFooter>
+                              <AlertDialogCancel>Cancel</AlertDialogCancel>
+                              <AlertDialogAction 
+                                onClick={handleDeletionRequest}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Submit Request
+                              </AlertDialogAction>
+                           </AlertDialogFooter>
+                        </AlertDialogContent>
+                     </AlertDialog>
                 </CardContent>
             </Card>
             <div className="text-center space-y-1">
