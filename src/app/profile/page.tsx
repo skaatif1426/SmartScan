@@ -1,7 +1,7 @@
 'use client';
 
 import { Settings as SettingsIcon, Award, User as UserIcon, Mail, ChevronRight } from 'lucide-react';
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -20,7 +20,7 @@ export default function ProfilePage() {
   const { level, xp, getLevelProgress } = useGamification();
 
   return (
-    <div className="p-4 md:p-6 space-y-8 max-w-2xl mx-auto pb-20">
+    <div className="p-4 md:p-6 space-y-8 max-w-2xl mx-auto pb-24">
         {/* IDENTITY BLOCK */}
         <div className="flex flex-col items-center text-center space-y-4 pt-4">
             <div className="relative">
@@ -37,12 +37,12 @@ export default function ProfilePage() {
             <div className="space-y-1">
                 <h1 className="text-3xl font-bold tracking-tight">{preferences.name || 'Smart Scanner'}</h1>
                 <p className="text-sm text-muted-foreground flex items-center justify-center gap-1.5">
-                    <Mail className="h-3.5 w-3.5" /> {preferences.email || 'Welcome to SmartScan AI'}
+                    <Mail className="h-3.5 w-3.5" /> {preferences.email || 'SmartScan AI User'}
                 </p>
             </div>
         </div>
 
-        {/* PROGRESS BLOCK */}
+        {/* GAMIFICATION BLOCK */}
         <Card className="border shadow-sm">
             <CardContent className="p-6 space-y-4">
                 <div className="flex justify-between items-end">
@@ -53,12 +53,12 @@ export default function ProfilePage() {
                         </div>
                     </div>
                     <div className="text-right">
-                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">XP Progress</p>
+                        <p className="text-xs uppercase tracking-widest text-muted-foreground font-bold">XP Level</p>
                         <p className="text-sm font-bold">{Math.floor(xp % 200)} / 200</p>
                     </div>
                 </div>
                 <Progress value={getLevelProgress()} className="h-3 bg-muted border" />
-                <p className="text-[10px] text-center text-muted-foreground">Scan more items to reach Level {level + 1}</p>
+                <p className="text-[10px] text-center text-muted-foreground">Scan items to level up. Level {level + 1} is next!</p>
             </CardContent>
         </Card>
 
@@ -69,10 +69,10 @@ export default function ProfilePage() {
             <div className="flex items-center justify-between px-1">
                 <h2 className="text-xl font-bold flex items-center gap-2">
                     <Award className="h-5 w-5 text-primary" /> 
-                    Unlocked Rewards
+                    Achievements
                 </h2>
                 <span className="text-xs font-bold text-muted-foreground uppercase tracking-widest">
-                    Collection
+                    Your Collection
                 </span>
             </div>
             <Card className="border shadow-sm">
@@ -82,7 +82,7 @@ export default function ProfilePage() {
             </Card>
         </div>
 
-        {/* SYSTEM CONTROLS - SINGLE SOURCE */}
+        {/* SETTINGS LINK - Master home for controls */}
         <div className="pt-4">
             <Link href="/settings" className="block transition-transform active:scale-[0.98]">
                 <Button variant="outline" className="w-full justify-between h-16 px-6 text-lg font-bold rounded-2xl border-2 hover:bg-muted/50 shadow-sm">

@@ -26,7 +26,7 @@ import { Separator } from '@/components/ui/separator';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
-import type { Language, DataRetention, AiVerbosity, UnitSystem, HealthGoal, DietType, AiFocusPriority, Theme } from '@/lib/types';
+import type { Language, DataRetention, AiVerbosity, UnitSystem, HealthGoal, DietType, AiFocusPriority, Theme, HealthFocus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
 import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -58,6 +58,16 @@ const healthGoals: {id: HealthGoal, label: string}[] = [
     {id: 'improve-diet', label: 'Improve Diet'},
     {id: 'manage-condition', label: 'Manage Health'},
 ];
+const healthFocusOptions: { id: HealthFocus; label: string }[] = [
+    { id: 'low-sugar', label: 'Low Sugar' },
+    { id: 'low-fat', label: 'Low Fat' },
+    { id: 'high-protein', label: 'High Protein' },
+    { id: 'low-carb', label: 'Low Carb' },
+    { id: 'low-sodium', label: 'Low Sodium' },
+    { id: 'clean-ingredients', label: 'Clean Ingredients' },
+    { id: 'organic', label: 'Organic' },
+    { id: 'eco-friendly', label: 'Eco-Friendly' },
+];
 const dietTypes: DietType[] = ['none', 'vegetarian', 'vegan', 'non-vegetarian', 'keto', 'paleo', 'eggetarian'];
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -88,19 +98,19 @@ export default function SettingsPage() {
     });
   };
 
+  const toggleHealthFocus = (id: HealthFocus) => {
+    const current = preferences.healthFocus || [];
+    const updated = current.includes(id) 
+        ? current.filter(item => item !== id)
+        : [...current, id];
+    handleSettingChange('healthFocus', updated);
+  };
+
   const handleSupportClick = (title: string) => {
     toast({
         title,
-        description: "This feature is coming soon. Stay tuned!",
+        description: "Feature coming soon.",
         icon: <Info className="h-4 w-4 text-blue-500" />
-    });
-  };
-
-  const handleDeletionRequest = () => {
-    toast({
-      title: "Deletion request submitted",
-      description: "Our team will review your request and process it within 48 hours.",
-      icon: <Trash2 className="h-4 w-4 text-destructive" />
     });
   };
 
@@ -111,7 +121,7 @@ export default function SettingsPage() {
         toast({
           variant: 'destructive',
           title: 'Image too large',
-          description: 'Please select an image smaller than 10MB.',
+          description: 'Max size 10MB.',
         });
         return;
       }
@@ -119,24 +129,19 @@ export default function SettingsPage() {
       const reader = new FileReader();
       reader.onloadend = () => {
         savePreferences({ profilePicUrl: reader.result as string });
-        toast({
-          title: 'Photo updated',
-          description: 'Your profile picture has been saved.',
-        });
+        toast({ title: 'Photo updated' });
       };
       reader.readAsDataURL(file);
     }
   };
 
   return (
-    <div className="p-4 md:p-6 space-y-6 pb-20">
+    <div className="p-4 md:p-6 space-y-6 pb-24 max-w-2xl mx-auto">
       <div className="flex items-center gap-4">
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ChevronLeft />
         </Button>
-        <h1 className="text-3xl font-bold flex items-center gap-2">
-            Settings
-        </h1>
+        <h1 className="text-3xl font-bold">Settings</h1>
       </div>
 
       <div className="space-y-6">
@@ -153,66 +158,37 @@ export default function SettingsPage() {
                         </AvatarFallback>
                     </Avatar>
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                        <div className="bg-black/40 rounded-full p-1.5">
-                            <Camera className="w-4 h-4 text-white" />
-                        </div>
+                        <Camera className="w-5 h-5 text-white bg-black/40 rounded-full p-1" />
                     </div>
-                    <input 
-                      type="file" 
-                      ref={fileInputRef} 
-                      className="hidden" 
-                      accept="image/*" 
-                      onChange={handleFileChange}
-                    />
+                    <input type="file" ref={fileInputRef} className="hidden" accept="image/*" onChange={handleFileChange} />
                 </div>
-                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>
-                    Change Photo
-                </Button>
+                <Button variant="outline" size="sm" onClick={() => fileInputRef.current?.click()}>Change Photo</Button>
              </div>
 
              <div className="grid gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="user-name">Display Name</Label>
-                    <div className="relative">
-                        <Input 
-                            id="user-name" 
-                            value={preferences.name} 
-                            onChange={(e) => savePreferences({ name: e.target.value })}
-                            onBlur={() => toast({ title: "Name saved" })}
-                            placeholder="Enter your name"
-                        />
-                        <Edit3 className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    </div>
+                    <Label htmlFor="user-name">Name</Label>
+                    <Input id="user-name" value={preferences.name} onChange={(e) => savePreferences({ name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="user-email">Email Address</Label>
-                    <div className="relative">
-                        <Input 
-                            id="user-email" 
-                            value={preferences.email} 
-                            onChange={(e) => savePreferences({ email: e.target.value })}
-                            placeholder="user@example.com"
-                        />
-                        <Mail className="absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-                    </div>
+                    <Label htmlFor="user-email">Email</Label>
+                    <Input id="user-email" value={preferences.email} onChange={(e) => savePreferences({ email: e.target.value })} />
                 </div>
              </div>
              <Separator />
-             <div className="flex flex-col gap-2">
-                <Button variant="outline" className="w-full justify-start gap-2 h-11"><LogOut className="h-4 w-4" /> Logout</Button>
-             </div>
+             <Button variant="outline" className="w-full justify-start gap-2 h-11"><LogOut className="h-4 w-4" /> Logout</Button>
           </CardContent>
         </Card>
 
-        {/* DIETARY & GOALS */}
+        {/* DIETARY & GOALS - Unified Source */}
         <Card id="dietary" className="border shadow-sm">
             <CardHeader>
                 <CardTitle className="flex items-center gap-2 text-lg"><Target className="h-5 w-5 text-primary" /> Dietary & Goals</CardTitle>
-                <CardDescription>Personalize the scan analysis for your body.</CardDescription>
+                <CardDescription>Master source for all health preferences.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-3">
-                    <Label>Primary Health Goal</Label>
+                    <Label>Health Goal</Label>
                     <Select value={preferences.healthGoal} onValueChange={(v: HealthGoal) => handleSettingChange('healthGoal', v)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -220,6 +196,7 @@ export default function SettingsPage() {
                         </SelectContent>
                     </Select>
                 </div>
+                
                 <div className="space-y-3">
                     <Label>Diet Type</Label>
                     <Select value={preferences.diet} onValueChange={(v: DietType) => handleSettingChange('diet', v)}>
@@ -229,10 +206,27 @@ export default function SettingsPage() {
                         </SelectContent>
                     </Select>
                 </div>
+
+                <div className="space-y-3">
+                    <Label>Specific Focus</Label>
+                    <div className="flex flex-wrap gap-2">
+                        {healthFocusOptions.map((option) => (
+                            <Badge 
+                                key={option.id} 
+                                variant={preferences.healthFocus?.includes(option.id) ? 'default' : 'outline'}
+                                className="cursor-pointer py-1.5"
+                                onClick={() => toggleHealthFocus(option.id)}
+                            >
+                                {option.label}
+                            </Badge>
+                        ))}
+                    </div>
+                </div>
+
                 <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
                     <div className="space-y-0.5">
                         <Label>Strict Mode</Label>
-                        <p className="text-xs text-muted-foreground">High sensitivity alerts for allergies.</p>
+                        <p className="text-xs text-muted-foreground">High sensitivity alerts for allergens.</p>
                     </div>
                     <Switch checked={preferences.strictMode} onCheckedChange={(v) => handleSettingChange('strictMode', v)} />
                 </div>
@@ -241,27 +235,18 @@ export default function SettingsPage() {
 
         {/* APP PREFERENCES */}
         <Card className="border shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Palette className="h-5 w-5 text-primary" /> App Preferences</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Palette className="h-5 w-5 text-primary" /> App Style</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
               <Label>Theme</Label>
-              <ThemeToggle 
-                theme={preferences.theme} 
-                onThemeChange={(t: Theme) => handleSettingChange('theme', t)} 
-              />
+              <ThemeToggle theme={preferences.theme} onThemeChange={(t: Theme) => handleSettingChange('theme', t)} />
             </div>
             <div className="space-y-3">
-              <Label>Interface Language</Label>
-              <Select value={language} onValueChange={(l: Language) => { setLanguage(l); toast({ title: `Language set to ${l}` }); }}>
+              <Label>Language</Label>
+              <Select value={language} onValueChange={(l: Language) => { setLanguage(l); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{languages.map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}</SelectContent>
               </Select>
-            </div>
-             <div className="space-y-3">
-              <Label>Measurement Units</Label>
-               <div className="grid grid-cols-2 gap-2">{unitSystems.map(({ id, label }) => (
-                  <Button key={id} variant={preferences.units === id ? 'default' : 'outline'} onClick={() => handleSettingChange('units', id)} className="h-10">{label}</Button>
-              ))}</div>
             </div>
           </CardContent>
         </Card>
@@ -269,8 +254,7 @@ export default function SettingsPage() {
         {/* AI CONFIGURATION */}
         <Card id="ai" className="border shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg"><Sparkles className="h-5 w-5 text-primary" /> AI Configuration</CardTitle>
-            <CardDescription>Control the intelligence layer of the app.</CardDescription>
+            <CardTitle className="flex items-center gap-2 text-lg"><Sparkles className="h-5 w-5 text-primary" /> AI Settings</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
@@ -280,106 +264,41 @@ export default function SettingsPage() {
               ))}</div>
             </div>
             <div className="space-y-3">
-              <Label>Focus Priority</Label>
+              <Label>Analysis Priority</Label>
                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">{aiFocusOptions.map(({ id, label }) => (
                   <Button key={id} variant={preferences.aiFocusPriority === id ? 'default' : 'outline'} onClick={() => handleSettingChange('aiFocusPriority', id)} className="h-10 text-[10px] sm:text-xs">{label}</Button>
               ))}</div>
-            </div>
-            <div className="flex items-center justify-between p-4 rounded-xl border">
-                <div className="space-y-0.5">
-                    <Label>Auto Language Reply</Label>
-                    <p className="text-xs text-muted-foreground">AI matches your chat language automatically.</p>
-                </div>
-                <Switch checked={preferences.autoLanguageReply} onCheckedChange={(v) => handleSettingChange('autoLanguageReply', v)} />
-            </div>
-            <div className="flex items-center justify-between p-4 rounded-xl border">
-              <div className="space-y-0.5">
-                <Label>Advanced UI Mode</Label>
-                <p className="text-xs text-muted-foreground">Show extra technical details on scans.</p>
-              </div>
-              <Switch checked={preferences.advancedUiMode} onCheckedChange={(c) => handleSettingChange('advancedUiMode', c)} />
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* NOTIFICATIONS */}
-        <Card className="border shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Bell className="h-5 w-5 text-primary" /> Notifications</CardTitle></CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between p-4 rounded-xl bg-primary/5 border border-primary/20">
-              <div className="space-y-0.5">
-                <Label className="text-primary font-bold">Master Toggle</Label>
-                <p className="text-xs text-primary/70">Enable or disable all app alerts.</p>
-              </div>
-              <Switch checked={preferences.notifications.master} onCheckedChange={(v) => handleSettingChange('notifications', { ...preferences.notifications, master: v })} />
-            </div>
-            
-            <div className={cn("space-y-4 pt-2 transition-opacity", !preferences.notifications.master && "opacity-50 pointer-events-none")}>
-                <div className="flex items-center justify-between">
-                    <Label htmlFor="smart-alerts">Smart Notifications</Label>
-                    <Switch checked={preferences.notifications.smart} onCheckedChange={(v) => handleSettingChange('notifications', { ...preferences.notifications, smart: v })} />
-                </div>
-                <div className="flex items-center justify-between">
-                    <Label>Goal Reminders</Label>
-                    <Switch checked={preferences.notifications.goalReminders} onCheckedChange={(c) => handleSettingChange('notifications', { ...preferences.notifications, goalReminders: c })}/>
-                </div>
-                <div className="flex items-center justify-between">
-                    <Label>Scan Reminders</Label>
-                    <Switch checked={preferences.notifications.scanReminders} onCheckedChange={(c) => handleSettingChange('notifications', { ...preferences.notifications, scanReminders: c })}/>
-                </div>
-                <div className="flex items-center justify-between">
-                    <Label>Insight Alerts</Label>
-                    <Switch checked={preferences.notifications.insightAlerts} onCheckedChange={(c) => handleSettingChange('notifications', { ...preferences.notifications, insightAlerts: c })}/>
-                </div>
             </div>
           </CardContent>
         </Card>
 
         {/* DATA & PRIVACY */}
-        <Card className="border shadow-sm overflow-hidden">
-          <CardHeader className="bg-muted/30"><CardTitle className="flex items-center gap-2 text-lg"><HardDrive className="h-5 w-5 text-primary" /> Data & Privacy</CardTitle></CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            <div className="space-y-3">
-              <Label>Scan History Retention</Label>
-              <Select value={preferences.dataRetention} onValueChange={(v: DataRetention) => handleSettingChange('dataRetention', v)}>
-                <SelectTrigger><SelectValue /></SelectTrigger>
-                <SelectContent>{retentionPeriods.map(p => <SelectItem key={p} value={p}>{t(`retention${p}`)}</SelectItem>)}</SelectContent>
-              </Select>
-            </div>
+        <Card className="border shadow-sm">
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><HardDrive className="h-5 w-5 text-primary" /> Privacy</CardTitle></CardHeader>
+          <CardContent className="space-y-6">
             <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/10">
                 <div className="space-y-0.5">
-                    <p className="text-sm font-semibold">AI Usage Transparency</p>
-                    <p className="text-xs text-muted-foreground">Tracks how often AI is used for transparency.</p>
+                    <p className="text-sm font-semibold">AI API Usage</p>
+                    <p className="text-xs text-muted-foreground">Transparency on AI usage.</p>
                 </div>
-                <Badge variant="secondary" className="px-3 py-1 font-mono">AI Requests Used: {usage.callCount}</Badge>
+                <Badge variant="secondary" className="px-3 py-1 font-mono">{usage.callCount} Calls</Badge>
             </div>
-            <div className="flex flex-col gap-2">
-                <Button variant="outline" className="w-full h-11 justify-center gap-2"><HardDrive className="h-4 w-4" /> Export All Data</Button>
-                <AlertDialog>
-                    <AlertDialogTrigger asChild><Button variant="outline" className="w-full h-11 text-destructive hover:bg-destructive/5"><Trash2 className="mr-2 h-4 w-4" /> Clear Local History</Button></AlertDialogTrigger>
-                    <AlertDialogContent>
-                        <AlertDialogHeader><AlertDialogTitle>Clear History?</AlertDialogTitle><AlertDialogDescription>This will remove all scans from your local device. This action is irreversible.</AlertDialogDescription></AlertDialogHeader>
-                        <AlertDialogFooter><AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory} disabled={isClearing} className="bg-destructive text-destructive-foreground">{isClearing ? "Clearing..." : "Confirm"}</AlertDialogAction></AlertDialogFooter>
-                    </AlertDialogContent>
-                </AlertDialog>
-            </div>
+            <AlertDialog>
+                <AlertDialogTrigger asChild><Button variant="outline" className="w-full h-11 text-destructive hover:bg-destructive/5"><Trash2 className="mr-2 h-4 w-4" /> Clear History</Button></AlertDialogTrigger>
+                <AlertDialogContent>
+                    <AlertDialogHeader><AlertDialogTitle>Clear History?</AlertDialogTitle><AlertDialogDescription>This removes all local scan data. It is irreversible.</AlertDialogDescription></AlertDialogHeader>
+                    <AlertDialogFooter><AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory} disabled={isClearing} className="bg-destructive text-destructive-foreground">Confirm</AlertDialogAction></AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
           </CardContent>
         </Card>
         
-        {/* HELP, SUPPORT & ABOUT */}
+        {/* SUPPORT */}
         <div className="grid gap-4">
             <Card>
                 <CardContent className="p-2 divide-y">
-                     <Button variant="ghost" className="w-full justify-between h-12" onClick={() => handleSupportClick("Help Center")}>
+                     <Button variant="ghost" className="w-full justify-between h-12" onClick={() => handleSupportClick("Help")}>
                         <div className="flex items-center gap-2"><HelpCircle className="h-4 w-4" /> Help Center</div>
-                        <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
-                     </Button>
-                     <Button variant="ghost" className="w-full justify-between h-12" onClick={() => handleSupportClick("Report a Problem")}>
-                        <div className="flex items-center gap-2"><AlertCircle className="h-4 w-4" /> Report a Problem</div>
-                        <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
-                     </Button>
-                     <Button variant="ghost" className="w-full justify-between h-12" onClick={() => handleSupportClick("Terms & Conditions")}>
-                        <div className="flex items-center gap-2"><Shield className="h-4 w-4" /> Terms & Conditions</div>
                         <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
                      </Button>
                      <AlertDialog>
@@ -390,28 +309,14 @@ export default function SettingsPage() {
                            </Button>
                         </AlertDialogTrigger>
                         <AlertDialogContent>
-                           <AlertDialogHeader>
-                              <AlertDialogTitle>Request Account Deletion</AlertDialogTitle>
-                              <AlertDialogDescription>
-                                 Your account and all associated data will be permanently deleted after review. This action cannot be undone once processed.
-                              </AlertDialogDescription>
-                           </AlertDialogHeader>
-                           <AlertDialogFooter>
-                              <AlertDialogCancel>Cancel</AlertDialogCancel>
-                              <AlertDialogAction 
-                                onClick={handleDeletionRequest}
-                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                              >
-                                Submit Request
-                              </AlertDialogAction>
-                           </AlertDialogFooter>
+                           <AlertDialogHeader><AlertDialogTitle>Request Deletion</AlertDialogTitle><AlertDialogDescription>Your data will be permanently deleted after review.</AlertDialogDescription></AlertDialogHeader>
+                           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => toast({ title: "Request submitted" })} className="bg-destructive text-destructive-foreground">Submit Request</AlertDialogAction></AlertDialogFooter>
                         </AlertDialogContent>
                      </AlertDialog>
                 </CardContent>
             </Card>
-            <div className="text-center space-y-1">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">SmartScan AI • v1.0.0</p>
-                <p className="text-[10px] text-muted-foreground">Built for healthier choices • 2026</p>
+            <div className="text-center">
+                <p className="text-[10px] text-muted-foreground uppercase tracking-widest font-bold">SmartScan AI • v1.0.0 • 2026</p>
             </div>
         </div>
       </div>

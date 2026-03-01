@@ -4,7 +4,7 @@ import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package, AlertTriangle, Shield, CheckCircle } from 'lucide-react';
+import { Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -16,7 +16,6 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { calculateLocalScore } from '@/lib/scoring';
-import { cn } from '@/lib/utils';
 import { useGamification } from '@/hooks/useGamification';
 import { getAICategory } from '@/lib/actions';
 
@@ -91,7 +90,7 @@ export default function ProductDetailsClient({ product: productData }: { product
     }
 
     return (
-        <div className="p-4 md:p-6 space-y-4">
+        <div className="p-4 md:p-6 space-y-4 max-w-2xl mx-auto pb-24">
             <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-8 duration-500">
                 <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0" aria-label="Go back">
                     <ChevronLeft className="h-6 w-6" />
@@ -140,6 +139,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Card>
 
              <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="ai-analysis">
+                 {/* Unified Health Analysis Section: Handles both local breakdown and AI insights */}
                  <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
                     <AccordionItem value="ai-analysis" className="border-none">
                          <AccordionTrigger className="p-6 hover:no-underline">
@@ -150,32 +150,8 @@ export default function ProductDetailsClient({ product: productData }: { product
                          </AccordionContent>
                     </AccordionItem>
                 </Card>
-                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
-                    <AccordionItem value="score-breakdown" className="border-none">
-                         <AccordionTrigger className="p-6 hover:no-underline">
-                             <CardTitle className="flex items-center gap-2"><Shield className="text-primary" /> Score Breakdown</CardTitle>
-                         </AccordionTrigger>
-                         <AccordionContent className="px-6 pt-0 pb-6 space-y-2">
-                            <p className="text-sm text-muted-foreground">This score is based on the following factors:</p>
-                             {localAnalysis.warnings.length > 0 ? (
-                                 <ul className="list-disc list-inside space-y-1">
-                                    {localAnalysis.warnings.map((warning, i) => (
-                                        <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                                            <AlertTriangle className="h-4 w-4 mt-0.5 text-yellow-500 flex-shrink-0" />
-                                            <span>{warning}</span>
-                                        </li>
-                                    ))}
-                                 </ul>
-                             ) : (
-                                <div className="flex items-center gap-2 text-green-600">
-                                    <CheckCircle className="h-4 w-4" />
-                                    <p className="text-sm font-medium">No significant negative factors found.</p>
-                                </div>
-                             )}
-                         </AccordionContent>
-                    </AccordionItem>
-                </Card>
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
+
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
                     <AccordionItem value="nutrition-facts" className="border-none">
                         <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
@@ -187,13 +163,13 @@ export default function ProductDetailsClient({ product: productData }: { product
                                     {nutritionValues.map(item => <NutritionValue key={item.label} {...item} />)}
                                 </>
                             ) : (
-                                <p className="text-sm text-muted-foreground">No nutrition data available for this product.</p>
+                                <p className="text-sm text-muted-foreground">No nutrition data available.</p>
                             )}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>
 
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
                     <AccordionItem value="ingredients" className="border-none">
                          <AccordionTrigger className="p-6 hover:no-underline">
                             <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
@@ -202,7 +178,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                              {product.ingredients_text_with_allergens ? (
                                 <p className="text-sm text-muted-foreground">{product.ingredients_text_with_allergens}</p>
                             ) : (
-                                <p className="text-sm text-muted-foreground">No ingredients information available for this product.</p>
+                                <p className="text-sm text-muted-foreground">No ingredients information available.</p>
                             )}
                         </AccordionContent>
                     </AccordionItem>
@@ -210,7 +186,7 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Accordion>
             
             {preferences.aiChatEnabled && (
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-700">
+                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
                     <CardHeader>
                         <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
                     </CardHeader>
