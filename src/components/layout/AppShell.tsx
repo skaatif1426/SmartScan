@@ -15,8 +15,20 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <AppProviders>
       <div className="flex flex-col h-svh bg-background">
-        <main key={pathname} className={cn('flex-1 overflow-y-auto animate-in fade-in-0 duration-200 ease-out', showNav ? 'pb-28' : '')}>
+        <main 
+          key={pathname} 
+          className={cn(
+            'flex-1 overflow-y-auto animate-in fade-in-0 duration-200 ease-out',
+            showNav ? 'pb-24 pt-2' : '' // Reduced padding, added tiny top breathing space
+          )}
+        >
+          {/* Subtle global scaling wrapper for content only */}
+          <div className={cn(
+            "max-w-screen-xl mx-auto w-full h-full transition-all duration-300",
+            showNav ? "px-4" : ""
+          )}>
             {children}
+          </div>
         </main>
         {showNav && <BottomNav />}
       </div>

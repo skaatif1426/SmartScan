@@ -47,40 +47,40 @@ const AnalysisDisplay = ({
     }, [isLocal]);
 
     return (
-        <div className="space-y-10 animate-in fade-in slide-in-from-bottom-6 duration-500">
+        <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {warningTitle && (
-                <Alert variant="destructive" className="border-2 shadow-sm">
-                    <AlertCircle className="h-5 w-5" />
-                    <AlertTitle className="font-bold">{warningTitle}</AlertTitle>
+                <Alert variant="destructive" className="border shadow-sm py-3 px-4">
+                    <AlertCircle className="h-4 w-4" />
+                    <AlertTitle className="font-bold text-sm">{warningTitle}</AlertTitle>
                 </Alert>
             )}
 
             {summary && (
-                 <Card className="border-primary/20 bg-primary/5 shadow-none rounded-2xl">
-                    <CardContent className="p-5 flex gap-4 items-start">
-                        <CheckCircle className="h-6 w-6 text-primary flex-shrink-0 mt-0.5" />
-                        <p className="text-base font-bold leading-tight">{summary}</p>
+                 <Card className="border-primary/20 bg-primary/5 shadow-none rounded-xl">
+                    <CardContent className="p-4 flex gap-3 items-start">
+                        <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+                        <p className="text-sm font-bold leading-tight">{summary}</p>
                     </CardContent>
                 </Card>
             )}
             
-            <div className="text-center space-y-4">
+            <div className="text-center space-y-2">
                  <div className="relative inline-block">
-                    <div className={cn('text-8xl font-black tracking-tighter', scoreInfo.textClassName)}>
+                    <div className={cn('text-7xl font-black tracking-tighter', scoreInfo.textClassName)}>
                         <AnimatedCounter value={score} />
                     </div>
-                    {!isLocal && <CheckCircle className="absolute -top-4 -right-8 w-10 h-10 text-emerald-500 success-tick" />}
+                    {!isLocal && <CheckCircle className="absolute -top-2 -right-6 w-8 h-8 text-emerald-500 success-tick" />}
                  </div>
-                 <div className="flex flex-col items-center gap-2">
-                    <Badge variant="outline" className={cn('text-xs px-4 py-1.5 rounded-full font-black border-2', scoreInfo.badgeClassName)}>
+                 <div className="flex flex-col items-center gap-1.5">
+                    <Badge variant="outline" className={cn('text-[10px] px-3 py-1 rounded-full font-black border', scoreInfo.badgeClassName)}>
                         {scoreInfo.label} {t('healthChoice')}
                     </Badge>
-                    <Progress value={score} indicatorClassName={scoreInfo.progressClassName} className="h-3 w-48 mx-auto bg-muted rounded-full" />
+                    <Progress value={score} indicatorClassName={scoreInfo.progressClassName} className="h-2 w-40 mx-auto bg-muted rounded-full" />
                  </div>
             </div>
 
             {nutrition && (
-                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                     <NutritionCard label={t('calories')} value={nutrition.calories} unit="kcal" icon={Flame} color="text-orange-500" />
                     <NutritionCard label={t('sugar')} value={nutrition.sugar} unit="g" icon={Apple} color="text-pink-500" />
                     <NutritionCard label={t('fat')} value={nutrition.fat} unit="g" icon={Info} color="text-yellow-500" />
@@ -89,11 +89,11 @@ const AnalysisDisplay = ({
             )}
 
             {risks && risks.length > 0 && (
-                <div className="space-y-3">
-                     <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground">{t('nutritionAlerts')}</Label>
-                     <div className="flex flex-wrap gap-2">
+                <div className="space-y-2">
+                     <Label className="text-[9px] uppercase tracking-widest font-black text-muted-foreground">{t('nutritionAlerts')}</Label>
+                     <div className="flex flex-wrap gap-1.5">
                         {risks.map((risk, i) => (
-                            <Badge key={i} variant="destructive" className="rounded-xl px-3 py-1 font-bold lowercase first-letter:uppercase">
+                            <Badge key={i} variant="destructive" className="rounded-lg px-2 py-0.5 font-bold text-[10px] lowercase first-letter:uppercase">
                                 {risk} ⚠️
                             </Badge>
                         ))}
@@ -102,9 +102,9 @@ const AnalysisDisplay = ({
             )}
 
             {recommendation && (
-                <div className="p-5 rounded-2xl border-2 bg-muted/30">
-                    <Label className="text-[10px] uppercase tracking-widest font-black text-muted-foreground block mb-2">{t('expertTake')}</Label>
-                    <p className="text-sm font-medium leading-relaxed">{recommendation}</p>
+                <div className="p-4 rounded-xl border bg-muted/20">
+                    <Label className="text-[9px] uppercase tracking-widest font-black text-muted-foreground block mb-1">{t('expertTake')}</Label>
+                    <p className="text-xs font-medium leading-relaxed">{recommendation}</p>
                 </div>
             )}
         </div>
@@ -113,11 +113,11 @@ const AnalysisDisplay = ({
 
 function NutritionCard({ label, value, unit, icon: Icon, color }: any) {
   return (
-    <Card className="border shadow-none rounded-2xl bg-muted/20">
-      <CardContent className="p-4 flex flex-col items-center text-center gap-1">
-        <Icon className={cn("h-5 w-5", color)} />
-        <div className="text-lg font-black">{Math.round(value)}{unit}</div>
-        <div className="text-[10px] uppercase font-black tracking-tighter text-muted-foreground">{label}</div>
+    <Card className="border shadow-none rounded-xl bg-muted/10">
+      <CardContent className="p-3 flex flex-col items-center text-center gap-0.5">
+        <Icon className={cn("h-4 w-4", color)} />
+        <div className="text-base font-black">{Math.round(value)}{unit}</div>
+        <div className="text-[9px] uppercase font-black tracking-tighter text-muted-foreground">{label}</div>
       </CardContent>
     </Card>
   );

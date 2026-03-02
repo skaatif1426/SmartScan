@@ -64,39 +64,39 @@ export default function ProductDetailsClient({ product: productData }: { product
     if (!product) return null;
 
     return (
-        <div className="p-4 md:p-6 space-y-8 max-w-2xl mx-auto pb-40 animate-in fade-in slide-in-from-bottom-8 duration-700">
-            <div className="flex items-center gap-4">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-12 w-12 rounded-full flex-shrink-0 bg-muted/50 active:scale-90" aria-label="Go back">
-                    <ChevronLeft className="h-8 w-8" />
+        <div className="p-4 space-y-6 max-w-2xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-6 duration-700">
+            <div className="flex items-center gap-3">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 rounded-full flex-shrink-0 bg-muted/30 active:scale-90" aria-label="Go back">
+                    <ChevronLeft className="h-6 w-6" />
                 </Button>
                 <div className="flex-1 truncate">
-                    <h1 className="text-2xl font-black truncate leading-tight">{product.product_name}</h1>
-                    <p className="text-muted-foreground font-bold">{product.brands}</p>
+                    <h1 className="text-xl font-black truncate leading-tight">{product.product_name}</h1>
+                    <p className="text-muted-foreground text-xs font-bold">{product.brands}</p>
                 </div>
             </div>
             
-            <Card className="rounded-3xl border shadow-lg overflow-hidden group">
-                <div className="p-0 relative h-72 bg-muted flex items-center justify-center">
+            <Card className="rounded-2xl border shadow-md overflow-hidden group">
+                <div className="p-0 relative h-60 bg-muted flex items-center justify-center">
                     {(product.image_front_url && !imageError) ? (
                         <Image
                             src={product.image_front_url}
                             alt={product.product_name}
                             fill
-                            className="object-contain p-6 transition-transform duration-700 group-hover:scale-105"
+                            className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
                             onError={() => setImageError(true)}
                         />
                     ) : (
                         <div className="flex flex-col items-center text-muted-foreground opacity-50">
-                            <Package size={64} />
-                            <p className="mt-4 text-sm font-black uppercase tracking-widest">{t('noPreview')}</p>
+                            <Package size={48} />
+                            <p className="mt-2 text-[10px] font-black uppercase tracking-widest">{t('noPreview')}</p>
                         </div>
                     )}
                 </div>
-                <CardContent className="p-6">
-                    <div className="flex flex-wrap gap-2">
-                        {product.nutriscore_grade && <Badge variant="outline" className="rounded-full px-4 font-black">{t('grade')}: {product.nutriscore_grade.toUpperCase()}</Badge>}
-                        {product.nova_group && <Badge variant="outline" className="rounded-full px-4 font-black">{t('nova')}: {product.nova_group}</Badge>}
-                        {hasAllergens && <Badge variant="destructive" className="rounded-full px-4 font-black"><Wheat className="mr-1 h-3 w-3" /> {t('allergensAlert')}</Badge>}
+                <CardContent className="p-4">
+                    <div className="flex flex-wrap gap-1.5">
+                        {product.nutriscore_grade && <Badge variant="outline" className="rounded-full px-3 py-0.5 font-black text-[10px]">{t('grade')}: {product.nutriscore_grade.toUpperCase()}</Badge>}
+                        {product.nova_group && <Badge variant="outline" className="rounded-full px-3 py-0.5 font-black text-[10px]">{t('nova')}: {product.nova_group}</Badge>}
+                        {hasAllergens && <Badge variant="destructive" className="rounded-full px-3 py-0.5 font-black text-[10px]"><Wheat className="mr-1 h-3 w-3" /> {t('allergensAlert')}</Badge>}
                     </div>
                 </CardContent>
             </Card>
@@ -107,15 +107,15 @@ export default function ProductDetailsClient({ product: productData }: { product
                 localAnalysis={localAnalysis} 
             />
             
-            <Accordion type="single" collapsible className="w-full space-y-4">
-                <Card className="rounded-2xl border shadow-none overflow-hidden">
+            <Accordion type="single" collapsible className="w-full space-y-3">
+                <Card className="rounded-xl border shadow-none overflow-hidden">
                     <AccordionItem value="nutrition-facts" className="border-none">
-                        <AccordionTrigger className="px-6 py-5 hover:no-underline font-black">
-                            <div className="flex items-center gap-3"><Info className="h-5 w-5 text-primary" /> {t('fullNutrition')}</div>
+                        <AccordionTrigger className="px-5 py-4 hover:no-underline font-black text-sm">
+                            <div className="flex items-center gap-2.5"><Info className="h-4 w-4 text-primary" /> {t('fullNutrition')}</div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6">
-                             {Object.entries(product.nutriments).slice(0, 10).map(([key, value]) => (
-                                 <div key={key} className="flex justify-between py-2 border-b border-muted last:border-0 text-sm font-medium">
+                        <AccordionContent className="px-5 pb-4">
+                             {Object.entries(product.nutriments).slice(0, 8).map(([key, value]) => (
+                                 <div key={key} className="flex justify-between py-1.5 border-b border-muted last:border-0 text-xs font-medium">
                                      <span className="text-muted-foreground capitalize">{key.replace(/_100g|-/g, ' ')}</span>
                                      <span>{typeof value === 'number' ? value.toFixed(1) : value}</span>
                                  </div>
@@ -124,12 +124,12 @@ export default function ProductDetailsClient({ product: productData }: { product
                     </AccordionItem>
                 </Card>
 
-                <Card className="rounded-2xl border shadow-none overflow-hidden">
+                <Card className="rounded-xl border shadow-none overflow-hidden">
                     <AccordionItem value="ingredients" className="border-none">
-                         <AccordionTrigger className="px-6 py-5 hover:no-underline font-black">
-                             <div className="flex items-center gap-3"><Hash className="h-5 w-5 text-primary" /> {t('fullIngredients')}</div>
+                         <AccordionTrigger className="px-5 py-4 hover:no-underline font-black text-sm">
+                             <div className="flex items-center gap-2.5"><Hash className="h-4 w-4 text-primary" /> {t('fullIngredients')}</div>
                          </AccordionTrigger>
-                        <AccordionContent className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground font-medium">
+                        <AccordionContent className="px-5 pb-4 text-xs leading-relaxed text-muted-foreground font-medium">
                              {product.ingredients_text_with_allergens || "No ingredients list available."}
                         </AccordionContent>
                     </AccordionItem>
@@ -137,21 +137,21 @@ export default function ProductDetailsClient({ product: productData }: { product
             </Accordion>
 
             {preferences.aiChatEnabled && (
-                <Card className="overflow-hidden border-2 border-primary/20 hover:border-primary/50 transition-all rounded-3xl shadow-lg mt-8 active:scale-98">
+                <Card className="overflow-hidden border border-primary/20 hover:border-primary/50 transition-all rounded-2xl shadow-md mt-6 active:scale-98">
                     <Accordion type="single" collapsible value={showChat ? 'chat' : ''} onValueChange={(v) => setShowChat(!!v)}>
                         <AccordionItem value="chat" className="border-none">
-                            <AccordionTrigger className="px-6 py-6 hover:no-underline">
-                                <div className="flex items-center gap-4 text-left">
-                                    <div className="p-3 bg-primary/10 rounded-2xl">
-                                        <Sparkles className="h-7 w-7 text-primary animate-pulse" />
+                            <AccordionTrigger className="px-5 py-4 hover:no-underline">
+                                <div className="flex items-center gap-3 text-left">
+                                    <div className="p-2.5 bg-primary/10 rounded-xl">
+                                        <Sparkles className="h-6 w-6 text-primary animate-pulse" />
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-xl">{t('askAiAssistant')}</h3>
-                                        <p className="text-sm text-muted-foreground font-medium">{t('dietSafetyAnalysis')}</p>
+                                        <h3 className="font-black text-base">{t('askAiAssistant')}</h3>
+                                        <p className="text-[10px] text-muted-foreground font-medium">{t('dietSafetyAnalysis')}</p>
                                     </div>
                                 </div>
                             </AccordionTrigger>
-                            <AccordionContent className="px-6 pb-6">
+                            <AccordionContent className="px-5 pb-4">
                                 <ProductChatbot productData={JSON.stringify(product, null, 2)} />
                             </AccordionContent>
                         </AccordionItem>
@@ -159,13 +159,13 @@ export default function ProductDetailsClient({ product: productData }: { product
                 </Card>
             )}
 
-            <div className="fixed bottom-24 inset-x-6 z-50 flex gap-4 max-w-2xl mx-auto animate-in slide-in-from-bottom-8 duration-500 delay-400">
-                <Button variant="outline" className="flex-1 h-16 rounded-2xl gap-3 font-black shadow-2xl bg-background/80 backdrop-blur-xl border-2 active:scale-95" onClick={() => router.push('/')}>
-                    <RotateCcw className="h-6 w-6" />
+            <div className="fixed bottom-20 inset-x-4 z-50 flex gap-3 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-500 delay-400">
+                <Button variant="outline" className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={() => router.push('/')}>
+                    <RotateCcw className="h-5 w-5" />
                     {t('scanAgain')}
                 </Button>
-                <Button className="flex-1 h-16 rounded-2xl gap-3 font-black shadow-2xl active:scale-95">
-                    <Share2 className="h-6 w-6" />
+                <Button className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg active:scale-95 text-sm">
+                    <Share2 className="h-5 w-5" />
                     {t('shareResult')}
                 </Button>
             </div>

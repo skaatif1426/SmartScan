@@ -32,7 +32,7 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 142 71% 45%;
-    --radius: 1.25rem;
+    --radius: 1rem; /* Slightly tighter radius */
   }
 
   .dark {
@@ -72,7 +72,8 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300;
+    @apply bg-background text-foreground transition-colors duration-300 antialiased;
+    font-size: 15px; /* Subtle global text reduction */
   }
 }
 
