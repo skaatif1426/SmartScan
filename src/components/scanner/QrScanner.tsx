@@ -92,6 +92,7 @@ const QrScanner = ({
           aspectRatio: 1.0,
         },
         (decodedText: string) => {
+          // Use the latest ref-based success callback
           onScanSuccessRef.current(decodedText);
         },
         (error) => {
@@ -124,7 +125,7 @@ const QrScanner = ({
   useEffect(() => {
     isMounted.current = true;
 
-    if (!window.isSecureContext && window.location.hostname !== 'localhost') {
+    if (typeof window !== 'undefined' && !window.isSecureContext && window.location.hostname !== 'localhost') {
       onCameraPermissionError(new Error('Camera requires HTTPS.'));
       return;
     }
