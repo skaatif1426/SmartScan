@@ -59,40 +59,44 @@ const QrScanner = ({
     if (!scannerRef.current) return;
     try {
       const state = scannerRef.current.getState();
+      
       // ONLY stop if it's actually running or paused. 
-      // State 1 is IDLE, calling stop() on IDLE throws the "Cannot stop" error.
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         await scannerRef.current.stop();
         // Hardware settle delay
         await new Promise(r => setTimeout(r, 600));
       }
       
-      // Cleanup DOM if still attached
-      if (document.getElementById(qrcodeRegionId)) {
+      // Cleanup DOM ONLY if still attached and we're mounted
+      if (isMounted.current && document.getElementById(qrcodeRegionId)) {
         await scannerRef.current.clear();
       }
     } catch (e) {
-      // Swallowing the specific error to prevent Runtime crashes
       const errStr = String(e);
-      if (!errStr.includes('not running') && !errStr.includes('transition')) {
-        console.warn('Non-benign stop error:', e);
+      // Suppress benign state errors
+      if (!errStr.includes('not running') && !errStr.includes('transition') && !errStr.includes('play()')) {
+        console.warn('Non-benign scanner cleanup error:', e);
       }
     }
   };
 
   const executeAction = (action: () => Promise<void>) => {
     transitionLock.current = transitionLock.current.then(async () => {
-      if (isMounted.current) {
-        try {
-          await action();
-        } catch (err) {
-          const errorMessage = String(err);
-          // Catch common interruption errors to prevent app crashes
-          if (errorMessage.includes('play()') || errorMessage.includes('interrupted') || errorMessage.includes('AbortError')) {
-             return;
-          }
-          console.warn('Scanner action failed:', err);
+      if (!isMounted.current) return;
+      try {
+        await action();
+      } catch (err) {
+        const errorMessage = String(err);
+        // Suppress interruptions to prevent Runtime Error overlays
+        if (
+          errorMessage.includes('play()') || 
+          errorMessage.includes('interrupted') || 
+          errorMessage.includes('AbortError') ||
+          errorMessage.includes('removed from the document')
+        ) {
+           return;
         }
+        console.warn('Scanner transition failed:', err);
       }
     });
   };
@@ -103,10 +107,10 @@ const QrScanner = ({
     const container = document.getElementById(qrcodeRegionId);
     if (!container) return;
 
-    // Guaranteed cleanup before start
+    // Ensure previous instances are fully dead before starting new ones
     await stopScannerSafe();
     
-    if (!isMounted.current) return;
+    if (!isMounted.current || !document.getElementById(qrcodeRegionId)) return;
 
     try {
       await scannerRef.current.start(
@@ -138,7 +142,13 @@ const QrScanner = ({
       }
     } catch (err) {
       const errorMessage = String(err);
-      if (isMounted.current && !errorMessage.includes('transition') && !errorMessage.includes('play()') && !errorMessage.includes('AbortError')) {
+      if (
+        isMounted.current && 
+        !errorMessage.includes('transition') && 
+        !errorMessage.includes('play()') && 
+        !errorMessage.includes('AbortError') &&
+        !errorMessage.includes('removed from the document')
+      ) {
         onCameraPermissionError(err instanceof Error ? err : new Error(errorMessage));
       }
     }
@@ -164,7 +174,7 @@ const QrScanner = ({
     scannerRef.current = html5Qrcode;
 
     const initialize = async () => {
-      // Initial delay to avoid double-mount race conditions
+      // Safety delay to avoid race conditions with React's initial mount
       await new Promise(r => setTimeout(r, 800));
       if (!isMounted.current) return;
 
@@ -199,7 +209,7 @@ const QrScanner = ({
       isMounted.current = false;
       if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
       
-      // Attempt cleanup through the lock to ensure start() finishes first
+      // Synchronize cleanup to ensure no orphaned transitions survive
       executeAction(async () => {
         await stopScannerSafe();
       });
