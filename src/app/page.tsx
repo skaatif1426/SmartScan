@@ -414,7 +414,7 @@ export default function ScannerPage() {
                 onClick={handleCaptureAction}
               >
                 <Camera className="h-6 w-6" />
-                {mode === 'barcode' ? "Scan via Camera" : "Capture Photo"}
+                Capture Photo
               </Button>
 
               <Button 
@@ -426,7 +426,7 @@ export default function ScannerPage() {
                 onClick={handleUploadAction}
               >
                 <ImageIcon className="h-5 w-5" />
-                {mode === 'barcode' ? "Upload Barcode Image" : "Upload Image"}
+                Upload Image
               </Button>
             </div>
 
