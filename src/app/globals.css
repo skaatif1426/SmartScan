@@ -105,6 +105,10 @@
   .segmented-switch-indicator {
     @apply absolute h-[calc(100%-8px)] top-1 rounded-full bg-background shadow-md transition-all duration-300 ease-in-out border border-white/10;
   }
+
+  .animate-pulse-subtle {
+    animation: pulse-subtle 2s infinite ease-in-out;
+  }
 }
 
 @keyframes scan {
@@ -138,4 +142,9 @@
   0% { border-color: hsl(var(--primary) / 0.3); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.1); }
   50% { border-color: hsl(var(--primary) / 0.8); box-shadow: 0 0 0 8px hsl(var(--primary) / 0.05); }
   100% { border-color: hsl(var(--primary) / 0.3); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.1); }
+}
+
+@keyframes pulse-subtle {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.04); }
 }

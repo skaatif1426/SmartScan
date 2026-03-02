@@ -364,14 +364,24 @@ export default function ScannerPage() {
         ) : (
           <div className="flex flex-col items-center">
             {/* 2. MAIN ICON - TACTILE & ANIMATED */}
-            <div className="mb-8">
-              <div className="w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center animate-in zoom-in duration-500 shadow-inner">
-                <div className="w-20 h-20 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg active:scale-90 transition-transform animate-shadow-pulse">
-                  {mode === 'barcode' ? (
-                    <Scan className="w-10 h-10 text-white" />
-                  ) : (
-                    <Camera className="w-10 h-10 text-white" />
+            <div className="mb-10">
+              <div className="relative group">
+                {/* Subtle Glow Ring */}
+                <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                
+                <div 
+                  className={cn(
+                    "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
+                    "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
                   )}
+                >
+                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                    {mode === 'barcode' ? (
+                      <QrCode className="w-11 h-11 text-white" />
+                    ) : (
+                      <ImageIcon className="w-11 h-11 text-white" />
+                    )}
+                  </div>
                 </div>
               </div>
             </div>
@@ -381,18 +391,23 @@ export default function ScannerPage() {
               <h1 className="text-3xl font-black tracking-tight text-foreground transition-all">
                 {mode === 'barcode' ? "Barcode Entry" : "Photo Analysis"}
               </h1>
-              <p className="text-muted-foreground text-sm max-w-[240px] mx-auto leading-relaxed font-medium">
+              <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-medium">
                 {mode === 'barcode' 
                   ? "Choose your preferred method to identify a product barcode." 
                   : "Upload or capture a product image to analyze details using AI."}
               </p>
             </div>
 
-            {/* 5. PRIMARY BUTTON - PREMIUM HAPTIC FEEL */}
-            <div className="w-full space-y-4">
+            {/* 5. PRIMARY BUTTON - PILL GRADIENT */}
+            <div className="w-full space-y-5">
               <Button 
                 size="lg" 
-                className="w-full rounded-2xl h-18 text-lg font-black shadow-lg shadow-primary/20 active:scale-95 transition-all bg-primary hover:bg-primary/90 text-primary-foreground gap-3" 
+                className={cn(
+                  "w-full rounded-full h-13 text-base font-semibold transition-all duration-300 gap-3",
+                  "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
+                  "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
+                  "active:scale-95 active:brightness-95 active:shadow-sm"
+                )}
                 onClick={() => {
                   if (mode === 'barcode') {
                     setShowScanner(true);
@@ -401,15 +416,18 @@ export default function ScannerPage() {
                   }
                 }}
               >
-                <Camera className="h-6 w-6" />
-                {mode === 'barcode' ? "Capture Photo" : "Capture Image"}
+                <Camera className="h-5 w-5" />
+                {mode === 'barcode' ? "Capture Photo" : "Capture Photo"}
               </Button>
 
-              {/* 6. SECONDARY BUTTONS - CARD STYLE */}
+              {/* 6. SECONDARY BUTTONS - SOFT CARDS */}
               <div className="grid grid-cols-2 gap-4">
                 <Button 
                   variant="outline" 
-                  className="h-16 rounded-2xl border-2 font-black text-[11px] active:scale-[0.97] transition-all px-2 bg-card/50 hover:bg-accent/50 hover:border-primary/30"
+                  className={cn(
+                    "h-16 rounded-2xl border-border/40 font-bold text-[11px] px-2",
+                    "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
+                  )}
                   onClick={() => {
                     if (mode === 'barcode') {
                       setShowManualInput(true);
@@ -424,7 +442,10 @@ export default function ScannerPage() {
                 
                 <Button 
                   variant="outline" 
-                  className="h-16 rounded-2xl border-2 font-black text-[11px] active:scale-[0.97] transition-all px-2 bg-card/50 hover:bg-accent/50 hover:border-primary/30"
+                  className={cn(
+                    "h-16 rounded-2xl border-border/40 font-bold text-[11px] px-2",
+                    "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
+                  )}
                   onClick={() => {
                     if (mode === 'barcode') {
                       barcodeFileInputRef.current?.click();
