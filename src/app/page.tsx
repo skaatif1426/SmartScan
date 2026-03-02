@@ -69,6 +69,7 @@ export default function ScannerPage() {
   const [showScanner, setShowScanner] = useState(false);
   const [isCapturing, setIsCapturing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
+  const [isOpeningScanner, setIsOpeningScanner] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hint, setHint] = useState<string>('');
@@ -162,6 +163,15 @@ export default function ScannerPage() {
     galleryInputRef.current?.click();
   };
 
+  const handleOpenScanner = () => {
+    if (isOpeningScanner) return;
+    setIsOpeningScanner(true);
+    setTimeout(() => {
+      setShowScanner(true);
+      setIsOpeningScanner(false);
+    }, 100);
+  };
+
   if (isAnalyzing) {
     return (
       <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background">
@@ -246,10 +256,12 @@ export default function ScannerPage() {
             <div className="w-full space-y-4">
               <Button 
                 size="lg" 
+                disabled={isOpeningScanner}
                 className="w-full rounded-full h-20 text-xl font-bold bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white shadow-lg active:scale-95 transition-all" 
-                onClick={() => { if (mode === 'barcode') setShowScanner(true); else handleCapturePhoto(); }}
+                onClick={() => { if (mode === 'barcode') handleOpenScanner(); else handleCapturePhoto(); }}
               >
-                <Camera className="mr-3 h-6 w-6" /> {t('capturePhoto')}
+                {isOpeningScanner ? <Loader2 className="mr-3 h-6 w-6 animate-spin" /> : <Camera className="mr-3 h-6 w-6" />} 
+                {t('capturePhoto')}
               </Button>
               <Button variant="outline" className="w-full h-18 rounded-full border-2 font-bold text-lg active:scale-95 transition-all" onClick={handleUploadImage}>
                 <ImageIcon className="mr-3 h-6 w-6" /> {t('uploadImage')}

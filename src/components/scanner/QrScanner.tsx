@@ -62,21 +62,17 @@ const QrScanner = ({
       
       // ONLY stop if it's actually running or paused. 
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
-        await scannerRef.current.stop();
+        await scannerRef.current.stop().catch(() => {}); // Silently catch any internal stop errors
         // Hardware settle delay
         await new Promise(r => setTimeout(r, 600));
       }
       
       // Cleanup DOM ONLY if still attached and we're mounted
       if (isMounted.current && document.getElementById(qrcodeRegionId)) {
-        await scannerRef.current.clear();
+        await scannerRef.current.clear().catch(() => {});
       }
     } catch (e) {
-      const errStr = String(e);
-      // Suppress benign state errors
-      if (!errStr.includes('not running') && !errStr.includes('transition') && !errStr.includes('play()')) {
-        console.warn('Non-benign scanner cleanup error:', e);
-      }
+      // Benign catch for hardware-level state mismatches during unmount
     }
   };
 
@@ -92,7 +88,8 @@ const QrScanner = ({
           errorMessage.includes('play()') || 
           errorMessage.includes('interrupted') || 
           errorMessage.includes('AbortError') ||
-          errorMessage.includes('removed from the document')
+          errorMessage.includes('removed from the document') ||
+          errorMessage.includes('not running')
         ) {
            return;
         }
@@ -113,6 +110,7 @@ const QrScanner = ({
     if (!isMounted.current || !document.getElementById(qrcodeRegionId)) return;
 
     try {
+      // Direct start call with explicit internal catch for media interruptions
       await scannerRef.current.start(
         cameraId,
         {
@@ -135,7 +133,14 @@ const QrScanner = ({
             onScanFailure(error);
           }
         }
-      );
+      ).catch((err) => {
+         const msg = String(err);
+         if (msg.includes('play()') || msg.includes('interrupted') || msg.includes('AbortError')) {
+           // Silently consume browser-level media interruptions
+           return;
+         }
+         throw err;
+      });
       
       if (isMounted.current) {
         setIsReady(true);
@@ -175,7 +180,7 @@ const QrScanner = ({
 
     const initialize = async () => {
       // Safety delay to avoid race conditions with React's initial mount
-      await new Promise(r => setTimeout(r, 800));
+      await new Promise(r => setTimeout(r, 600));
       if (!isMounted.current) return;
 
       executeAction(async () => {
