@@ -28,13 +28,11 @@ const QrScanner = ({
 }: QrScannerProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isMounted = useRef(true);
-  const isStarting = useRef(false);
+  const isBusy = useRef(false);
   const [isReady, setIsReady] = useState(false);
   const lastHintRef = useRef<string>('');
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Use a ref for the success callback to prevent re-initialization of hardware
-  // when the parent component's state changes (like isCapturing toggling).
   const onScanSuccessRef = useRef(onScanSuccess);
   useEffect(() => {
     onScanSuccessRef.current = onScanSuccess;
@@ -45,7 +43,6 @@ const QrScanner = ({
       lastHintRef.current = hint;
       onStatusChange?.(hint);
 
-      // Auto-hide hint after 2 seconds
       if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
       hintTimeoutRef.current = setTimeout(() => {
         if (isMounted.current) {
@@ -57,38 +54,27 @@ const QrScanner = ({
   }, [onStatusChange]);
 
   const startScanner = useCallback(async (cameraId: string) => {
-    if (!isMounted.current || !scannerRef.current || isStarting.current) return;
+    if (!isMounted.current || !scannerRef.current || isBusy.current) return;
     
     const container = document.getElementById(qrcodeRegionId);
     if (!container) return;
 
-    isStarting.current = true;
+    isBusy.current = true;
     try {
       const state = scannerRef.current.getState();
       
-      // If we are already scanning this exact camera, don't restart it
-      if (state === Html5QrcodeScannerState.SCANNING && activeCameraId === cameraId) {
-        setIsReady(true);
-        isStarting.current = false;
-        return;
-      }
-
-      // If scanner is busy, stop it first
+      // If we are scanning or paused, we must stop first
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         try {
           await scannerRef.current.stop();
+          // Give hardware/library a moment to transition states
+          await new Promise(resolve => setTimeout(resolve, 500));
         } catch (stopError) {
-          // Non-critical error during stop
+          // Ignore stop errors as they usually mean it was already stopped or transitioning
         }
       }
 
-      // Give hardware a moment to settle
-      await new Promise(resolve => setTimeout(resolve, 400));
-
-      if (!isMounted.current) {
-        isStarting.current = false;
-        return;
-      }
+      if (!isMounted.current) return;
 
       await scannerRef.current.start(
         cameraId,
@@ -102,8 +88,6 @@ const QrScanner = ({
           aspectRatio: 1.0,
         },
         (decodedText: string) => {
-          // Use the ref-based callback so we don't need to restart the scanner
-          // if the parent's logic changes
           onScanSuccessRef.current(decodedText);
         },
         (error) => {
@@ -118,19 +102,18 @@ const QrScanner = ({
       
       setIsReady(true);
     } catch (err) {
-      // Ignore "Cannot clear while scan is ongoing" and "Cannot stop" errors 
-      // as they are usually race conditions that resolve themselves
       const errorMessage = err instanceof Error ? err.message : String(err);
-      if (errorMessage.includes('Cannot clear') || errorMessage.includes('Cannot stop')) {
-        isStarting.current = false;
+      
+      // Ignore internal transition/clear errors as they are benign race conditions
+      if (errorMessage.includes('transition') || errorMessage.includes('clear')) {
         return;
       }
 
       onCameraPermissionError(new Error(errorMessage));
     } finally {
-      isStarting.current = false;
+      isBusy.current = false;
     }
-  }, [onScanFailure, onCameraPermissionError, updateHint, activeCameraId]);
+  }, [onScanFailure, onCameraPermissionError, updateHint]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -153,7 +136,7 @@ const QrScanner = ({
 
     const initialize = async () => {
       try {
-        await new Promise(r => setTimeout(r, 500));
+        await new Promise(r => setTimeout(r, 600)); // Increased initial delay
         if (!isMounted.current) return;
 
         if (activeCameraId) {
