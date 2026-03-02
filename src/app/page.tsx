@@ -11,20 +11,15 @@ import {
   ZapOff, 
   RefreshCw, 
   Scan, 
-  Keyboard,
   CheckCircle2,
   Camera,
   QrCode,
   Sparkles,
   Image as ImageIcon,
-  Search,
-  Focus
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -76,8 +71,6 @@ export default function ScannerPage() {
   const [cameras, setCameras] = useState<any[]>([]);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hint, setHint] = useState<string>('');
-  const [manualBarcode, setManualBarcode] = useState('');
-  const [showManualInput, setShowManualInput] = useState(false);
   const [isProcessingFile, setIsProcessingFile] = useState(false);
 
   // Photo Analysis States
@@ -209,24 +202,21 @@ export default function ScannerPage() {
     }
   };
 
-  const handleCapturePhotoAction = () => {
+  const handleCaptureAction = () => {
     triggerHaptic();
-    if (photoCaptureInputRef.current) {
-      photoCaptureInputRef.current.click();
+    if (mode === 'barcode') {
+      setShowScanner(true);
+    } else {
+      photoCaptureInputRef.current?.click();
     }
   };
 
-  const handleUploadPhotoAction = () => {
+  const handleUploadAction = () => {
     triggerHaptic();
-    if (photoFileInputRef.current) {
-      photoFileInputRef.current.click();
-    }
-  };
-
-  const handleBarcodeUploadAction = () => {
-    triggerHaptic();
-    if (barcodeFileInputRef.current) {
-      barcodeFileInputRef.current.click();
+    if (mode === 'barcode') {
+      barcodeFileInputRef.current?.click();
+    } else {
+      photoFileInputRef.current?.click();
     }
   };
 
@@ -237,13 +227,6 @@ export default function ScannerPage() {
     setActiveCameraId(cameras[nextIndex].id);
     if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
       window.navigator.vibrate(50);
-    }
-  };
-
-  const onManualSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (/^[0-9]+$/.test(manualBarcode)) {
-      handleBarcodeAnalysisFlow(manualBarcode);
     }
   };
 
@@ -396,7 +379,7 @@ export default function ScannerPage() {
                   "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
                   "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
                 )}
-                onClick={mode === 'barcode' ? () => setShowScanner(true) : handleCapturePhotoAction}
+                onClick={handleCaptureAction}
               >
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                   {mode === 'barcode' ? (
@@ -414,7 +397,7 @@ export default function ScannerPage() {
               </h1>
               <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-bold">
                 {mode === 'barcode' 
-                  ? "Choose your preferred method to identify a product barcode." 
+                  ? "Scan a product barcode via camera or upload an image to identify it." 
                   : "Upload or capture a product image to analyze details using AI."}
               </p>
             </div>
@@ -428,10 +411,10 @@ export default function ScannerPage() {
                   "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
                   "active:scale-95 active:brightness-95 active:shadow-sm"
                 )}
-                onClick={mode === 'barcode' ? () => setShowScanner(true) : handleCapturePhotoAction}
+                onClick={handleCaptureAction}
               >
                 <Camera className="h-6 w-6" />
-                Capture Photo
+                {mode === 'barcode' ? "Scan via Camera" : "Capture Photo"}
               </Button>
 
               <Button 
@@ -440,22 +423,14 @@ export default function ScannerPage() {
                   "w-full h-16 rounded-full border-border/40 font-bold text-sm gap-3",
                   "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                 )}
-                onClick={mode === 'barcode' ? handleBarcodeUploadAction : handleUploadPhotoAction}
+                onClick={handleUploadAction}
               >
                 <ImageIcon className="h-5 w-5" />
-                {mode === 'barcode' ? "Upload Barcode Image" : "Upload from Gallery"}
+                {mode === 'barcode' ? "Upload Barcode Image" : "Upload Image"}
               </Button>
-
-              {mode === 'barcode' && (
-                <button 
-                  onClick={() => setShowManualInput(true)}
-                  className="w-full text-center text-xs font-bold text-muted-foreground hover:text-primary transition-colors py-2"
-                >
-                  Enter Barcode Manually
-                </button>
-              )}
             </div>
 
+            {/* Hidden Inputs for File/Camera Intent */}
             <input 
               type="file" 
               ref={barcodeFileInputRef} 
@@ -489,33 +464,6 @@ export default function ScannerPage() {
           </div>
         )}
       </div>
-
-      {showManualInput && (mode === 'barcode') && (
-        <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-[200] flex items-end sm:items-center justify-center p-6 animate-in fade-in duration-300">
-          <Card className="w-full max-w-md animate-in slide-in-from-bottom-full duration-500 shadow-2xl border-2 rounded-[2.5rem]">
-            <CardContent className="pt-8 space-y-6">
-              <div className="flex justify-between items-center px-2">
-                <h2 className="text-xl font-black tracking-tight text-foreground">Enter Barcode</h2>
-                <Button variant="ghost" size="sm" className="rounded-full h-10 px-6 font-bold" onClick={() => setShowManualInput(false)}>Cancel</Button>
-              </div>
-              <form onSubmit={onManualSubmit} className="space-y-4 p-2">
-                <div className="relative">
-                  <Input 
-                    placeholder="e.g. 8901234567890" 
-                    value={manualBarcode} 
-                    onChange={e => setManualBarcode(e.target.value)}
-                    type="number"
-                    autoFocus
-                    className="h-16 text-xl font-mono tracking-widest text-center rounded-2xl border-2 focus:ring-primary shadow-inner"
-                  />
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 h-5 w-5" />
-                </div>
-                <Button className="w-full h-16 rounded-2xl text-lg font-black shadow-lg bg-primary hover:bg-primary/90 text-primary-foreground active:scale-95 transition-all">Search Database</Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
-      )}
     </div>
   );
 }
