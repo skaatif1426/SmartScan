@@ -209,35 +209,27 @@ export default function ScannerPage() {
     }
   };
 
-  const handlePrimaryAction = () => {
+  // HANDLER: Trigger Device Camera
+  const handleCapturePhotoAction = () => {
     triggerHaptic();
-    if (mode === 'barcode') {
-      setShowScanner(true);
-    } else {
-      // Photo Analysis - Open Native Camera Directly
-      if (photoCaptureInputRef.current) {
-        photoCaptureInputRef.current.click();
-      }
+    if (photoCaptureInputRef.current) {
+      photoCaptureInputRef.current.click();
     }
   };
 
-  const handleLeftAction = () => {
+  // HANDLER: Trigger File Picker (Gallery)
+  const handleUploadPhotoAction = () => {
     triggerHaptic();
-    if (mode === 'barcode') {
-      setShowManualInput(true);
-    } else {
-      // Photo Analysis - Upload from Gallery
-      photoFileInputRef.current?.click();
+    if (photoFileInputRef.current) {
+      photoFileInputRef.current.click();
     }
   };
 
-  const handleRightAction = () => {
+  // HANDLER: Trigger Manual Input (Barcode) or Gallery Upload (Barcode)
+  const handleBarcodeUploadAction = () => {
     triggerHaptic();
-    if (mode === 'barcode') {
-      barcodeFileInputRef.current?.click();
-    } else {
-      // Photo Analysis - Choose from Gallery (same as upload)
-      photoFileInputRef.current?.click();
+    if (barcodeFileInputRef.current) {
+      barcodeFileInputRef.current.click();
     }
   };
 
@@ -320,7 +312,7 @@ export default function ScannerPage() {
     <div className="flex flex-col h-full bg-background relative overflow-hidden">
       <div id="barcode-shuttle-hidden" className="hidden"></div>
 
-      {/* 1. TOP TOGGLE - PIXEL-LOCKED REPLICATION */}
+      {/* 1. TOP TOGGLE */}
       {!showScanner && (
         <div className="pt-8 px-6 flex justify-center z-10">
           <div className="bg-muted p-1 rounded-full flex w-full max-w-[280px] shadow-inner relative border border-white/5 active:scale-[0.98] transition-transform">
@@ -405,14 +397,14 @@ export default function ScannerPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            {/* 2. MAIN ICON - PIXEL-LOCKED CENTERPIECE */}
+            {/* 2. MAIN ICON */}
             <div className="mb-10">
               <div 
                 className={cn(
                   "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
                   "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
                 )}
-                onClick={handlePrimaryAction}
+                onClick={mode === 'barcode' ? () => setShowScanner(true) : handleCapturePhotoAction}
               >
                 <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                   {mode === 'barcode' ? (
@@ -444,7 +436,7 @@ export default function ScannerPage() {
                   "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
                   "active:scale-95 active:brightness-95 active:shadow-sm"
                 )}
-                onClick={handlePrimaryAction}
+                onClick={mode === 'barcode' ? () => setShowScanner(true) : handleCapturePhotoAction}
               >
                 <Camera className="h-6 w-6" />
                 Capture Photo
@@ -457,7 +449,7 @@ export default function ScannerPage() {
                     "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
-                  onClick={handleLeftAction}
+                  onClick={mode === 'barcode' ? () => setShowManualInput(true) : handleUploadPhotoAction}
                 >
                   {mode === 'barcode' ? <Keyboard className="mr-2 h-4 w-4" /> : <ImageIcon className="mr-2 h-4 w-4" />}
                   {mode === 'barcode' ? "Enter Barcode Manually" : "Upload Image"}
@@ -469,7 +461,7 @@ export default function ScannerPage() {
                     "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
-                  onClick={handleRightAction}
+                  onClick={mode === 'barcode' ? handleBarcodeUploadAction : handleUploadPhotoAction}
                 >
                   <ImageIcon className="mr-2 h-4 w-4" />
                   {mode === 'barcode' ? "Upload Barcode Image" : "Choose from Gallery"}
@@ -477,7 +469,9 @@ export default function ScannerPage() {
               </div>
             </div>
 
-            {/* Hidden Inputs for different Intents */}
+            {/* HIDDEN INPUTS */}
+            
+            {/* Standard File Picker (for Barcode images in Barcode mode) */}
             <input 
               type="file" 
               ref={barcodeFileInputRef} 
@@ -485,6 +479,8 @@ export default function ScannerPage() {
               className="hidden" 
               onChange={handleBarcodeFileUpload}
             />
+            
+            {/* Standard File Picker (for Gallery uploads in Photo mode) */}
             <input 
               type="file" 
               ref={photoFileInputRef} 
@@ -495,7 +491,8 @@ export default function ScannerPage() {
                 if (file) processPhotoImage(file);
               }}
             />
-            {/* CRITICAL: capture="environment" forces camera on mobile instead of storage */}
+            
+            {/* DIRECT CAMERA INTENT (for 'Capture Photo' button in Photo mode) */}
             <input 
               type="file" 
               ref={photoCaptureInputRef} 
@@ -540,4 +537,3 @@ export default function ScannerPage() {
     </div>
   );
 }
-
