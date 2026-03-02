@@ -15,7 +15,9 @@ import {
   CheckCircle2,
   Camera,
   QrCode,
-  Sparkles
+  Sparkles,
+  Image as ImageIcon,
+  Search
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -60,6 +62,9 @@ export default function ScannerPage() {
   const [hint, setHint] = useState<string>('');
   const [manualBarcode, setManualBarcode] = useState('');
   const [showManualInput, setShowManualInput] = useState(false);
+  const [isProcessingFile, setIsProcessingFile] = useState(false);
+
+  const barcodeFileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (showScanner && mode === 'barcode') {
@@ -93,6 +98,32 @@ export default function ScannerPage() {
     }, 400);
   }, [handleAnalysisFlow, isAnalyzing, isCapturing]);
 
+  const handleBarcodeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setIsProcessingFile(true);
+    const html5QrCode = new Html5Qrcode("barcode-shuttle-hidden", false);
+
+    try {
+      const decodedText = await html5QrCode.scanFile(file, true);
+      if (decodedText) {
+        handleAnalysisFlow(decodedText);
+      }
+    } catch (err) {
+      console.error(err);
+      toast({
+        variant: 'destructive',
+        title: 'No Barcode Detected',
+        description: 'Could not read a barcode from this image. Please try another or scan directly.',
+      });
+    } finally {
+      setIsProcessingFile(false);
+      // Clear the input so the same file can be selected again if needed
+      if (barcodeFileInputRef.current) barcodeFileInputRef.current.value = '';
+    }
+  };
+
   const switchCamera = () => {
     if (cameras.length < 2) return;
     const currentIndex = cameras.findIndex(c => c.id === activeCameraId);
@@ -108,7 +139,7 @@ export default function ScannerPage() {
     }
   };
 
-  if (isAnalyzing) {
+  if (isAnalyzing || isProcessingFile) {
     return (
       <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background animate-in fade-in duration-500">
         <div className="relative mb-16">
@@ -121,8 +152,8 @@ export default function ScannerPage() {
         </div>
         
         <div className="space-y-6 w-full max-w-xs">
-          <h2 className="text-xl font-bold text-center mb-4">Processing Scan...</h2>
-          {LOADING_STEPS.map((step, idx) => (
+          <h2 className="text-xl font-bold text-center mb-4">{isProcessingFile ? "Reading Barcode..." : "Processing Scan..."}</h2>
+          {!isProcessingFile && LOADING_STEPS.map((step, idx) => (
             <div 
               key={step} 
               className={cn(
@@ -143,13 +174,21 @@ export default function ScannerPage() {
               <p className="text-base">{t(step)}</p>
             </div>
           ))}
+          {isProcessingFile && (
+            <div className="text-center text-muted-foreground animate-pulse">
+              Identifying product in database...
+            </div>
+          )}
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-full bg-background">
+    <div className="flex flex-col h-full bg-background relative">
+      {/* Hidden div for html5-qrcode file shuttle */}
+      <div id="barcode-shuttle-hidden" className="hidden"></div>
+
       {/* Top Mode Switcher */}
       {!showScanner && (
         <div className="pt-8 px-6 flex justify-center z-10">
@@ -181,27 +220,53 @@ export default function ScannerPage() {
       <div className="flex-1 overflow-auto flex flex-col justify-center">
         {mode === 'barcode' ? (
           !showScanner ? (
-            <div className="flex flex-col items-center p-6 space-y-12 animate-in zoom-in-95 duration-500">
+            <div className="flex flex-col items-center p-6 space-y-12 animate-in zoom-in-95 duration-500 max-w-sm mx-auto w-full">
               <div className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
                 <ScanLine className="w-14 h-14 text-primary" />
               </div>
               
               <div className="text-center space-y-3">
-                <h1 className="text-3xl font-black tracking-tight">{t('scannerTitle')}</h1>
-                <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">{t('scannerPrompt')}</p>
+                <h1 className="text-3xl font-black tracking-tight">Barcode Entry</h1>
+                <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">Choose your preferred method to identify a product barcode.</p>
               </div>
 
-              <div className="w-full max-w-sm space-y-4">
-                <Button size="lg" className="w-full rounded-2xl h-16 text-lg font-bold shadow-xl active:scale-95" onClick={() => setShowScanner(true)}>
-                  <Scan className="mr-2 h-6 w-6" />
-                  {t('startScanning')}
+              <div className="w-full space-y-4">
+                <Button 
+                  size="lg" 
+                  className="w-full rounded-2xl h-18 text-lg font-bold shadow-xl active:scale-95 gap-3" 
+                  onClick={() => setShowScanner(true)}
+                >
+                  <Scan className="h-6 w-6" />
+                  Scan with Camera
                 </Button>
                 
-                <Button variant="ghost" className="w-full h-12 text-muted-foreground font-bold" onClick={() => setShowManualInput(true)}>
-                  <Keyboard className="mr-2 h-4 w-4" />
-                  Manual Entry
+                <Button 
+                  variant="outline" 
+                  size="lg"
+                  className="w-full rounded-2xl h-16 text-lg font-bold border-2 active:scale-95 gap-3" 
+                  onClick={() => barcodeFileInputRef.current?.click()}
+                >
+                  <ImageIcon className="h-5 w-5 text-primary" />
+                  Upload Barcode Image
+                </Button>
+
+                <Button 
+                  variant="ghost" 
+                  className="w-full h-14 text-muted-foreground font-bold hover:bg-muted/50 rounded-2xl gap-3" 
+                  onClick={() => setShowManualInput(true)}
+                >
+                  <Keyboard className="h-5 w-5" />
+                  Enter Barcode Manually
                 </Button>
               </div>
+
+              <input 
+                type="file" 
+                ref={barcodeFileInputRef} 
+                accept="image/*" 
+                className="hidden" 
+                onChange={handleBarcodeFileUpload}
+              />
             </div>
           ) : (
             <div className="fixed inset-0 bg-black z-[100] flex flex-col h-svh overflow-hidden text-white animate-in slide-in-from-bottom-full duration-500">
@@ -265,14 +330,17 @@ export default function ScannerPage() {
                 <Button variant="ghost" size="sm" className="rounded-full h-8 px-4" onClick={() => setShowManualInput(false)}>Close</Button>
               </div>
               <form onSubmit={onManualSubmit} className="space-y-4">
-                <Input 
-                  placeholder="Enter Barcode Number" 
-                  value={manualBarcode} 
-                  onChange={e => setManualBarcode(e.target.value)}
-                  type="number"
-                  autoFocus
-                  className="h-14 text-lg font-mono tracking-widest text-center"
-                />
+                <div className="relative">
+                  <Input 
+                    placeholder="Enter Barcode Number" 
+                    value={manualBarcode} 
+                    onChange={e => setManualBarcode(e.target.value)}
+                    type="number"
+                    autoFocus
+                    className="h-14 text-lg font-mono tracking-widest text-center"
+                  />
+                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                </div>
                 <Button className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg" disabled={!manualBarcode}>Search Database</Button>
               </form>
             </CardContent>
