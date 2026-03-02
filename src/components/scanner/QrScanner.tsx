@@ -27,13 +27,14 @@ const QrScanner = ({
 }: QrScannerProps) => {
   const scannerRef = useRef<Html5Qrcode | null>(null);
   const isMounted = useRef(true);
-  const isBusy = useRef(false);
   const [isReady, setIsReady] = useState(false);
   const lastHintRef = useRef<string>('');
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  
+  // Serializes all scanner operations to prevent "already under transition" errors
+  const transitionLock = useRef<Promise<void>>(Promise.resolve());
 
   // Use a ref for the success callback to avoid scanner re-initialization 
-  // when the parent component re-renders with a new function instance.
   const onScanSuccessRef = useRef(onScanSuccess);
   useEffect(() => {
     onScanSuccessRef.current = onScanSuccess;
@@ -54,32 +55,29 @@ const QrScanner = ({
     }
   }, [onStatusChange]);
 
-  const startScanner = useCallback(async (cameraId: string) => {
-    // 1. Initial Guard: If already busy or unmounted, abort.
-    if (!isMounted.current || !scannerRef.current || isBusy.current) return;
-    
-    const container = document.getElementById(qrcodeRegionId);
-    if (!container) return;
-
-    isBusy.current = true;
-    try {
-      const state = scannerRef.current.getState();
-      
-      // 2. Clean up existing session if active
-      if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
-        try {
-          await scannerRef.current.stop();
-          // Mandatory hardware settling delay to ensure cleanup
-          await new Promise(resolve => setTimeout(resolve, 800));
-        } catch (stopError) {
-          // Benign error if already transitioning or stopped
-        }
+  const stopScannerSafe = async () => {
+    if (!scannerRef.current) return;
+    const state = scannerRef.current.getState();
+    if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
+      try {
+        await scannerRef.current.stop();
+        // Brief pause for hardware to settle
+        await new Promise(r => setTimeout(r, 400));
+      } catch (e) {
+        // Ignore benign stop errors
       }
+    }
+  };
 
-      // 3. Post-cleanup Check: Ensure we're still mounted after the async stop
-      if (!isMounted.current) return;
+  const startScannerInternal = async (cameraId: string) => {
+    if (!isMounted.current || !scannerRef.current) return;
+    
+    // Ensure we are stopped before starting
+    await stopScannerSafe();
+    
+    if (!isMounted.current) return;
 
-      // 4. Start Hardware
+    try {
       await scannerRef.current.start(
         cameraId,
         {
@@ -92,7 +90,6 @@ const QrScanner = ({
           aspectRatio: 1.0,
         },
         (decodedText: string) => {
-          // Use the latest ref-based success callback
           onScanSuccessRef.current(decodedText);
         },
         (error) => {
@@ -111,16 +108,22 @@ const QrScanner = ({
     } catch (err) {
       if (isMounted.current) {
         const errorMessage = err instanceof Error ? err.message : String(err);
-        // Ignore benign library-internal race condition errors
-        if (errorMessage.includes('transition') || errorMessage.includes('clear')) {
-          return;
+        if (!errorMessage.includes('transition') && !errorMessage.includes('clear')) {
+          onCameraPermissionError(new Error(errorMessage));
         }
-        onCameraPermissionError(new Error(errorMessage));
       }
-    } finally {
-      isBusy.current = false;
     }
-  }, [onScanFailure, onCameraPermissionError, updateHint]);
+  };
+
+  const executeAction = (action: () => Promise<void>) => {
+    transitionLock.current = transitionLock.current.then(async () => {
+      if (isMounted.current) {
+        await action();
+      }
+    }).catch(err => {
+      console.warn('Scanner transition warning:', err);
+    });
+  };
 
   useEffect(() => {
     isMounted.current = true;
@@ -142,32 +145,33 @@ const QrScanner = ({
     scannerRef.current = html5Qrcode;
 
     const initialize = async () => {
-      try {
-        // Initial delay to prevent rapid double-mount conflicts (React 18)
-        await new Promise(r => setTimeout(r, 800)); 
-        if (!isMounted.current) return;
+      // Small initial delay to avoid double-mount race conditions in dev mode
+      await new Promise(r => setTimeout(r, 600));
+      if (!isMounted.current) return;
 
-        if (activeCameraId) {
-          await startScanner(activeCameraId);
-        } else {
-          const cameras = await Html5Qrcode.getCameras();
-          if (cameras && cameras.length > 0) {
-            const backCamera = cameras.find(c => 
-              c.label.toLowerCase().includes('back') || 
-              c.label.toLowerCase().includes('rear') ||
-              c.label.toLowerCase().includes('environment')
-            );
-            await startScanner(backCamera?.id || cameras[0].id);
+      executeAction(async () => {
+        try {
+          if (activeCameraId) {
+            await startScannerInternal(activeCameraId);
           } else {
-            throw new Error('No cameras found.');
+            const cameras = await Html5Qrcode.getCameras();
+            if (cameras && cameras.length > 0) {
+              const backCamera = cameras.find(c => 
+                c.label.toLowerCase().includes('back') || 
+                c.label.toLowerCase().includes('rear') ||
+                c.label.toLowerCase().includes('environment')
+              );
+              await startScannerInternal(backCamera?.id || cameras[0].id);
+            } else {
+              throw new Error('No cameras found.');
+            }
+          }
+        } catch (err) {
+          if (isMounted.current) {
+            onCameraPermissionError(err instanceof Error ? err : new Error('Camera access failed'));
           }
         }
-      } catch (err) {
-        if (isMounted.current) {
-          const error = err instanceof Error ? err : new Error('Camera access failed');
-          onCameraPermissionError(error);
-        }
-      }
+      });
     };
 
     initialize();
@@ -175,14 +179,12 @@ const QrScanner = ({
     return () => {
       isMounted.current = false;
       if (hintTimeoutRef.current) clearTimeout(hintTimeoutRef.current);
-      if (scannerRef.current) {
-        const state = scannerRef.current.getState();
-        if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
-          scannerRef.current.stop().catch(() => {});
-        }
-      }
+      // Final attempt to release hardware on unmount
+      executeAction(async () => {
+        await stopScannerSafe();
+      });
     };
-  }, [activeCameraId, startScanner, onCameraPermissionError]);
+  }, [activeCameraId, onCameraPermissionError]);
 
   return (
     <div className="relative w-full h-full bg-black overflow-hidden">
