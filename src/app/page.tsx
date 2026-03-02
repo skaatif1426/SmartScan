@@ -10,7 +10,6 @@ import {
   Zap, 
   ZapOff, 
   RefreshCw, 
-  Scan, 
   CheckCircle2,
   Camera,
   QrCode,
@@ -43,13 +42,6 @@ const BARCODE_LOADING_STEPS = [
   'loadingInsights'
 ];
 
-const PHOTO_LOADING_STEPS = [
-  "Analyzing image profile...",
-  "Detecting food content...",
-  "Calculating nutritional values...",
-  "Generating smart insights..."
-];
-
 type ScanMode = 'barcode' | 'photo';
 
 export default function ScannerPage() {
@@ -71,15 +63,12 @@ export default function ScannerPage() {
   const [cameras, setCameras] = useState<any[]>([]);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hint, setHint] = useState<string>('');
-  const [isProcessingFile, setIsProcessingFile] = useState(false);
 
-  // Photo Analysis States
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const barcodeFileInputRef = useRef<HTMLInputElement>(null);
-  const photoFileInputRef = useRef<HTMLInputElement>(null);
-  const photoCaptureInputRef = useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const captureInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (showScanner && mode === 'barcode') {
@@ -90,13 +79,10 @@ export default function ScannerPage() {
   const handleBarcodeAnalysisFlow = useCallback(async (barcode: string) => {
     setIsAnalyzing(true);
     setAnalysisStep(0);
-
     for (let i = 1; i < BARCODE_LOADING_STEPS.length; i++) {
       await new Promise(r => setTimeout(r, 800));
       setAnalysisStep(i);
     }
-    
-    await new Promise(r => setTimeout(r, 400));
     router.push(`/product/${barcode}`);
   }, [router]);
 
@@ -107,11 +93,6 @@ export default function ScannerPage() {
       setSelectedImage(base64);
       setIsAnalyzing(true);
       setAnalysisStep(0);
-
-      const interval = setInterval(() => {
-        setAnalysisStep(prev => (prev < 3 ? prev + 1 : prev));
-      }, 1200);
-
       try {
         incrementAiCallCount();
         const result = await getFoodImageAnalysis({
@@ -126,7 +107,6 @@ export default function ScannerPage() {
             strictMode: preferences.strictMode,
           }
         });
-
         if (result) {
           setAnalysisResult(result);
           addScanToHistory({
@@ -139,17 +119,10 @@ export default function ScannerPage() {
             imageAnalysis: result
           });
           addXp(XP_PER_SCAN);
-        } else {
-          throw new Error("Analysis failed");
         }
       } catch (err) {
-        toast({
-          variant: 'destructive',
-          title: 'Analysis Error',
-          description: 'Could not analyze this image. Please try again.',
-        });
+        toast({ variant: 'destructive', title: t('support'), description: t('generatingInsightError') });
       } finally {
-        clearInterval(interval);
         setIsAnalyzing(false);
       }
     };
@@ -158,12 +131,7 @@ export default function ScannerPage() {
 
   const handleScanSuccess = useCallback((decodedText: string) => {
     if (isCapturing || isAnalyzing) return;
-    
     setIsCapturing(true);
-    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(100);
-    }
-    
     setTimeout(() => {
       setShowScanner(false);
       setIsCapturing(false);
@@ -171,293 +139,82 @@ export default function ScannerPage() {
     }, 400);
   }, [handleBarcodeAnalysisFlow, isAnalyzing, isCapturing]);
 
-  const handleBarcodeFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setIsProcessingFile(true);
-    const html5QrCode = new Html5Qrcode("barcode-shuttle-hidden", false);
-
-    try {
-      const decodedText = await html5QrCode.scanFile(file, true);
-      if (decodedText) {
-        handleBarcodeAnalysisFlow(decodedText);
-      }
-    } catch (err) {
-      console.error(err);
-      toast({
-        variant: 'destructive',
-        title: 'No Barcode Detected',
-        description: 'Could not read a barcode from this image. Please try another or scan directly.',
-      });
-    } finally {
-      setIsProcessingFile(false);
-      if (barcodeFileInputRef.current) barcodeFileInputRef.current.value = '';
-    }
-  };
-
-  const triggerHaptic = () => {
-    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(50);
-    }
-  };
-
-  const handleCaptureAction = () => {
-    triggerHaptic();
-    if (mode === 'barcode') {
-      setShowScanner(true);
-    } else {
-      photoCaptureInputRef.current?.click();
-    }
-  };
-
-  const handleUploadAction = () => {
-    triggerHaptic();
-    if (mode === 'barcode') {
-      barcodeFileInputRef.current?.click();
-    } else {
-      photoFileInputRef.current?.click();
-    }
-  };
-
-  const switchCamera = () => {
-    if (cameras.length < 2) return;
-    const currentIndex = cameras.findIndex(c => c.id === activeCameraId);
-    const nextIndex = (currentIndex + 1) % cameras.length;
-    setActiveCameraId(cameras[nextIndex].id);
-    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
-      window.navigator.vibrate(50);
-    }
-  };
-
-  if (isAnalyzing || isProcessingFile) {
-    const loadingSteps = mode === 'barcode' ? BARCODE_LOADING_STEPS : PHOTO_LOADING_STEPS;
-    const title = isProcessingFile ? "Reading Barcode..." : (mode === 'barcode' ? t('processingScan') : t('aiPhotoAnalysis'));
-
+  if (isAnalyzing) {
     return (
-      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background animate-in fade-in duration-500">
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background">
         <div className="relative mb-16">
           <div className="w-32 h-32 rounded-full border-4 border-primary/10 flex items-center justify-center">
-             <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center animate-shadow-pulse">
-                <Sparkles className="w-12 h-12 text-primary animate-pulse" />
+             <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center animate-pulse">
+                <Sparkles className="w-12 h-12 text-primary" />
              </div>
           </div>
           <Loader2 className="absolute -bottom-2 -right-2 w-10 h-10 text-primary animate-spin" />
         </div>
-        
         <div className="space-y-6 w-full max-w-xs">
-          <h2 className="text-xl font-bold text-center mb-4">{title}</h2>
-          {!isProcessingFile && loadingSteps.map((step, idx) => (
-            <div 
-              key={step} 
-              className={cn(
-                "flex items-center gap-4 transition-all duration-500",
-                analysisStep > idx ? "text-primary opacity-100" : 
-                analysisStep === idx ? "text-foreground scale-105 opacity-100 font-bold" : 
-                "text-muted-foreground opacity-20"
-              )}
-            >
-              {analysisStep > idx ? (
-                <CheckCircle2 className="w-5 h-5 text-emerald-500" />
-              ) : (
-                <div className={cn(
-                  "w-5 h-5 rounded-full border-2 flex items-center justify-center",
-                  analysisStep === idx ? "border-primary border-t-transparent animate-spin" : "border-current"
-                )} />
-              )}
-              <p className="text-base">{mode === 'barcode' ? t(step as any) : step}</p>
+          <h2 className="text-xl font-bold text-center">{mode === 'barcode' ? t('processingScan') : t('aiPhotoAnalysis')}</h2>
+          {BARCODE_LOADING_STEPS.map((step, idx) => (
+            <div key={step} className={cn("flex items-center gap-4 transition-all duration-500", analysisStep >= idx ? "text-primary opacity-100" : "opacity-20")}>
+              {analysisStep > idx ? <CheckCircle2 className="w-5 h-5" /> : <Loader2 className={cn("w-5 h-5", analysisStep === idx && "animate-spin")} />}
+              <p>{t(step as any)}</p>
             </div>
           ))}
-          {isProcessingFile && (
-            <div className="text-center text-muted-foreground animate-pulse">
-              Identifying product in database...
-            </div>
-          )}
         </div>
       </div>
     );
   }
 
   if (analysisResult && mode === 'photo') {
-    return (
-      <ImageAnalysisResult 
-        result={analysisResult} 
-        image={selectedImage} 
-        onReset={() => { setAnalysisResult(null); setSelectedImage(null); }} 
-      />
-    );
+    return <ImageAnalysisResult result={analysisResult} image={selectedImage} onReset={() => { setAnalysisResult(null); setSelectedImage(null); }} />;
   }
 
   return (
     <div className="flex flex-col h-full bg-background relative overflow-hidden">
-      <div id="barcode-shuttle-hidden" className="hidden"></div>
-
       {!showScanner && (
         <div className="pt-8 px-6 flex justify-center z-10">
-          <div className="bg-muted p-1 rounded-full flex w-full max-w-[280px] shadow-inner relative border border-white/5 active:scale-[0.98] transition-transform">
-            <div 
-              className={cn(
-                "segmented-switch-indicator w-[calc(50%-4px)]",
-                mode === 'barcode' ? "translate-x-0" : "translate-x-full"
-              )}
-            />
-            <button 
-              onClick={() => { triggerHaptic(); setMode('barcode'); }}
-              className={cn(
-                "flex-1 py-2.5 rounded-full text-sm font-bold transition-all z-10",
-                mode === 'barcode' ? "text-foreground" : "text-muted-foreground opacity-60"
-              )}
-            >
-              {t('barcodeMode')}
-            </button>
-            <button 
-              onClick={() => { triggerHaptic(); setMode('photo'); }}
-              className={cn(
-                "flex-1 py-2.5 rounded-full text-sm font-bold transition-all z-10",
-                mode === 'photo' ? "text-foreground" : "text-muted-foreground opacity-60"
-              )}
-            >
-              {t('photoMode')}
-            </button>
+          <div className="bg-muted p-1 rounded-full flex w-full max-w-[280px]">
+            <button onClick={() => setMode('barcode')} className={cn("flex-1 py-2 rounded-full text-sm font-bold", mode === 'barcode' ? "bg-background shadow-sm" : "text-muted-foreground")}>{t('barcodeMode')}</button>
+            <button onClick={() => setMode('photo')} className={cn("flex-1 py-2 rounded-full text-sm font-bold", mode === 'photo' ? "bg-background shadow-sm" : "text-muted-foreground")}>{t('photoMode')}</button>
           </div>
         </div>
       )}
 
-      <div 
-        key={mode} 
-        className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-6 animate-in fade-in slide-in-from-bottom-4 duration-300"
-      >
-        {mode === 'barcode' && showScanner ? (
-          <div className="fixed inset-0 bg-black z-[100] flex flex-col h-svh overflow-hidden text-white animate-in slide-in-from-bottom-full duration-500">
-            <div className="flex items-center justify-between px-6 py-8 z-10">
-              <Button variant="ghost" size="icon" className="text-white bg-black/40 backdrop-blur-md hover:bg-white/10 rounded-full h-12 w-12" onClick={() => setShowScanner(false)}>
-                <ChevronLeft className="h-7 w-7" />
-              </Button>
-              <Button variant="ghost" size="icon" className="text-white bg-black/40 backdrop-blur-md hover:bg-white/10 rounded-full h-12 w-12" onClick={() => setIsFlashOn(!isFlashOn)}>
-                {isFlashOn ? <Zap className="h-6 w-6 fill-yellow-400 text-yellow-400" /> : <ZapOff className="h-6 w-6" />}
-              </Button>
+      <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full px-6">
+        {showScanner ? (
+          <div className="fixed inset-0 bg-black z-[100] flex flex-col h-svh">
+            <div className="flex items-center justify-between px-6 py-8">
+              <Button variant="ghost" size="icon" className="text-white" onClick={() => setShowScanner(false)}><ChevronLeft /></Button>
+              <Button variant="ghost" size="icon" className="text-white" onClick={() => setIsFlashOn(!isFlashOn)}>{isFlashOn ? <Zap className="fill-yellow-400" /> : <ZapOff />}</Button>
             </div>
-
             <div className="flex-1 relative">
               <QrScanner 
-                onScanSuccess={handleScanSuccess}
-                onScanFailure={() => {}}
-                onCameraPermissionError={(e) => { trackError(); toast({ variant: 'destructive', title: 'Camera Error', description: e.message }); setShowScanner(false); }}
-                onStatusChange={setHint}
-                isAutoScan={true}
-                activeCameraId={activeCameraId}
-                isCapturing={isCapturing}
+                onScanSuccess={handleScanSuccess} 
+                onScanFailure={() => {}} 
+                onCameraPermissionError={(e) => { trackError(); setShowScanner(false); }} 
+                onStatusChange={setHint} 
+                isCapturing={isCapturing} 
               />
-              
               {hint && (
-                <div className="absolute top-12 inset-x-0 flex justify-center pointer-events-none px-6">
-                  <div className="bg-black/70 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 animate-in fade-in slide-in-from-top-6 duration-300">
-                    <p className="text-sm font-bold tracking-tight text-white">{t(hint as any)}</p>
-                  </div>
+                <div className="absolute top-12 inset-x-0 flex justify-center">
+                  <div className="bg-black/70 px-6 py-2 rounded-full border border-white/20 text-white text-sm font-bold">{t(hint as any)}</div>
                 </div>
               )}
-            </div>
-
-            <div className="px-8 pb-16 pt-6 bg-gradient-to-t from-black to-transparent space-y-8">
-              <div className="flex justify-end pr-2">
-                <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 border border-white/10 shadow-2xl active:scale-90" onClick={switchCamera}>
-                  <RefreshCw className="h-6 w-6 text-white" />
-                </Button>
-              </div>
-
-              <div className="flex flex-col items-center gap-2">
-                 <div className="w-1.5 h-1.5 rounded-full bg-[#22C55E] animate-pulse" />
-                 <p className="text-[10px] uppercase tracking-[0.2em] font-black opacity-60 text-white">Auto-Detect Active</p>
-              </div>
             </div>
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            <div className="mb-10">
-              <div 
-                className={cn(
-                  "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
-                  "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
-                )}
-                onClick={handleCaptureAction}
-              >
-                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
-                  {mode === 'barcode' ? (
-                    <QrCode className="w-11 h-11 text-white" />
-                  ) : (
-                    <ImageIcon className="w-11 h-11 text-white" />
-                  )}
-                </div>
-              </div>
+            <div className="mb-10 w-32 h-32 rounded-full bg-primary/10 flex items-center justify-center">
+              {mode === 'barcode' ? <QrCode className="w-16 h-16 text-primary" /> : <ImageIcon className="w-16 h-16 text-primary" />}
             </div>
-
             <div className="text-center space-y-2 mb-12">
-              <h1 className="text-3xl font-black tracking-tight text-foreground transition-all">
-                {mode === 'barcode' ? t('barcodeEntry') : t('photoAnalysis')}
-              </h1>
-              <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-bold">
-                {mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}
-              </p>
+              <h1 className="text-3xl font-black">{mode === 'barcode' ? t('barcodeEntry') : t('photoAnalysis')}</h1>
+              <p className="text-muted-foreground text-sm max-w-[280px]">{mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}</p>
             </div>
-
-            <div className="w-full space-y-5">
-              <Button 
-                size="lg" 
-                className={cn(
-                  "w-full rounded-full h-16 text-lg font-semibold transition-all duration-300 gap-3",
-                  "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
-                  "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
-                  "active:scale-95 active:brightness-95 active:shadow-sm"
-                )}
-                onClick={handleCaptureAction}
-              >
-                <Camera className="h-6 w-6" />
-                {t('capturePhoto')}
-              </Button>
-
-              <Button 
-                variant="outline" 
-                className={cn(
-                  "w-full h-16 rounded-full border-border/40 font-bold text-sm gap-3",
-                  "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
-                )}
-                onClick={handleUploadAction}
-              >
-                <ImageIcon className="h-5 w-5" />
-                {t('uploadImage')}
-              </Button>
+            <div className="w-full space-y-4">
+              <Button size="lg" className="w-full rounded-full h-16 text-lg font-bold bg-gradient-to-b from-[#22C55E] to-[#16A34A]" onClick={() => { if (mode === 'barcode') setShowScanner(true); else captureInputRef.current?.click(); }}><Camera className="mr-2" /> {t('capturePhoto')}</Button>
+              <Button variant="outline" className="w-full h-16 rounded-full border-2 font-bold" onClick={() => fileInputRef.current?.click()}><ImageIcon className="mr-2" /> {t('uploadImage')}</Button>
             </div>
-
-            <input 
-              type="file" 
-              ref={barcodeFileInputRef} 
-              accept="image/*" 
-              className="hidden" 
-              onChange={handleBarcodeFileUpload}
-            />
-            
-            <input 
-              type="file" 
-              ref={photoFileInputRef} 
-              accept="image/*" 
-              className="hidden" 
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) processPhotoImage(file);
-              }}
-            />
-            
-            <input 
-              type="file" 
-              ref={photoCaptureInputRef} 
-              accept="image/*" 
-              capture="environment" 
-              className="hidden" 
-              onChange={(e) => {
-                const file = e.target.files?.[0];
-                if (file) processPhotoImage(file);
-              }}
-            />
+            <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (mode === 'barcode') handleBarcodeAnalysisFlow('upload'); else processPhotoImage(f); }}} />
+            <input type="file" ref={captureInputRef} accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) processPhotoImage(f); }} />
           </div>
         )}
       </div>

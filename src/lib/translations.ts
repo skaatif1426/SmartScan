@@ -39,6 +39,14 @@ export const translations: Translations = {
   uploadImage: { English: 'Upload Image', Hindi: 'छवि अपलोड करें', Marathi: 'प्रतिमा अपलोड करा', Hinglish: 'Image Upload Karo' },
   processingScan: { English: 'Processing Scan...', Hindi: 'स्कैन प्रोसेस हो रहा है...', Marathi: 'स्कॅन प्रक्रिया होत आहे...', Hinglish: 'Scan process ho raha hai...' },
   aiPhotoAnalysis: { English: 'AI Photo Analysis...', Hindi: 'AI फोटो विश्लेषण...', Marathi: 'AI फोटो विश्लेषण...', Hinglish: 'AI Photo Analysis...' },
+  
+  // Scanner Hints & Loading
+  hintAlign: { English: 'Align Barcode in Center', Hindi: 'बारकोड को केंद्र में रखें', Marathi: 'बारकोड मध्यभागी ठेवा', Hinglish: 'Barcode beech mein rakho' },
+  loadingCapture: { English: 'Capturing data...', Hindi: 'डेटा कैप्चर हो रहा है...', Marathi: 'डेटा कॅप्चर करत आहे...', Hinglish: 'Data capture ho raha hai...' },
+  loadingRead: { English: 'Reading barcode...', Hindi: 'बारकोड पढ़ा जा रहा है...', Marathi: 'बारकोड वाचत आहे...', Hinglish: 'Barcode read ho raha hai...' },
+  loadingIngredients: { English: 'Fetching ingredients...', Hindi: 'सामग्री प्राप्त हो रही है...', Marathi: 'साहित्य मिळवत आहे...', Hinglish: 'Ingredients aa rahe hain...' },
+  loadingInsights: { English: 'Generating insights...', Hindi: 'जानकारी तैयार की जा रही है...', Marathi: 'माहिती तयार करत आहे...', Hinglish: 'Insights ban rahe hain...' },
+  analyzingImage: { English: 'Analyzing image...', Hindi: 'छवि का विश्लेषण...', Marathi: 'प्रतिमेचे विश्लेषण...', Hinglish: 'Image analyze ho rahi hai...' },
 
   // Product Details
   grade: { English: 'Grade', Hindi: 'ग्रेड', Marathi: 'ग्रेड', Hinglish: 'Grade' },
@@ -67,6 +75,11 @@ export const translations: Translations = {
   historyEmpty: { English: 'No products scanned yet.', Hindi: 'अभी तक कोई उत्पाद स्कैन नहीं किया गया है।', Marathi: 'अद्याप कोणतेही उत्पादन स्कॅन केलेले नाही।', Hinglish: 'Abhi tak kuch scan nahi kiya.' },
   scanFirstProduct: { English: 'Scan Your First Product', Hindi: 'अपना पहला उत्पाद स्कैन करें', Marathi: 'तुमचे पहिले उत्पादन स्कॅन करा', Hinglish: 'Pehla product scan karo' },
   discoveredByYou: { English: 'Discovered by you', Hindi: 'आपके द्वारा खोजा गया', Marathi: 'तुम्ही शोधलेले', Hinglish: 'Aapne dhoonda hai' },
+  all: { English: 'All', Hindi: 'सभी', Marathi: 'सर्व', Hinglish: 'All' },
+  scanned: { English: 'Scanned', Hindi: 'स्कैन किया हुआ', Marathi: 'स्कॅन केलेले', Hinglish: 'Scanned' },
+  discovered: { English: 'Discovered', Hindi: 'खोजा गया', Marathi: 'शोधलेले', Hinglish: 'Discovered' },
+  recent: { English: 'Recent', Hindi: 'हालिया', Marathi: 'अलीकडील', Hinglish: 'Recent' },
+  healthiest: { English: 'Healthiest', Hindi: 'सबसे स्वस्थ', Marathi: 'सर्वात निरोगी', Hinglish: 'Healthiest' },
 
   // Profile
   contributorRank: { English: 'Contributor Rank', Hindi: 'योगदानकर्ता रैंक', Marathi: 'योगदानकर्ता रँक', Hinglish: 'Contributor Rank' },
@@ -77,6 +90,7 @@ export const translations: Translations = {
   settingsPreferences: { English: 'Settings & Preferences', Hindi: 'सेटिंग्स और प्राथमिकताएं', Marathi: 'सेटिंग्ज आणि प्राधान्ये', Hinglish: 'Settings & Preferences' },
 
   // Settings
+  settingsTitle: { English: 'Settings', Hindi: 'सेटिंग्स', Marathi: 'सेटिंग्ज', Hinglish: 'Settings' },
   account: { English: 'Account', Hindi: 'खाता', Marathi: 'खाते', Hinglish: 'Account' },
   dietaryGoals: { English: 'Dietary & Goals', Hindi: 'आहार और लक्ष्य', Marathi: 'आहार आणि ध्येय', Hinglish: 'Dietary & Goals' },
   appStyle: { English: 'App Style', Hindi: 'ऐप स्टाइल', Marathi: 'अॅप स्टाईल', Hinglish: 'App Style' },
@@ -94,10 +108,16 @@ export const translations: Translations = {
   language: { English: 'Language', Hindi: 'भाषा', Marathi: 'भाषा', Hinglish: 'Language' },
   responseStyle: { English: 'Response Style', Hindi: 'प्रतिक्रिया शैली', Marathi: 'प्रतिसाद शैली', Hinglish: 'Response Style' },
   analysisPriority: { English: 'Analysis Priority', Hindi: 'विश्लेषण प्राथमिकता', Marathi: 'विश्लेषण प्राथमिकता', Hinglish: 'Analysis Priority' },
+  clearHistory: { English: 'Clear History', Hindi: 'इतिहास साफ करें', Marathi: 'इतिहास साफ करा', Hinglish: 'History Clear Karo' },
+  clearHistoryConfirmTitle: { English: 'Clear History?', Hindi: 'इतिहास साफ करें?', Marathi: 'इतिहास साफ करायचा?', Hinglish: 'History Clear?' },
+  clearHistoryConfirmDescription: { English: 'This will permanently delete all your scanned products.', Hindi: 'इससे आपके सभी स्कैन किए गए उत्पाद स्थायी रूप से हटा दिए जाएंगे।', Marathi: 'यामुळे तुमची सर्व स्कॅन केलेली उत्पादने कायमची हटवली जातील।', Hinglish: 'Saara scan history uda diya jayega.' },
+  cancel: { English: 'Cancel', Hindi: 'रद्द करें', Marathi: 'रद्द करा', Hinglish: 'Cancel' },
+  confirm: { English: 'Confirm', Hindi: 'पुष्टि करें', Marathi: 'पुष्टी करा', Hinglish: 'Confirm' },
 
   // AI & Discovery
   newDiscovery: { English: 'New Discovery!', Hindi: 'नई खोज!', Marathi: 'नवीन शोध!', Hinglish: 'Nayi Discovery!' },
   thanksDiscovery: { English: "Thanks for discovering something new!", Hindi: "कुछ नया खोजने के लिए धन्यवाद!", Marathi: "काहीतरी नवीन शोधल्याबद्दल धन्यवाद!", Hinglish: "Kuch naya dhoondne ke liye thanks!" },
   getAiEstimate: { English: 'Get AI Estimate', Hindi: 'एआई अनुमान प्राप्त करें', Marathi: 'AI अंदाज मिळवा', Hinglish: 'AI Estimate lo' },
   aiEstimatedAnalysis: { English: 'AI Estimated Analysis', Hindi: 'एआई अनुमानित विश्लेषण', Marathi: 'AI अंदाजित विश्लेषण', Hinglish: 'AI Estimated Analysis' },
+  generatingInsightError: { English: 'Unable to generate AI analysis at this moment.', Hindi: 'इस समय AI विश्लेषण तैयार करने में असमर्थ।', Marathi: 'यावेळी AI विश्लेषण व्युत्पन्न करण्यात अक्षम।', Hinglish: 'Abhi AI analysis nahi ho paa raha.' },
 };

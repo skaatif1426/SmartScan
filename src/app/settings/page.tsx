@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Settings, User, Palette, Languages, Sparkles, Bell, HardDrive, Shield, HelpCircle, Info, Trash2, LogOut, ChevronLeft, Target, Mail, Edit3, Camera, AlertCircle, ShieldAlert } from 'lucide-react';
+import { Settings, User, Palette, Languages, Sparkles, HardDrive, LogOut, ChevronLeft, Target, Mail, Camera, Trash2, ShieldAlert, HelpCircle } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 import {
@@ -28,12 +28,10 @@ import { useAiUsage } from '@/hooks/useAiUsage';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import type { Language, DataRetention, AiVerbosity, UnitSystem, HealthGoal, DietType, AiFocusPriority, Theme, HealthFocus } from '@/lib/types';
 import { useToast } from '@/hooks/use-toast';
-import { cn } from '@/lib/utils';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ThemeToggle } from '@/components/settings/ThemeToggle';
 
 const languages: Language[] = ['English', 'Hindi', 'Marathi', 'Hinglish'];
-const retentionPeriods: DataRetention[] = ['30d', '90d', 'forever'];
 const verbosityLevels: {id: AiVerbosity, label: string}[] = [
     {id: 'concise', label: 'Concise'},
     {id: 'balanced', label: 'Balanced'},
@@ -45,10 +43,6 @@ const aiFocusOptions: {id: AiFocusPriority, label: string}[] = [
     {id: 'ingredients', label: 'Ingredients'},
     {id: 'eco', label: 'Eco'},
     {id: 'performance', label: 'Performance'},
-];
-const unitSystems: {id: UnitSystem, label: string}[] = [
-    { id: 'metric', label: 'Metric' },
-    { id: 'imperial', label: 'Imperial' },
 ];
 const healthGoals: {id: HealthGoal, label: string}[] = [
     {id: 'general', label: 'General Wellness'},
@@ -85,14 +79,14 @@ export default function SettingsPage() {
   const handleClearHistory = () => {
     setIsClearing(true);
     clearHistory();
-    toast({ title: 'History Cleared', description: 'Your scan history has been deleted.' });
+    toast({ title: t('historyTitle'), description: t('clearHistoryConfirmDescription') });
     setIsClearing(false);
   };
   
   const handleSettingChange = (key: string, value: any) => {
     savePreferences({ [key]: value });
     toast({ 
-        title: "Setting saved", 
+        title: t('confirm'), 
         description: `${key.charAt(0).toUpperCase() + key.slice(1)} updated.`,
         duration: 2000 
     });
@@ -104,14 +98,6 @@ export default function SettingsPage() {
         ? current.filter(item => item !== id)
         : [...current, id];
     handleSettingChange('healthFocus', updated);
-  };
-
-  const handleSupportClick = (title: string) => {
-    toast({
-        title,
-        description: "Feature coming soon.",
-        icon: <Info className="h-4 w-4 text-blue-500" />
-    });
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -291,22 +277,14 @@ export default function SettingsPage() {
         <div className="grid gap-4">
             <Card>
                 <CardContent className="p-2 divide-y">
-                     <Button variant="ghost" className="w-full justify-between h-12" onClick={() => handleSupportClick("Help")}>
-                        <div className="flex items-center gap-2"><HelpCircle className="h-4 w-4" /> Help Center</div>
+                     <Button variant="ghost" className="w-full justify-between h-12">
+                        <div className="flex items-center gap-2"><HelpCircle className="h-4 w-4" /> {t('support')}</div>
                         <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
                      </Button>
-                     <AlertDialog>
-                        <AlertDialogTrigger asChild>
-                           <Button variant="ghost" className="w-full justify-between h-12 text-destructive hover:bg-destructive/10">
-                              <div className="flex items-center gap-2"><ShieldAlert className="h-4 w-4" /> Request Account Deletion</div>
-                              <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
-                           </Button>
-                        </AlertDialogTrigger>
-                        <AlertDialogContent>
-                           <AlertDialogHeader><AlertDialogTitle>Request Deletion</AlertDialogTitle><AlertDialogDescription>Your data will be permanently deleted after review.</AlertDialogDescription></AlertDialogHeader>
-                           <AlertDialogFooter><AlertDialogCancel>Cancel</AlertDialogCancel><AlertDialogAction onClick={() => toast({ title: "Request submitted" })} className="bg-destructive text-destructive-foreground">Submit Request</AlertDialogAction></AlertDialogFooter>
-                        </AlertDialogContent>
-                     </AlertDialog>
+                     <Button variant="ghost" className="w-full justify-between h-12 text-destructive hover:bg-destructive/10">
+                        <div className="flex items-center gap-2"><ShieldAlert className="h-4 w-4" /> Request Deletion</div>
+                        <ChevronLeft className="h-4 w-4 rotate-180 text-muted-foreground" />
+                     </Button>
                 </CardContent>
             </Card>
             <div className="text-center">
