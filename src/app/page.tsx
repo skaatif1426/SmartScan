@@ -16,6 +16,7 @@ import {
   Sparkles,
   Image as ImageIcon,
   ArrowRight,
+  Keyboard,
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -31,6 +32,13 @@ import { useGamification } from '@/hooks/useGamification';
 import { cn } from '@/lib/utils';
 import { getFoodImageAnalysis } from '@/lib/actions';
 import ImageAnalysisResult from '@/components/product/ImageAnalysisResult';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 const QrScanner = dynamic(() => import('@/components/scanner/QrScanner'), {
   loading: () => <Skeleton className="w-full h-full bg-black" />,
@@ -61,27 +69,26 @@ export default function ScannerPage() {
   const [isCapturing, setIsCapturing] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [analysisStep, setAnalysisStep] = useState(0);
-  const [activeCameraId, setActiveCameraId] = useState<string | undefined>(undefined);
-  const [cameras, setCameras] = useState<any[]>([]);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hint, setHint] = useState<string>('');
   const [manualBarcode, setManualBarcode] = useState('');
+  const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
 
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const photoCaptureInputRef = useRef<HTMLInputElement>(null);
   const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (showScanner && mode === 'barcode') {
-      Html5Qrcode.getCameras().then(setCameras).catch(trackError);
+      Html5Qrcode.getCameras().catch(trackError);
     }
   }, [showScanner, trackError, mode]);
 
   const handleBarcodeAnalysisFlow = useCallback(async (barcode: string) => {
     if (!barcode.trim()) return;
+    setIsManualDialogOpen(false);
     setIsAnalyzing(true);
     setAnalysisStep(0);
     for (let i = 1; i < BARCODE_LOADING_STEPS.length; i++) {
@@ -237,34 +244,46 @@ export default function ScannerPage() {
               </Button>
 
               {mode === 'barcode' && (
-                <div className="pt-6 space-y-4 w-full">
-                  <div className="flex items-center gap-4">
-                    <div className="h-px flex-1 bg-border" />
-                    <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">{t('manualEntry')}</span>
-                    <div className="h-px flex-1 bg-border" />
-                  </div>
-                  <div className="flex gap-2">
-                    <Input 
-                      value={manualBarcode}
-                      onChange={(e) => setManualBarcode(e.target.value)}
-                      placeholder={t('barcodePlaceholder')}
-                      className="h-14 rounded-2xl border-2 font-bold px-6"
-                      type="number"
-                      onKeyDown={(e) => { if (e.key === 'Enter') handleBarcodeAnalysisFlow(manualBarcode); }}
-                    />
-                    <Button 
-                      disabled={!manualBarcode || manualBarcode.length < 5}
-                      onClick={() => handleBarcodeAnalysisFlow(manualBarcode)}
-                      className="h-14 w-14 rounded-2xl p-0 shrink-0"
-                    >
-                      <ArrowRight className="w-6 h-6" />
-                    </Button>
-                  </div>
+                <div className="pt-8 w-full flex justify-center">
+                  <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
+                    <DialogTrigger asChild>
+                      <Button variant="ghost" className="text-primary font-bold hover:bg-primary/5 rounded-full px-6">
+                        <Keyboard className="mr-2 h-4 w-4" />
+                        {t('enterManually')}
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent className="rounded-3xl border-2 w-[90vw] max-w-md">
+                      <DialogHeader>
+                        <DialogTitle className="text-2xl font-black text-center mb-4">{t('manualEntry')}</DialogTitle>
+                      </DialogHeader>
+                      <div className="flex flex-col gap-6 pt-4">
+                        <div className="space-y-2">
+                          <p className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-1">{t('barcodeMode')}</p>
+                          <Input 
+                            value={manualBarcode}
+                            onChange={(e) => setManualBarcode(e.target.value)}
+                            placeholder={t('barcodePlaceholder')}
+                            className="h-16 rounded-2xl border-2 font-bold px-6 text-lg"
+                            type="number"
+                            autoFocus
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleBarcodeAnalysisFlow(manualBarcode); }}
+                          />
+                        </div>
+                        <Button 
+                          disabled={!manualBarcode || manualBarcode.length < 5}
+                          onClick={() => handleBarcodeAnalysisFlow(manualBarcode)}
+                          className="h-16 w-full rounded-2xl font-bold text-lg bg-gradient-to-r from-primary to-emerald-600"
+                        >
+                          {t('analyzeProduct')}
+                          <ArrowRight className="ml-2 w-5 h-5" />
+                        </Button>
+                      </div>
+                    </DialogContent>
+                  </Dialog>
                 </div>
               )}
             </div>
             
-            {/* Hidden Inputs for specialized intents */}
             <input type="file" ref={photoCaptureInputRef} accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (mode === 'barcode') handleBarcodeAnalysisFlow('upload'); else processPhotoImage(f); }}} />
             <input type="file" ref={galleryInputRef} accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (mode === 'barcode') handleBarcodeAnalysisFlow('upload'); else processPhotoImage(f); }}} />
           </div>
