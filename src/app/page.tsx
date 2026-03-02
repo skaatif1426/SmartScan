@@ -227,13 +227,13 @@ export default function ScannerPage() {
               
               <div className="text-center space-y-3">
                 <h1 className="text-3xl font-black tracking-tight">Barcode Entry</h1>
-                <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">Choose your preferred method to identify a product barcode.</p>
+                <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">Scan instantly or add barcode manually</p>
               </div>
 
               <div className="w-full space-y-4">
                 <Button 
                   size="lg" 
-                  className="w-full rounded-2xl h-18 text-lg font-bold shadow-xl active:scale-95 gap-3" 
+                  className="w-full rounded-2xl h-18 text-lg font-bold shadow-xl active:scale-95 gap-3 bg-gradient-to-r from-primary to-emerald-500 hover:opacity-90" 
                   onClick={() => setShowScanner(true)}
                 >
                   <Scan className="h-6 w-6" />
@@ -243,7 +243,7 @@ export default function ScannerPage() {
                 <Button 
                   variant="outline" 
                   size="lg"
-                  className="w-full rounded-2xl h-16 text-lg font-bold border-2 active:scale-95 gap-3" 
+                  className="w-full rounded-2xl h-16 text-lg font-bold border-2 active:scale-95 gap-4 justify-start px-6 bg-card/50 hover:bg-card" 
                   onClick={() => barcodeFileInputRef.current?.click()}
                 >
                   <ImageIcon className="h-5 w-5 text-primary" />
@@ -251,11 +251,12 @@ export default function ScannerPage() {
                 </Button>
 
                 <Button 
-                  variant="ghost" 
-                  className="w-full h-14 text-muted-foreground font-bold hover:bg-muted/50 rounded-2xl gap-3" 
+                  variant="outline" 
+                  size="lg"
+                  className="w-full rounded-2xl h-16 text-lg font-bold border-2 active:scale-95 gap-4 justify-start px-6 bg-card/50 hover:bg-card" 
                   onClick={() => setShowManualInput(true)}
                 >
-                  <Keyboard className="h-5 w-5" />
+                  <Keyboard className="h-5 w-5 text-primary" />
                   Enter Barcode Manually
                 </Button>
               </div>

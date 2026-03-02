@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* --- LIGHT MODE: Premium off-white & Green Primary --- */
-    --background: 210 29% 98%; /* #F9FAFB */
+    /* --- LIGHT MODE: Premium soft off-white & Green Primary --- */
+    --background: 210 40% 98%; /* #F8FAFC */
     --foreground: 221 39% 11%; /* #111827 */
     
     --card: 0 0% 100%;
@@ -32,22 +32,22 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 142 71% 45%;
-    --radius: 1rem;
+    --radius: 1.25rem;
   }
 
   .dark {
-    /* --- DARK MODE: Deep Charcoal & Soft Green --- */
-    --background: 214 27% 6%; /* #0B0F14 */
-    --foreground: 210 29% 98%; /* #F9FAFB */
+    /* --- DARK MODE: Deep Navy & Softer Green --- */
+    --background: 222 47% 11%; /* #0F172A */
+    --foreground: 210 40% 98%; /* #F8FAFC */
     
     --card: 221 39% 11%; /* #111827 */
-    --card-foreground: 210 29% 98%;
+    --card-foreground: 210 40% 98%;
     
-    --popover: 214 27% 6%;
-    --popover-foreground: 210 29% 98%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
     
     --primary: 142 71% 58%; /* #4ADE80 */
-    --primary-foreground: 221 39% 11%;
+    --primary-foreground: 222 47% 11%;
     
     --secondary: 217.2 32.6% 17.5%;
     --secondary-foreground: 210 40% 98%;
@@ -58,8 +58,8 @@
     --accent: 142 71% 58% / 0.15;
     --accent-foreground: 142 71% 75%;
     
-    --destructive: 0 91% 71%; /* #F87171 - High Visibility */
-    --destructive-foreground: 221 39% 11%;
+    --destructive: 0 91% 71%; /* #F87171 */
+    --destructive-foreground: 222 47% 11%;
     
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
@@ -115,7 +115,7 @@
 }
 
 @keyframes shadow-pulse {
-  0% { box-shadow: 0 0 0 0px hsl(var(--primary) / 0.7); }
+  0% { box-shadow: 0 0 0 0px hsl(var(--primary) / 0.3); }
   100% { box-shadow: 0 0 0 15px hsl(var(--primary) / 0); }
 }
 
