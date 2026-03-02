@@ -237,10 +237,12 @@ const QrScanner = ({
       
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         <div className={cn(
-          "w-[70vw] aspect-[1.3/1] rounded-2xl border-2 transition-all duration-300",
+          "w-[70vw] aspect-[1.3/1] rounded-2xl border-2 transition-all duration-300 relative overflow-hidden",
           isReady ? "opacity-80 scale-100" : "opacity-0 scale-110",
           isCapturing ? "border-white scale-95" : "border-white/30 scan-frame-pulse"
-        )} />
+        )}>
+           {isReady && !isCapturing && <div className="scanner-line" />}
+        </div>
       </div>
 
       {isCapturing && <div className="absolute inset-0 bg-white/50 flash-capture z-50 pointer-events-none" />}
