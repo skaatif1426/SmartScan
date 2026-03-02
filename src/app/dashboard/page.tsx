@@ -157,8 +157,16 @@ export default function DashboardPage() {
                 <h2 className="text-4xl font-black tracking-tight">Ready to Start?</h2>
                 <p className="mt-4 max-w-xs text-muted-foreground font-bold leading-relaxed">Scan your first product to unlock AI-powered health insights and personalized recommendations.</p>
                 <Link href="/" className="mt-12 w-full max-w-xs">
-                    <Button size="lg" className="w-full rounded-2xl h-18 text-xl font-bold shadow-2xl active:scale-95 transition-transform">
-                        <ScanLine className="mr-3 h-7 w-7" />
+                    <Button 
+                        size="lg" 
+                        className={cn(
+                            "w-full rounded-full h-20 text-xl font-bold transition-all",
+                            "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
+                            "shadow-[0_12px_24px_rgba(34,197,94,0.15)] border-t border-white/20",
+                            "active:scale-95 active:shadow-sm"
+                        )}
+                    >
+                        <ScanLine className="mr-3 h-8 w-8" />
                         Scan Now
                     </Button>
                 </Link>
@@ -174,7 +182,15 @@ export default function DashboardPage() {
             
             <div className="text-center">
                 <Link href="/">
-                    <Button size="lg" className="rounded-2xl h-20 px-16 text-xl font-bold shadow-2xl active:scale-95 transition-all bg-primary hover:shadow-primary/20">
+                    <Button 
+                        size="lg" 
+                        className={cn(
+                            "rounded-full h-20 px-16 text-xl font-bold transition-all",
+                            "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
+                            "shadow-[0_12px_24px_rgba(34,197,94,0.15)] border-t border-white/20",
+                            "active:scale-95 active:shadow-sm"
+                        )}
+                    >
                        <ScanLine className="mr-3 h-8 w-8" />
                         Analyze Product
                     </Button>
