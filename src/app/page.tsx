@@ -15,10 +15,12 @@ import {
   QrCode,
   Sparkles,
   Image as ImageIcon,
+  ArrowRight,
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -63,12 +65,14 @@ export default function ScannerPage() {
   const [cameras, setCameras] = useState<any[]>([]);
   const [isFlashOn, setIsFlashOn] = useState(false);
   const [hint, setHint] = useState<string>('');
+  const [manualBarcode, setManualBarcode] = useState('');
 
   const [analysisResult, setAnalysisResult] = useState<any>(null);
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const captureInputRef = useRef<HTMLInputElement>(null);
+  const photoCaptureInputRef = useRef<HTMLInputElement>(null);
+  const galleryInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (showScanner && mode === 'barcode') {
@@ -77,6 +81,7 @@ export default function ScannerPage() {
   }, [showScanner, trackError, mode]);
 
   const handleBarcodeAnalysisFlow = useCallback(async (barcode: string) => {
+    if (!barcode.trim()) return;
     setIsAnalyzing(true);
     setAnalysisStep(0);
     for (let i = 1; i < BARCODE_LOADING_STEPS.length; i++) {
@@ -138,6 +143,16 @@ export default function ScannerPage() {
       handleBarcodeAnalysisFlow(decodedText);
     }, 400);
   }, [handleBarcodeAnalysisFlow, isAnalyzing, isCapturing]);
+
+  const handleCapturePhoto = () => {
+    if (navigator.vibrate) navigator.vibrate(50);
+    photoCaptureInputRef.current?.click();
+  };
+
+  const handleUploadImage = () => {
+    if (navigator.vibrate) navigator.vibrate(50);
+    galleryInputRef.current?.click();
+  };
 
   if (isAnalyzing) {
     return (
@@ -210,11 +225,48 @@ export default function ScannerPage() {
               <p className="text-muted-foreground text-sm max-w-[280px]">{mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}</p>
             </div>
             <div className="w-full space-y-4">
-              <Button size="lg" className="w-full rounded-full h-16 text-lg font-bold bg-gradient-to-b from-[#22C55E] to-[#16A34A]" onClick={() => { if (mode === 'barcode') setShowScanner(true); else captureInputRef.current?.click(); }}><Camera className="mr-2" /> {t('capturePhoto')}</Button>
-              <Button variant="outline" className="w-full h-16 rounded-full border-2 font-bold" onClick={() => fileInputRef.current?.click()}><ImageIcon className="mr-2" /> {t('uploadImage')}</Button>
+              <Button 
+                size="lg" 
+                className="w-full rounded-full h-16 text-lg font-bold bg-gradient-to-b from-[#22C55E] to-[#16A34A]" 
+                onClick={() => { if (mode === 'barcode') setShowScanner(true); else handleCapturePhoto(); }}
+              >
+                <Camera className="mr-2" /> {t('capturePhoto')}
+              </Button>
+              <Button variant="outline" className="w-full h-16 rounded-full border-2 font-bold" onClick={handleUploadImage}>
+                <ImageIcon className="mr-2" /> {t('uploadImage')}
+              </Button>
+
+              {mode === 'barcode' && (
+                <div className="pt-6 space-y-4 w-full">
+                  <div className="flex items-center gap-4">
+                    <div className="h-px flex-1 bg-border" />
+                    <span className="text-[10px] uppercase font-black tracking-widest text-muted-foreground">{t('manualEntry')}</span>
+                    <div className="h-px flex-1 bg-border" />
+                  </div>
+                  <div className="flex gap-2">
+                    <Input 
+                      value={manualBarcode}
+                      onChange={(e) => setManualBarcode(e.target.value)}
+                      placeholder={t('barcodePlaceholder')}
+                      className="h-14 rounded-2xl border-2 font-bold px-6"
+                      type="number"
+                      onKeyDown={(e) => { if (e.key === 'Enter') handleBarcodeAnalysisFlow(manualBarcode); }}
+                    />
+                    <Button 
+                      disabled={!manualBarcode || manualBarcode.length < 5}
+                      onClick={() => handleBarcodeAnalysisFlow(manualBarcode)}
+                      className="h-14 w-14 rounded-2xl p-0 shrink-0"
+                    >
+                      <ArrowRight className="w-6 h-6" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
-            <input type="file" ref={fileInputRef} accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (mode === 'barcode') handleBarcodeAnalysisFlow('upload'); else processPhotoImage(f); }}} />
-            <input type="file" ref={captureInputRef} accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) processPhotoImage(f); }} />
+            
+            {/* Hidden Inputs for specialized intents */}
+            <input type="file" ref={photoCaptureInputRef} accept="image/*" capture="environment" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (mode === 'barcode') handleBarcodeAnalysisFlow('upload'); else processPhotoImage(f); }}} />
+            <input type="file" ref={galleryInputRef} accept="image/*" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) { if (mode === 'barcode') handleBarcodeAnalysisFlow('upload'); else processPhotoImage(f); }}} />
           </div>
         )}
       </div>

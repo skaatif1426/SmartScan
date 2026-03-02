@@ -37,13 +37,15 @@ export const translations: Translations = {
   photoDesc: { English: 'Upload or capture a product image to analyze details using AI.', Hindi: 'एआई का उपयोग करके विवरणों का विश्लेषण करने के लिए उत्पाद छवि अपलोड या कैप्चर करें।', Marathi: 'AI वापरून तपशीलांचे विश्लेषण करण्यासाठी उत्पादन प्रतिमा अपलोड किंवा कॅप्चर करा।', Hinglish: 'AI analysis ke liye photo click karo ya upload karo.' },
   capturePhoto: { English: 'Capture Photo', Hindi: 'फोटो खींचे', Marathi: 'फोटो काढा', Hinglish: 'Photo Kheecho' },
   uploadImage: { English: 'Upload Image', Hindi: 'छवि अपलोड करें', Marathi: 'प्रतिमा अपलोड करा', Hinglish: 'Image Upload Karo' },
+  manualEntry: { English: 'Manual Entry', Hindi: 'मैनुअल एंट्री', Marathi: 'मॅन्युअल एन्ट्री', Hinglish: 'Manual Entry' },
+  barcodePlaceholder: { English: 'e.g. 1234567890123', Hindi: 'जैसे 1234567890123', Marathi: 'उदा. 1234567890123', Hinglish: 'e.g. 1234567890123' },
   processingScan: { English: 'Processing Scan...', Hindi: 'स्कैन प्रोसेस हो रहा है...', Marathi: 'स्कॅन प्रक्रिया होत आहे...', Hinglish: 'Scan process ho raha hai...' },
   aiPhotoAnalysis: { English: 'AI Photo Analysis...', Hindi: 'AI फोटो विश्लेषण...', Marathi: 'AI फोटो विश्लेषण...', Hinglish: 'AI Photo Analysis...' },
   
   // Scanner Hints & Loading
   hintAlign: { English: 'Align Barcode in Center', Hindi: 'बारकोड को केंद्र में रखें', Marathi: 'बारकोड मध्यभागी ठेवा', Hinglish: 'Barcode beech mein rakho' },
   loadingCapture: { English: 'Capturing data...', Hindi: 'डेटा कैप्चर हो रहा है...', Marathi: 'डेटा कॅप्चर करत आहे...', Hinglish: 'Data capture ho raha hai...' },
-  loadingRead: { English: 'Reading barcode...', Hindi: 'बारकोड पढ़ा जा रहा है...', Marathi: 'बारकोड वाचत आहे...', Hinglish: 'Barcode read ho raha hai...' },
+  loadingRead: { English: 'Reading barcode...', Hindi: 'बारकोड पढ़ा जा रहा है...', Marathi: 'बारकोड वाचत है...', Hinglish: 'Barcode read ho raha hai...' },
   loadingIngredients: { English: 'Fetching ingredients...', Hindi: 'सामग्री प्राप्त हो रही है...', Marathi: 'साहित्य मिळवत आहे...', Hinglish: 'Ingredients aa rahe hain...' },
   loadingInsights: { English: 'Generating insights...', Hindi: 'जानकारी तैयार की जा रही है...', Marathi: 'माहिती तयार करत आहे...', Hinglish: 'Insights ban rahe hain...' },
   analyzingImage: { English: 'Analyzing image...', Hindi: 'छवि का विश्लेषण...', Marathi: 'प्रतिमेचे विश्लेषण...', Hinglish: 'Image analyze ho rahi hai...' },
