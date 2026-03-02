@@ -232,7 +232,7 @@ export default function ScannerPage() {
 
   if (isAnalyzing || isProcessingFile) {
     const loadingSteps = mode === 'barcode' ? BARCODE_LOADING_STEPS : PHOTO_LOADING_STEPS;
-    const title = isProcessingFile ? "Reading Barcode..." : (mode === 'barcode' ? "Processing Scan..." : "AI Photo Analysis...");
+    const title = isProcessingFile ? "Reading Barcode..." : (mode === 'barcode' ? t('processingScan') : t('aiPhotoAnalysis'));
 
     return (
       <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background animate-in fade-in duration-500">
@@ -308,7 +308,7 @@ export default function ScannerPage() {
                 mode === 'barcode' ? "text-foreground" : "text-muted-foreground opacity-60"
               )}
             >
-              Barcode
+              {t('barcodeMode')}
             </button>
             <button 
               onClick={() => { triggerHaptic(); setMode('photo'); }}
@@ -317,7 +317,7 @@ export default function ScannerPage() {
                 mode === 'photo' ? "text-foreground" : "text-muted-foreground opacity-60"
               )}
             >
-              Photo
+              {t('photoMode')}
             </button>
           </div>
         </div>
@@ -393,12 +393,10 @@ export default function ScannerPage() {
 
             <div className="text-center space-y-2 mb-12">
               <h1 className="text-3xl font-black tracking-tight text-foreground transition-all">
-                {mode === 'barcode' ? "Barcode Entry" : "Photo Analysis"}
+                {mode === 'barcode' ? t('barcodeEntry') : t('photoAnalysis')}
               </h1>
               <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-bold">
-                {mode === 'barcode' 
-                  ? "Scan a product barcode via camera or upload an image to identify it." 
-                  : "Upload or capture a product image to analyze details using AI."}
+                {mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}
               </p>
             </div>
 
@@ -414,7 +412,7 @@ export default function ScannerPage() {
                 onClick={handleCaptureAction}
               >
                 <Camera className="h-6 w-6" />
-                Capture Photo
+                {t('capturePhoto')}
               </Button>
 
               <Button 
@@ -426,11 +424,10 @@ export default function ScannerPage() {
                 onClick={handleUploadAction}
               >
                 <ImageIcon className="h-5 w-5" />
-                Upload Image
+                {t('uploadImage')}
               </Button>
             </div>
 
-            {/* Hidden Inputs for File/Camera Intent */}
             <input 
               type="file" 
               ref={barcodeFileInputRef} 

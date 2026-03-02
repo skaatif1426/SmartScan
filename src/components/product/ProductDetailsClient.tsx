@@ -4,43 +4,30 @@ import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import dynamic from 'next/dynamic';
-import { Wheat, Sparkles, MessageCircle, Info, Hash, ChevronLeft, Package } from 'lucide-react';
+import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash } from 'lucide-react';
 
 import type { Product } from '@/lib/types';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScanHistory } from '@/hooks/useScanHistory';
 import NutritionInsight from './NutritionInsight';
-import { usePreferences } from '@/contexts/AppProviders';
+import { usePreferences, useLanguage } from '@/contexts/AppProviders';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Skeleton } from '@/components/ui/skeleton';
 import { calculateLocalScore } from '@/lib/scoring';
 import { useGamification } from '@/hooks/useGamification';
 import { getAICategory } from '@/lib/actions';
-
-const ProductChatbot = dynamic(() => import('./ProductChatbot'), {
-    loading: () => <Skeleton className="h-96 w-full" />,
-    ssr: false,
-});
-
-const NutritionValue = ({ label, value, unit }: { label: string; value?: number; unit: string }) => {
-    if (value === undefined || value === null) return null;
-    return (
-        <div className="flex justify-between text-sm py-2 border-b">
-            <span className="text-muted-foreground">{label}</span>
-            <span className="font-medium">{value.toFixed(2)} {unit}</span>
-        </div>
-    );
-};
+import ProductChatbot from './ProductChatbot';
 
 export default function ProductDetailsClient({ product: productData }: { product: Product }) {
     const router = useRouter();
     const { addScanToHistory } = useScanHistory();
     const { product } = productData;
     const { preferences } = usePreferences();
+    const { t } = useLanguage();
     const [imageError, setImageError] = useState(false);
-    const isProblematicDomain = product.image_front_url?.includes('images.openfoodfacts.org');
+    const [showChat, setShowChat] = useState(false);
     const { addXp, XP_PER_SCAN } = useGamification();
 
     const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
@@ -70,131 +57,118 @@ export default function ProductDetailsClient({ product: productData }: { product
         };
 
         addScanWithCategory();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [productData.code, localAnalysis.score]);
     
     const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));
 
-    const nutritionValues = useMemo(() => [
-        { label: "Energy (kcal)", value: product?.nutriments?.['energy-kcal_100g'], unit: "kcal" },
-        { label: "Fat", value: product?.nutriments?.fat_100g, unit: "g" },
-        { label: "Saturated Fat", value: product?.nutriments?.['saturated-fat_100g'], unit: "g" },
-        { label: "Carbohydrates", value: product?.nutriments?.carbohydrates_100g, unit: "g" },
-        { label: "Sugars", value: product?.nutriments?.sugars_100g, unit: "g" },
-        { label: "Proteins", value: product?.nutriments?.proteins_100g, unit: "g" },
-        { label: "Salt", value: product?.nutriments?.salt_100g, unit: "g" }
-    ].filter(item => item.value !== undefined && item.value !== null), [product]);
-
-    if (!product) {
-        return null; 
-    }
+    if (!product) return null;
 
     return (
-        <div className="p-4 md:p-6 space-y-4 max-w-2xl mx-auto pb-24">
-            <div className="flex items-center gap-2 animate-in fade-in slide-in-from-top-8 duration-500">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-9 w-9 flex-shrink-0" aria-label="Go back">
-                    <ChevronLeft className="h-6 w-6" />
+        <div className="p-4 md:p-6 space-y-8 max-w-2xl mx-auto pb-40 animate-in fade-in slide-in-from-bottom-8 duration-700">
+            <div className="flex items-center gap-4">
+                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-12 w-12 rounded-full flex-shrink-0 bg-muted/50 active:scale-90" aria-label="Go back">
+                    <ChevronLeft className="h-8 w-8" />
                 </Button>
                 <div className="flex-1 truncate">
-                    <h1 className="text-xl font-bold truncate">{product.product_name}</h1>
-                    <p className="text-muted-foreground">{product.brands}</p>
+                    <h1 className="text-2xl font-black truncate leading-tight">{product.product_name}</h1>
+                    <p className="text-muted-foreground font-bold">{product.brands}</p>
                 </div>
             </div>
             
-            <Card className="animate-in fade-in-50 zoom-in-95 duration-500 delay-200">
-                <div className="p-0 relative h-64 bg-muted rounded-t-lg flex items-center justify-center">
+            <Card className="rounded-3xl border shadow-lg overflow-hidden group">
+                <div className="p-0 relative h-72 bg-muted flex items-center justify-center">
                     {(product.image_front_url && !imageError) ? (
-                        isProblematicDomain ? (
-                            <img
-                                src={product.image_front_url}
-                                alt={product.product_name}
-                                className="object-contain h-full w-full"
-                                onError={() => setImageError(true)}
-                                data-ai-hint="product image"
-                            />
-                        ) : (
-                            <Image
-                                src={product.image_front_url}
-                                alt={product.product_name}
-                                fill
-                                className="object-contain"
-                                onError={() => setImageError(true)}
-                                data-ai-hint="product image"
-                            />
-                        )
+                        <Image
+                            src={product.image_front_url}
+                            alt={product.product_name}
+                            fill
+                            className="object-contain p-6 transition-transform duration-700 group-hover:scale-105"
+                            onError={() => setImageError(true)}
+                        />
                     ) : (
-                        <div className="flex flex-col items-center text-muted-foreground">
-                            <Package size={48} />
-                            <p className="mt-2 text-sm">No image available</p>
+                        <div className="flex flex-col items-center text-muted-foreground opacity-50">
+                            <Package size={64} />
+                            <p className="mt-4 text-sm font-black uppercase tracking-widest">{t('noPreview')}</p>
                         </div>
                     )}
                 </div>
                 <CardContent className="p-6">
                     <div className="flex flex-wrap gap-2">
-                        {product.nutriscore_grade && <Badge variant="outline">Nutri-Score: {product.nutriscore_grade.toUpperCase()}</Badge>}
-                        {product.nova_group && <Badge variant="outline">NOVA: {product.nova_group}</Badge>}
-                        {hasAllergens && <Badge variant="destructive"><Wheat className="mr-1 h-3 w-3" /> Contains Allergens</Badge>}
+                        {product.nutriscore_grade && <Badge variant="outline" className="rounded-full px-4 font-black">{t('grade')}: {product.nutriscore_grade.toUpperCase()}</Badge>}
+                        {product.nova_group && <Badge variant="outline" className="rounded-full px-4 font-black">{t('nova')}: {product.nova_group}</Badge>}
+                        {hasAllergens && <Badge variant="destructive" className="rounded-full px-4 font-black"><Wheat className="mr-1 h-3 w-3" /> {t('allergensAlert')}</Badge>}
                     </div>
                 </CardContent>
             </Card>
 
-             <Accordion type="single" collapsible className="w-full space-y-4" defaultValue="ai-analysis">
-                 {/* Unified Health Analysis Section: Handles both local breakdown and AI insights */}
-                 <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-300">
-                    <AccordionItem value="ai-analysis" className="border-none">
-                         <AccordionTrigger className="p-6 hover:no-underline">
-                             <CardTitle className="flex items-center gap-2"><Sparkles className="text-primary" /> Health Analysis</CardTitle>
-                         </AccordionTrigger>
-                         <AccordionContent className="px-6 pt-0 pb-6">
-                             <NutritionInsight product={product} barcode={productData.code} localAnalysis={localAnalysis} />
-                         </AccordionContent>
-                    </AccordionItem>
-                </Card>
-
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-400">
+            <NutritionInsight 
+                product={product} 
+                barcode={productData.code} 
+                localAnalysis={localAnalysis} 
+            />
+            
+            <Accordion type="single" collapsible className="w-full space-y-4">
+                <Card className="rounded-2xl border shadow-none overflow-hidden">
                     <AccordionItem value="nutrition-facts" className="border-none">
-                        <AccordionTrigger className="p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2"><Info className="text-primary" /> Nutrition Facts</CardTitle>
+                        <AccordionTrigger className="px-6 py-5 hover:no-underline font-black">
+                            <div className="flex items-center gap-3"><Info className="h-5 w-5 text-primary" /> {t('fullNutrition')}</div>
                         </AccordionTrigger>
-                        <AccordionContent className="px-6 pt-0 pb-6">
-                            {nutritionValues.length > 0 ? (
-                                <>
-                                    <p className="text-sm text-muted-foreground pb-4">per 100g serving</p>
-                                    {nutritionValues.map(item => <NutritionValue key={item.label} {...item} />)}
-                                </>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">No nutrition data available.</p>
-                            )}
+                        <AccordionContent className="px-6 pb-6">
+                             {Object.entries(product.nutriments).slice(0, 10).map(([key, value]) => (
+                                 <div key={key} className="flex justify-between py-2 border-b border-muted last:border-0 text-sm font-medium">
+                                     <span className="text-muted-foreground capitalize">{key.replace(/_100g|-/g, ' ')}</span>
+                                     <span>{typeof value === 'number' ? value.toFixed(1) : value}</span>
+                                 </div>
+                             ))}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>
 
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-500">
+                <Card className="rounded-2xl border shadow-none overflow-hidden">
                     <AccordionItem value="ingredients" className="border-none">
-                         <AccordionTrigger className="p-6 hover:no-underline">
-                            <CardTitle className="flex items-center gap-2"><Hash className="text-primary" /> Ingredients</CardTitle>
-                        </AccordionTrigger>
-                        <AccordionContent className="px-6 pt-0 pb-6">
-                             {product.ingredients_text_with_allergens ? (
-                                <p className="text-sm text-muted-foreground">{product.ingredients_text_with_allergens}</p>
-                            ) : (
-                                <p className="text-sm text-muted-foreground">No ingredients information available.</p>
-                            )}
+                         <AccordionTrigger className="px-6 py-5 hover:no-underline font-black">
+                             <div className="flex items-center gap-3"><Hash className="h-5 w-5 text-primary" /> {t('fullIngredients')}</div>
+                         </AccordionTrigger>
+                        <AccordionContent className="px-6 pb-6 text-sm leading-relaxed text-muted-foreground font-medium">
+                             {product.ingredients_text_with_allergens || "No ingredients list available."}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>
             </Accordion>
-            
+
             {preferences.aiChatEnabled && (
-                <Card className="animate-in fade-in slide-in-from-bottom-8 duration-500 delay-600">
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2"><MessageCircle className="text-primary" /> AI Assistant</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <ProductChatbot productData={JSON.stringify(product, null, 2)} />
-                    </CardContent>
+                <Card className="overflow-hidden border-2 border-primary/20 hover:border-primary/50 transition-all rounded-3xl shadow-lg mt-8 active:scale-98">
+                    <Accordion type="single" collapsible value={showChat ? 'chat' : ''} onValueChange={(v) => setShowChat(!!v)}>
+                        <AccordionItem value="chat" className="border-none">
+                            <AccordionTrigger className="px-6 py-6 hover:no-underline">
+                                <div className="flex items-center gap-4 text-left">
+                                    <div className="p-3 bg-primary/10 rounded-2xl">
+                                        <Sparkles className="h-7 w-7 text-primary animate-pulse" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-black text-xl">{t('askAiAssistant')}</h3>
+                                        <p className="text-sm text-muted-foreground font-medium">{t('dietSafetyAnalysis')}</p>
+                                    </div>
+                                </div>
+                            </AccordionTrigger>
+                            <AccordionContent className="px-6 pb-6">
+                                <ProductChatbot productData={JSON.stringify(product, null, 2)} />
+                            </AccordionContent>
+                        </AccordionItem>
+                    </Accordion>
                 </Card>
             )}
+
+            <div className="fixed bottom-24 inset-x-6 z-50 flex gap-4 max-w-2xl mx-auto animate-in slide-in-from-bottom-8 duration-500 delay-400">
+                <Button variant="outline" className="flex-1 h-16 rounded-2xl gap-3 font-black shadow-2xl bg-background/80 backdrop-blur-xl border-2 active:scale-95" onClick={() => router.push('/')}>
+                    <RotateCcw className="h-6 w-6" />
+                    {t('scanAgain')}
+                </Button>
+                <Button className="flex-1 h-16 rounded-2xl gap-3 font-black shadow-2xl active:scale-95">
+                    <Share2 className="h-6 w-6" />
+                    {t('shareResult')}
+                </Button>
+            </div>
         </div>
     );
 }

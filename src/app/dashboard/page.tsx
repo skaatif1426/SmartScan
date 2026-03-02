@@ -13,14 +13,16 @@ import Loading from './loading';
 import { getScoreInfo } from '@/lib/scoring';
 import { cn } from '@/lib/utils';
 import AnimatedCounter from '@/components/ui/AnimatedCounter';
+import { useLanguage } from '@/contexts/AppProviders';
 
 const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
+    const { t } = useLanguage();
     const greetingText = useMemo(() => {
         const hour = new Date().getHours();
-        if (hour < 12) return 'Good Morning';
-        if (hour < 18) return 'Good Afternoon';
-        return 'Good Evening';
-    }, []);
+        if (hour < 12) return t('goodMorning');
+        if (hour < 18) return t('goodAfternoon');
+        return t('goodEvening');
+    }, [t]);
 
     const { averageScore, trendIcon: TrendIcon, trendColor } = useMemo(() => {
         const scores = history.map(item => item.healthScore).filter(score => score !== undefined) as number[];
@@ -48,17 +50,17 @@ const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
     
     const { message, scoreInfo } = useMemo(() => {
         const scoreInfo = getScoreInfo(averageScore);
-        let message = "Start scanning to unlock personalized insights.";
+        let message = t('startScanMsg');
 
         if (history.length < 3) return { message, scoreInfo };
         
-        if (averageScore! > 75) message = "You're making consistently smart choices! ✨";
-        else if (averageScore! < 45) message = "Let's aim for healthier options today.";
-        else message = "Tracking your progress beautifully.";
+        if (averageScore! > 75) message = t('smartChoiceMsg');
+        else if (averageScore! < 45) message = t('lowScoreMsg');
+        else message = t('trackingMsg');
         
         return { message, scoreInfo };
 
-    }, [history, averageScore]);
+    }, [history, averageScore, t]);
     
     return (
         <div className="text-center animate-in fade-in slide-in-from-top-4 duration-500">
@@ -66,7 +68,7 @@ const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
             <p className="text-muted-foreground font-bold mt-1">{message}</p>
             
             <div className="mt-12">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-black mb-2">Health Index</p>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-[0.2em] font-black mb-2">{t('healthIndex')}</p>
                 <div className="flex items-center justify-center gap-2">
                     <div className={cn("text-8xl font-black tracking-tighter", scoreInfo.textClassName)}>
                          {averageScore !== null ? <AnimatedCounter value={averageScore} /> : '-'}
@@ -82,26 +84,27 @@ const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
 const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
     const { scanStreak } = useScanHistory();
     const { discoveryCount } = useDiscovery();
+    const { t } = useLanguage();
     
     return (
         <div className="space-y-4">
-            <h2 className="font-black text-lg uppercase tracking-widest text-muted-foreground text-center">Your Stats</h2>
+            <h2 className="font-black text-lg uppercase tracking-widest text-muted-foreground text-center"></h2>
             <Card className="border-2 shadow-sm rounded-3xl">
                 <CardContent className="p-6 grid grid-cols-3 divide-x-2 divide-border text-center">
                     <div className="space-y-1">
                         <Scan className="mx-auto h-5 w-5 text-muted-foreground" />
                         <div className="text-2xl font-black">{history.length}</div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">Scans</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">{t('scans')}</p>
                     </div>
                     <div className="space-y-1">
                         <Flame className="mx-auto h-5 w-5 text-muted-foreground" />
                         <div className="text-2xl font-black">{scanStreak}</div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">Streak</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">{t('streak')}</p>
                     </div>
                     <div className="space-y-1">
                         <Compass className="mx-auto h-5 w-5 text-muted-foreground" />
                         <div className="text-2xl font-black">{discoveryCount}</div>
-                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">Found</p>
+                        <p className="text-[10px] uppercase tracking-wider text-muted-foreground font-black">{t('found')}</p>
                     </div>
                 </CardContent>
             </Card>
@@ -110,10 +113,11 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
 };
 
 const RecentScan = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
+    const { t } = useLanguage();
     const scoreInfo = getScoreInfo(lastScan.healthScore);
     return (
         <div className="space-y-4">
-            <h2 className="font-black text-lg uppercase tracking-widest text-muted-foreground">Latest Analysis</h2>
+            <h2 className="font-black text-lg uppercase tracking-widest text-muted-foreground">{t('latestAnalysis')}</h2>
             <Link href={lastScan.type === 'image' && lastScan.imageAnalysis ? '#' : `/product/${lastScan.barcode}`} passHref className="block transition-all active:scale-[0.98] rounded-3xl">
                 <Card className="hover:bg-muted/50 border-2 shadow-sm rounded-3xl overflow-hidden">
                     <CardContent className="p-5 flex items-center gap-5">
@@ -142,6 +146,7 @@ const RecentScan = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
 export default function DashboardPage() {
     const { history, isLoaded } = useScanHistory();
     const { isLoaded: isDiscoveryLoaded } = useDiscovery();
+    const { t } = useLanguage();
 
     if (!isLoaded || !isDiscoveryLoaded) {
         return <Loading />;
@@ -154,8 +159,8 @@ export default function DashboardPage() {
                     <Sparkles className="h-20 w-20 text-primary animate-pulse" />
                     <Scan className="absolute -bottom-2 -right-2 h-10 w-10 text-primary animate-bounce" />
                 </div>
-                <h2 className="text-4xl font-black tracking-tight">Ready to Start?</h2>
-                <p className="mt-4 max-w-xs text-muted-foreground font-bold leading-relaxed">Scan your first product to unlock AI-powered health insights and personalized recommendations.</p>
+                <h2 className="text-4xl font-black tracking-tight">{t('readyToStart')}</h2>
+                <p className="mt-4 max-w-xs text-muted-foreground font-bold leading-relaxed">{t('dashboardWelcome')}</p>
                 <Link href="/" className="mt-12 w-full max-w-xs">
                     <Button 
                         size="lg" 
@@ -167,7 +172,7 @@ export default function DashboardPage() {
                         )}
                     >
                         <ScanLine className="mr-3 h-8 w-8" />
-                        Scan Now
+                        {t('analyzeProduct')}
                     </Button>
                 </Link>
             </div>
@@ -192,7 +197,7 @@ export default function DashboardPage() {
                         )}
                     >
                        <ScanLine className="mr-3 h-8 w-8" />
-                        Analyze Product
+                        {t('analyzeProduct')}
                     </Button>
                 </Link>
             </div>

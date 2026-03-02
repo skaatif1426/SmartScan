@@ -141,13 +141,12 @@ export default function SettingsPage() {
         <Button variant="ghost" size="icon" onClick={() => router.back()} className="rounded-full">
             <ChevronLeft />
         </Button>
-        <h1 className="text-3xl font-bold">Settings</h1>
+        <h1 className="text-3xl font-bold">{t('settingsTitle')}</h1>
       </div>
 
       <div className="space-y-6">
-        {/* ACCOUNT */}
         <Card id="account" className="border shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><User className="h-5 w-5 text-primary" /> Account</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><User className="h-5 w-5 text-primary" /> {t('account')}</CardTitle></CardHeader>
           <CardContent className="space-y-6">
              <div className="flex flex-col items-center gap-4">
                 <div className="relative group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
@@ -167,28 +166,27 @@ export default function SettingsPage() {
 
              <div className="grid gap-4">
                 <div className="space-y-2">
-                    <Label htmlFor="user-name">Name</Label>
+                    <Label htmlFor="user-name">{t('name')}</Label>
                     <Input id="user-name" value={preferences.name} onChange={(e) => savePreferences({ name: e.target.value })} />
                 </div>
                 <div className="space-y-2">
-                    <Label htmlFor="user-email">Email</Label>
+                    <Label htmlFor="user-email">{t('email')}</Label>
                     <Input id="user-email" value={preferences.email} onChange={(e) => savePreferences({ email: e.target.value })} />
                 </div>
              </div>
              <Separator />
-             <Button variant="outline" className="w-full justify-start gap-2 h-11"><LogOut className="h-4 w-4" /> Logout</Button>
+             <Button variant="outline" className="w-full justify-start gap-2 h-11"><LogOut className="h-4 w-4" /> {t('logout')}</Button>
           </CardContent>
         </Card>
 
-        {/* DIETARY & GOALS - Unified Source */}
         <Card id="dietary" className="border shadow-sm">
             <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-lg"><Target className="h-5 w-5 text-primary" /> Dietary & Goals</CardTitle>
+                <CardTitle className="flex items-center gap-2 text-lg"><Target className="h-5 w-5 text-primary" /> {t('dietaryGoals')}</CardTitle>
                 <CardDescription>Master source for all health preferences.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-3">
-                    <Label>Health Goal</Label>
+                    <Label>{t('healthGoal')}</Label>
                     <Select value={preferences.healthGoal} onValueChange={(v: HealthGoal) => handleSettingChange('healthGoal', v)}>
                         <SelectTrigger><SelectValue /></SelectTrigger>
                         <SelectContent>
@@ -198,7 +196,7 @@ export default function SettingsPage() {
                 </div>
                 
                 <div className="space-y-3">
-                    <Label>Diet Type</Label>
+                    <Label>{t('dietType')}</Label>
                     <Select value={preferences.diet} onValueChange={(v: DietType) => handleSettingChange('diet', v)}>
                         <SelectTrigger><SelectValue className="capitalize" /></SelectTrigger>
                         <SelectContent>
@@ -208,7 +206,7 @@ export default function SettingsPage() {
                 </div>
 
                 <div className="space-y-3">
-                    <Label>Specific Focus</Label>
+                    <Label>{t('specificFocus')}</Label>
                     <div className="flex flex-wrap gap-2">
                         {healthFocusOptions.map((option) => (
                             <Badge 
@@ -225,7 +223,7 @@ export default function SettingsPage() {
 
                 <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/30">
                     <div className="space-y-0.5">
-                        <Label>Strict Mode</Label>
+                        <Label>{t('strictMode')}</Label>
                         <p className="text-xs text-muted-foreground">High sensitivity alerts for allergens.</p>
                     </div>
                     <Switch checked={preferences.strictMode} onCheckedChange={(v) => handleSettingChange('strictMode', v)} />
@@ -233,16 +231,15 @@ export default function SettingsPage() {
             </CardContent>
         </Card>
 
-        {/* APP PREFERENCES */}
         <Card className="border shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Palette className="h-5 w-5 text-primary" /> App Style</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><Palette className="h-5 w-5 text-primary" /> {t('appStyle')}</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label>Theme</Label>
+              <Label>{t('theme')}</Label>
               <ThemeToggle theme={preferences.theme} onThemeChange={(t: Theme) => handleSettingChange('theme', t)} />
             </div>
             <div className="space-y-3">
-              <Label>Language</Label>
+              <Label>{t('language')}</Label>
               <Select value={language} onValueChange={(l: Language) => { setLanguage(l); }}>
                 <SelectTrigger><SelectValue /></SelectTrigger>
                 <SelectContent>{languages.map(lang => <SelectItem key={lang} value={lang}>{lang}</SelectItem>)}</SelectContent>
@@ -251,20 +248,19 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* AI CONFIGURATION */}
         <Card id="ai" className="border shadow-sm">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-lg"><Sparkles className="h-5 w-5 text-primary" /> AI Settings</CardTitle>
+            <CardTitle className="flex items-center gap-2 text-lg"><Sparkles className="h-5 w-5 text-primary" /> {t('aiSettings')}</CardTitle>
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="space-y-3">
-              <Label>Response Style</Label>
+              <Label>{t('responseStyle')}</Label>
                <div className="grid grid-cols-3 gap-2">{verbosityLevels.map(({ id, label }) => (
                   <Button key={id} variant={preferences.aiVerbosity === id ? 'default' : 'outline'} onClick={() => handleSettingChange('aiVerbosity', id)} className="h-10 text-xs">{label}</Button>
               ))}</div>
             </div>
             <div className="space-y-3">
-              <Label>Analysis Priority</Label>
+              <Label>{t('analysisPriority')}</Label>
                <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">{aiFocusOptions.map(({ id, label }) => (
                   <Button key={id} variant={preferences.aiFocusPriority === id ? 'default' : 'outline'} onClick={() => handleSettingChange('aiFocusPriority', id)} className="h-10 text-[10px] sm:text-xs">{label}</Button>
               ))}</div>
@@ -272,9 +268,8 @@ export default function SettingsPage() {
           </CardContent>
         </Card>
 
-        {/* DATA & PRIVACY */}
         <Card className="border shadow-sm">
-          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><HardDrive className="h-5 w-5 text-primary" /> Privacy</CardTitle></CardHeader>
+          <CardHeader><CardTitle className="flex items-center gap-2 text-lg"><HardDrive className="h-5 w-5 text-primary" /> {t('privacy')}</CardTitle></CardHeader>
           <CardContent className="space-y-6">
             <div className="flex items-center justify-between p-4 rounded-xl border bg-muted/10">
                 <div className="space-y-0.5">
@@ -284,16 +279,15 @@ export default function SettingsPage() {
                 <Badge variant="secondary" className="px-3 py-1 font-mono">{usage.callCount} Calls</Badge>
             </div>
             <AlertDialog>
-                <AlertDialogTrigger asChild><Button variant="outline" className="w-full h-11 text-destructive hover:bg-destructive/5"><Trash2 className="mr-2 h-4 w-4" /> Clear History</Button></AlertDialogTrigger>
+                <AlertDialogTrigger asChild><Button variant="outline" className="w-full h-11 text-destructive hover:bg-destructive/5"><Trash2 className="mr-2 h-4 w-4" /> {t('clearHistory')}</Button></AlertDialogTrigger>
                 <AlertDialogContent>
-                    <AlertDialogHeader><AlertDialogTitle>Clear History?</AlertDialogTitle><AlertDialogDescription>This removes all local scan data. It is irreversible.</AlertDialogDescription></AlertDialogHeader>
-                    <AlertDialogFooter><AlertDialogCancel disabled={isClearing}>Cancel</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory} disabled={isClearing} className="bg-destructive text-destructive-foreground">Confirm</AlertDialogAction></AlertDialogFooter>
+                    <AlertDialogHeader><AlertDialogTitle>{t('clearHistoryConfirmTitle')}</AlertDialogTitle><AlertDialogDescription>{t('clearHistoryConfirmDescription')}</AlertDialogDescription></AlertDialogHeader>
+                    <AlertDialogFooter><AlertDialogCancel disabled={isClearing}>{t('cancel')}</AlertDialogCancel><AlertDialogAction onClick={handleClearHistory} disabled={isClearing} className="bg-destructive text-destructive-foreground">{t('confirm')}</AlertDialogAction></AlertDialogFooter>
                 </AlertDialogContent>
             </AlertDialog>
           </CardContent>
         </Card>
         
-        {/* SUPPORT */}
         <div className="grid gap-4">
             <Card>
                 <CardContent className="p-2 divide-y">

@@ -5,7 +5,6 @@ import { Bot, Camera } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { getAIEstimate } from '@/lib/actions';
 import type { NutritionInsightOutput } from '@/lib/types';
 import AnalysisDisplay from './AnalysisDisplay';
@@ -23,7 +22,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const { addDiscovery } = useDiscovery();
     const { addScanToHistory } = useScanHistory();
     const { addXp, XP_PER_DISCOVERY } = useGamification();
-    const { language } = useLanguage();
+    const { language, t } = useLanguage();
 
     useEffect(() => {
         if (barcode) {
@@ -33,11 +32,10 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                 productName: `Discovery: #${barcode.slice(-4)}`,
                 brand: 'Unknown Product',
                 isDiscovery: true,
-                categories: 'Other', // Default category
+                categories: 'Other', 
             });
             addXp(XP_PER_DISCOVERY);
         }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [barcode]);
 
     const handleGetEstimate = async () => {
@@ -46,20 +44,19 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
         const result = await getAIEstimate({ barcode, language });
         if (result) {
             setEstimate(result);
-            // If the AI returned a category, update the history item.
             if (result.category) {
                 addScanToHistory({
                     barcode,
                     productName: `Discovery: ${result.category}`,
                     brand: 'AI Estimate',
-                    imageUrl: null, // No image for discoveries
+                    imageUrl: null, 
                     categories: result.category,
                     healthScore: result.healthScore,
                     isDiscovery: true,
                 });
             }
         } else {
-            setError('Could not generate an AI estimate at this time.');
+            setError(t('generatingInsightError'));
         }
         setIsEstimating(false);
     };
@@ -68,12 +65,12 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
         <div className="flex flex-col items-center justify-center min-h-full p-4 md:p-6 text-center">
             <Card className="w-full max-w-lg shadow-lg animate-in fade-in zoom-in-95 duration-500">
                 <CardHeader>
-                    <CardTitle className="text-2xl font-bold">✨ New Discovery!</CardTitle>
+                    <CardTitle className="text-2xl font-bold">✨ {t('newDiscovery')}</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
                     <div>
                         <p className="text-muted-foreground">
-                            Thanks for discovering something new! We're learning from this.
+                            {t('thanksDiscovery')}
                         </p>
                         <p className="text-sm text-muted-foreground mt-2">
                            This product is under review. Soon you'll see full AI insights. Check back later!
@@ -87,11 +84,11 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                     <div className="flex flex-col sm:flex-row gap-2 pt-2">
                         <Button className="w-full" onClick={handleGetEstimate} disabled={isEstimating}>
                             <Bot className="mr-2" />
-                            {isEstimating ? 'Estimating...' : 'Get AI Estimate'}
+                            {isEstimating ? 'Estimating...' : t('getAiEstimate')}
                         </Button>
                         <Button variant="outline" className="w-full" onClick={() => router.push('/')}>
                             <Camera className="mr-2" />
-                            Scan Another
+                            {t('scanAgain')}
                         </Button>
                     </div>
 
@@ -113,7 +110,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                     {estimate && (
                         <div className="pt-6 text-left border-t mt-6">
                             <AnalysisDisplay
-                                warningTitle="⚠️ AI Estimated Analysis (may not be exact)"
+                                warningTitle={t('aiEstimatedAnalysis')}
                                 title="AI Health Score Estimate"
                                 score={estimate.healthScore}
                                 summary={estimate.summary}
