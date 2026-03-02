@@ -366,14 +366,13 @@ export default function ScannerPage() {
             {/* 2. MAIN ICON - TACTILE & ANIMATED */}
             <div className="mb-10">
               <div className="relative group">
-                {/* Subtle Glow Ring */}
                 <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                
                 <div 
                   className={cn(
                     "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
                     "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
                   )}
+                  onClick={() => mode === 'barcode' ? setShowScanner(true) : photoCaptureInputRef.current?.click()}
                 >
                   <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
                     {mode === 'barcode' ? (
@@ -386,24 +385,20 @@ export default function ScannerPage() {
               </div>
             </div>
 
-            {/* 3. TITLE & 4. SUBTITLE */}
             <div className="text-center space-y-2 mb-12">
               <h1 className="text-3xl font-black tracking-tight text-foreground transition-all">
                 {mode === 'barcode' ? "Barcode Entry" : "Photo Analysis"}
               </h1>
               <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-medium">
-                {mode === 'barcode' 
-                  ? "Choose your preferred method to identify a product barcode." 
-                  : "Upload or capture a product image to analyze details using AI."}
+                Scan instantly or add {mode === 'barcode' ? 'barcode' : 'photo'} manually
               </p>
             </div>
 
-            {/* 5. PRIMARY BUTTON - PILL GRADIENT */}
             <div className="w-full space-y-5">
               <Button 
                 size="lg" 
                 className={cn(
-                  "w-full rounded-full h-13 text-base font-semibold transition-all duration-300 gap-3",
+                  "w-full rounded-full h-15 text-lg font-semibold transition-all duration-300 gap-3",
                   "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
                   "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
                   "active:scale-95 active:brightness-95 active:shadow-sm"
@@ -416,16 +411,15 @@ export default function ScannerPage() {
                   }
                 }}
               >
-                <Camera className="h-5 w-5" />
-                {mode === 'barcode' ? "Capture Photo" : "Capture Photo"}
+                <Camera className="h-6 w-6" />
+                Capture Photo
               </Button>
 
-              {/* 6. SECONDARY BUTTONS - SOFT CARDS */}
               <div className="grid grid-cols-2 gap-4">
                 <Button 
                   variant="outline" 
                   className={cn(
-                    "h-16 rounded-2xl border-border/40 font-bold text-[11px] px-2",
+                    "h-15 rounded-2xl border-border/40 font-bold text-[11px] px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
                   onClick={() => {
@@ -443,7 +437,7 @@ export default function ScannerPage() {
                 <Button 
                   variant="outline" 
                   className={cn(
-                    "h-16 rounded-2xl border-border/40 font-bold text-[11px] px-2",
+                    "h-15 rounded-2xl border-border/40 font-bold text-[11px] px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
                   onClick={() => {
@@ -460,7 +454,6 @@ export default function ScannerPage() {
               </div>
             </div>
 
-            {/* Hidden Inputs */}
             <input 
               type="file" 
               ref={barcodeFileInputRef} 
@@ -493,7 +486,6 @@ export default function ScannerPage() {
         )}
       </div>
 
-      {/* Manual Entry Sheet */}
       {showManualInput && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-[200] flex items-end sm:items-center justify-center p-6 animate-in fade-in duration-300">
           <Card className="w-full max-w-md animate-in slide-in-from-bottom-full duration-500 shadow-2xl border-2 rounded-[2.5rem]">
