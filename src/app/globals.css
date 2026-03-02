@@ -107,7 +107,7 @@
   }
 
   .animate-pulse-subtle {
-    animation: pulse-subtle 2s infinite ease-in-out;
+    animation: pulse-subtle 2.5s infinite ease-in-out;
   }
 }
 
@@ -147,6 +147,6 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.04); }
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.08); opacity: 0.8; }
 }
