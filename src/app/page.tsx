@@ -398,7 +398,7 @@ export default function ScannerPage() {
               <Button 
                 size="lg" 
                 className={cn(
-                  "w-full rounded-full h-15 text-lg font-semibold transition-all duration-300 gap-3",
+                  "w-full rounded-full h-16 text-lg font-semibold transition-all duration-300 gap-3",
                   "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
                   "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
                   "active:scale-95 active:brightness-95 active:shadow-sm"
@@ -419,7 +419,7 @@ export default function ScannerPage() {
                 <Button 
                   variant="outline" 
                   className={cn(
-                    "h-15 rounded-2xl border-border/40 font-bold text-[11px] px-2",
+                    "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
                   onClick={() => {
@@ -437,7 +437,7 @@ export default function ScannerPage() {
                 <Button 
                   variant="outline" 
                   className={cn(
-                    "h-15 rounded-2xl border-border/40 font-bold text-[11px] px-2",
+                    "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
                   onClick={() => {
