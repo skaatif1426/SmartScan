@@ -22,7 +22,6 @@ const QrScanner = ({
   onScanFailure, 
   onCameraPermissionError, 
   onStatusChange,
-  isAutoScan = false,
   activeCameraId,
   isCapturing = false
 }: QrScannerProps) => {
@@ -54,6 +53,7 @@ const QrScanner = ({
   }, [onStatusChange]);
 
   const startScanner = useCallback(async (cameraId: string) => {
+    // 1. Initial Guard: If already busy or unmounted, abort.
     if (!isMounted.current || !scannerRef.current || isBusy.current) return;
     
     const container = document.getElementById(qrcodeRegionId);
@@ -63,19 +63,21 @@ const QrScanner = ({
     try {
       const state = scannerRef.current.getState();
       
-      // If we are scanning or paused, we must stop first
+      // 2. Clean up existing session if active
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         try {
           await scannerRef.current.stop();
-          // Give hardware/library a moment to transition states
-          await new Promise(resolve => setTimeout(resolve, 500));
+          // Mandatory hardware settling delay
+          await new Promise(resolve => setTimeout(resolve, 600));
         } catch (stopError) {
-          // Ignore stop errors as they usually mean it was already stopped or transitioning
+          // Benign error if already transitioning or stopped
         }
       }
 
+      // 3. Post-cleanup Check: Ensure we're still mounted after the async stop
       if (!isMounted.current) return;
 
+      // 4. Start Hardware
       await scannerRef.current.start(
         cameraId,
         {
@@ -100,16 +102,18 @@ const QrScanner = ({
         }
       );
       
-      setIsReady(true);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : String(err);
-      
-      // Ignore internal transition/clear errors as they are benign race conditions
-      if (errorMessage.includes('transition') || errorMessage.includes('clear')) {
-        return;
+      if (isMounted.current) {
+        setIsReady(true);
       }
-
-      onCameraPermissionError(new Error(errorMessage));
+    } catch (err) {
+      if (isMounted.current) {
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        // Ignore benign library-internal race condition errors
+        if (errorMessage.includes('transition') || errorMessage.includes('clear')) {
+          return;
+        }
+        onCameraPermissionError(new Error(errorMessage));
+      }
     } finally {
       isBusy.current = false;
     }
@@ -136,7 +140,8 @@ const QrScanner = ({
 
     const initialize = async () => {
       try {
-        await new Promise(r => setTimeout(r, 600)); // Increased initial delay
+        // Initial delay to prevent rapid double-mount conflicts (React 18)
+        await new Promise(r => setTimeout(r, 800)); 
         if (!isMounted.current) return;
 
         if (activeCameraId) {
