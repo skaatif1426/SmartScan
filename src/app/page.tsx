@@ -209,7 +209,6 @@ export default function ScannerPage() {
     }
   };
 
-  // HANDLER: Trigger Device Camera
   const handleCapturePhotoAction = () => {
     triggerHaptic();
     if (photoCaptureInputRef.current) {
@@ -217,7 +216,6 @@ export default function ScannerPage() {
     }
   };
 
-  // HANDLER: Trigger File Picker (Gallery)
   const handleUploadPhotoAction = () => {
     triggerHaptic();
     if (photoFileInputRef.current) {
@@ -225,7 +223,6 @@ export default function ScannerPage() {
     }
   };
 
-  // HANDLER: Trigger Manual Input (Barcode) or Gallery Upload (Barcode)
   const handleBarcodeUploadAction = () => {
     triggerHaptic();
     if (barcodeFileInputRef.current) {
@@ -312,7 +309,6 @@ export default function ScannerPage() {
     <div className="flex flex-col h-full bg-background relative overflow-hidden">
       <div id="barcode-shuttle-hidden" className="hidden"></div>
 
-      {/* 1. TOP TOGGLE */}
       {!showScanner && (
         <div className="pt-8 px-6 flex justify-center z-10">
           <div className="bg-muted p-1 rounded-full flex w-full max-w-[280px] shadow-inner relative border border-white/5 active:scale-[0.98] transition-transform">
@@ -350,7 +346,6 @@ export default function ScannerPage() {
       >
         {mode === 'barcode' && showScanner ? (
           <div className="fixed inset-0 bg-black z-[100] flex flex-col h-svh overflow-hidden text-white animate-in slide-in-from-bottom-full duration-500">
-            {/* Top Bar */}
             <div className="flex items-center justify-between px-6 py-8 z-10">
               <Button variant="ghost" size="icon" className="text-white bg-black/40 backdrop-blur-md hover:bg-white/10 rounded-full h-12 w-12" onClick={() => setShowScanner(false)}>
                 <ChevronLeft className="h-7 w-7" />
@@ -360,7 +355,6 @@ export default function ScannerPage() {
               </Button>
             </div>
 
-            {/* Camera View */}
             <div className="flex-1 relative">
               <QrScanner 
                 onScanSuccess={handleScanSuccess}
@@ -381,7 +375,6 @@ export default function ScannerPage() {
               )}
             </div>
 
-            {/* Bottom Controls */}
             <div className="px-8 pb-16 pt-6 bg-gradient-to-t from-black to-transparent space-y-8">
               <div className="flex justify-end pr-2">
                 <Button variant="secondary" size="icon" className="h-12 w-12 rounded-full bg-white/20 backdrop-blur-md hover:bg-white/30 border border-white/10 shadow-2xl active:scale-90" onClick={switchCamera}>
@@ -397,7 +390,6 @@ export default function ScannerPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            {/* 2. MAIN ICON */}
             <div className="mb-10">
               <div 
                 className={cn(
@@ -442,36 +434,28 @@ export default function ScannerPage() {
                 Capture Photo
               </Button>
 
-              <div className="grid grid-cols-2 gap-4">
-                <Button 
-                  variant="outline" 
-                  className={cn(
-                    "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
-                    "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
-                  )}
-                  onClick={mode === 'barcode' ? () => setShowManualInput(true) : handleUploadPhotoAction}
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "w-full h-16 rounded-full border-border/40 font-bold text-sm gap-3",
+                  "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
+                )}
+                onClick={mode === 'barcode' ? handleBarcodeUploadAction : handleUploadPhotoAction}
+              >
+                <ImageIcon className="h-5 w-5" />
+                {mode === 'barcode' ? "Upload Barcode Image" : "Upload from Gallery"}
+              </Button>
+
+              {mode === 'barcode' && (
+                <button 
+                  onClick={() => setShowManualInput(true)}
+                  className="w-full text-center text-xs font-bold text-muted-foreground hover:text-primary transition-colors py-2"
                 >
-                  {mode === 'barcode' ? <Keyboard className="mr-2 h-4 w-4" /> : <ImageIcon className="mr-2 h-4 w-4" />}
-                  {mode === 'barcode' ? "Enter Barcode Manually" : "Upload Image"}
-                </Button>
-                
-                <Button 
-                  variant="outline" 
-                  className={cn(
-                    "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
-                    "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
-                  )}
-                  onClick={mode === 'barcode' ? handleBarcodeUploadAction : handleUploadPhotoAction}
-                >
-                  <ImageIcon className="mr-2 h-4 w-4" />
-                  {mode === 'barcode' ? "Upload Barcode Image" : "Choose from Gallery"}
-                </Button>
-              </div>
+                  Enter Barcode Manually
+                </button>
+              )}
             </div>
 
-            {/* HIDDEN INPUTS */}
-            
-            {/* Standard File Picker (for Barcode images in Barcode mode) */}
             <input 
               type="file" 
               ref={barcodeFileInputRef} 
@@ -480,7 +464,6 @@ export default function ScannerPage() {
               onChange={handleBarcodeFileUpload}
             />
             
-            {/* Standard File Picker (for Gallery uploads in Photo mode) */}
             <input 
               type="file" 
               ref={photoFileInputRef} 
@@ -492,7 +475,6 @@ export default function ScannerPage() {
               }}
             />
             
-            {/* DIRECT CAMERA INTENT (for 'Capture Photo' button in Photo mode) */}
             <input 
               type="file" 
               ref={photoCaptureInputRef} 

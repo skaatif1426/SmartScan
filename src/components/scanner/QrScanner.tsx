@@ -62,7 +62,7 @@ const QrScanner = ({
       try {
         await scannerRef.current.stop();
         // Brief pause for hardware to settle
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 600));
       } catch (e) {
         // Ignore benign stop errors
       }
@@ -108,6 +108,7 @@ const QrScanner = ({
     } catch (err) {
       if (isMounted.current) {
         const errorMessage = err instanceof Error ? err.message : String(err);
+        // Specifically suppress transition errors from bubbling up to global error UI
         if (!errorMessage.includes('transition') && !errorMessage.includes('clear')) {
           onCameraPermissionError(new Error(errorMessage));
         }
@@ -145,8 +146,8 @@ const QrScanner = ({
     scannerRef.current = html5Qrcode;
 
     const initialize = async () => {
-      // Small initial delay to avoid double-mount race conditions in dev mode
-      await new Promise(r => setTimeout(r, 600));
+      // Small initial delay to avoid double-mount race conditions
+      await new Promise(r => setTimeout(r, 800));
       if (!isMounted.current) return;
 
       executeAction(async () => {
