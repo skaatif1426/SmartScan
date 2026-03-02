@@ -69,8 +69,8 @@ const QrScanner = ({
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         try {
           await scannerRef.current.stop();
-          // Mandatory hardware settling delay
-          await new Promise(resolve => setTimeout(resolve, 600));
+          // Mandatory hardware settling delay to ensure cleanup
+          await new Promise(resolve => setTimeout(resolve, 800));
         } catch (stopError) {
           // Benign error if already transitioning or stopped
         }

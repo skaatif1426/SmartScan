@@ -167,7 +167,9 @@ export default function ScannerPage() {
     if (isCapturing || isAnalyzing) return;
     
     setIsCapturing(true);
-    if (window.navigator.vibrate) window.navigator.vibrate(100);
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(100);
+    }
     
     setTimeout(() => {
       setShowScanner(false);
@@ -212,8 +214,10 @@ export default function ScannerPage() {
     if (mode === 'barcode') {
       setShowScanner(true);
     } else {
-      // Photo Analysis - Open Native Camera
-      photoCaptureInputRef.current?.click();
+      // Photo Analysis - Open Native Camera Directly
+      if (photoCaptureInputRef.current) {
+        photoCaptureInputRef.current.click();
+      }
     }
   };
 
@@ -242,7 +246,9 @@ export default function ScannerPage() {
     const currentIndex = cameras.findIndex(c => c.id === activeCameraId);
     const nextIndex = (currentIndex + 1) % cameras.length;
     setActiveCameraId(cameras[nextIndex].id);
-    if (window.navigator.vibrate) window.navigator.vibrate(50);
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
   };
 
   const onManualSubmit = (e: React.FormEvent) => {
@@ -287,7 +293,7 @@ export default function ScannerPage() {
                   analysisStep === idx ? "border-primary border-t-transparent animate-spin" : "border-current"
                 )} />
               )}
-              <p className="text-base">{mode === 'barcode' ? t(step) : step}</p>
+              <p className="text-base">{mode === 'barcode' ? t(step as any) : step}</p>
             </div>
           ))}
           {isProcessingFile && (
@@ -377,7 +383,7 @@ export default function ScannerPage() {
               {hint && (
                 <div className="absolute top-12 inset-x-0 flex justify-center pointer-events-none px-6">
                   <div className="bg-black/70 backdrop-blur-xl px-6 py-3 rounded-full border border-white/20 animate-in fade-in slide-in-from-top-6 duration-300">
-                    <p className="text-sm font-bold tracking-tight text-white">{t(hint)}</p>
+                    <p className="text-sm font-bold tracking-tight text-white">{t(hint as any)}</p>
                   </div>
                 </div>
               )}
@@ -489,6 +495,7 @@ export default function ScannerPage() {
                 if (file) processPhotoImage(file);
               }}
             />
+            {/* CRITICAL: capture="environment" forces camera on mobile instead of storage */}
             <input 
               type="file" 
               ref={photoCaptureInputRef} 
@@ -533,3 +540,4 @@ export default function ScannerPage() {
     </div>
   );
 }
+
