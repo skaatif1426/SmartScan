@@ -1,7 +1,7 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Camera, Loader2, Sparkles, BrainCircuit } from 'lucide-react';
+import { Camera, Loader2, Sparkles, Radar } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -84,7 +84,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                     <div className="mx-auto mb-6 relative">
                         <div className="absolute inset-0 bg-primary/20 rounded-full blur-xl animate-pulse" />
                         <div className="relative p-5 bg-primary/10 rounded-full">
-                            <BrainCircuit className="h-10 w-10 text-primary animate-pulse-subtle" />
+                            <Radar className="h-10 w-10 text-primary animate-pulse-subtle" />
                         </div>
                     </div>
                     <CardTitle className="text-3xl font-black tracking-tight h-8">
