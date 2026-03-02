@@ -32,6 +32,8 @@ const QrScanner = ({
   const lastHintRef = useRef<string>('');
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Use a ref for the success callback to avoid scanner re-initialization 
+  // when the parent component re-renders with a new function instance.
   const onScanSuccessRef = useRef(onScanSuccess);
   useEffect(() => {
     onScanSuccessRef.current = onScanSuccess;
