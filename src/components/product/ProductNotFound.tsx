@@ -26,11 +26,9 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const { addXp, XP_PER_DISCOVERY } = useGamification();
     const { language, t } = useLanguage();
 
-    // Fix hydration mismatch: Set random message key after mount
     const [randomMessageKey, setRandomMessageKey] = useState<any>(null);
 
     useEffect(() => {
-        // Pick random message on client side only
         const index = Math.floor(Math.random() * 7) + 1;
         setRandomMessageKey(`discoveryMsg${index}`);
 
@@ -46,7 +44,6 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
             addXp(XP_PER_DISCOVERY);
         }
 
-        // Simulate intelligence delay (Warm up phase)
         const timer = setTimeout(() => {
             setIsWarmingUp(false);
         }, 1800);
@@ -130,7 +127,7 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                             ) : (
                                 <Sparkles className="mr-3 h-5 w-5" />
                             )}
-                            {isEstimating ? 'Finalizing Analysis...' : t('getAiEstimate')}
+                            {isEstimating ? t('finalizingAnalysis') : t('getAiEstimate')}
                         </Button>
                         <Button 
                             variant="outline" 

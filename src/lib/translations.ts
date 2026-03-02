@@ -49,7 +49,14 @@ export const translations: Translations = {
   loadingRead: { English: 'Reading barcode...', Hindi: 'बारकोड पढ़ा जा रहा है...', Marathi: 'बारकोड वाचत है...', Hinglish: 'Barcode read ho raha hai...' },
   loadingIngredients: { English: 'Fetching ingredients...', Hindi: 'सामग्री प्राप्त हो रही है...', Marathi: 'साहित्य मिळवत आहे...', Hinglish: 'Ingredients aa rahe hain...' },
   loadingInsights: { English: 'Generating insights...', Hindi: 'जानकारी तैयार की जा रही है...', Marathi: 'माहिती तयार करत आहे...', Hinglish: 'Insights ban rahe hain...' },
-  analyzingImage: { English: 'Analyzing image...', Hindi: 'छवि का विश्लेषण...', Marathi: 'प्रतिमेचे विश्लेषण...', Hinglish: 'Image analyze ho rahi hai...' },
+  loadingImageProfile: { English: 'Analyzing image profile...', Hindi: 'छवि प्रोफ़ाइल का विश्लेषण...', Marathi: 'प्रतिमा प्रोफाइलचे विश्लेषण...', Hinglish: 'Image profile check ho rahi hai...' },
+  detectingFoodContent: { English: 'Detecting food content...', Hindi: 'खाद्य सामग्री का पता लगाना...', Marathi: 'अन्न सामग्री शोधत आहे...', Hinglish: 'Khana dhoond rahe hain...' },
+  calculatingNutritionalValues: { English: 'Calculating nutrition...', Hindi: 'पोषण की गणना...', Marathi: 'पोषण गणना...', Hinglish: 'Nutrition calculate ho raha hai...' },
+  generatingSmartInsights: { English: 'Generating smart insights...', Hindi: 'स्मार्ट जानकारी तैयार करना...', Marathi: 'स्मार्ट अंतर्दृष्टी तयार करत आहे...', Hinglish: 'Smart insights ban rahe hain...' },
+  aiVisionEngine: { English: 'AI Vision Engine', Hindi: 'एआई विजन इंजन', Marathi: 'AI विजन इंजिन', Hinglish: 'AI Vision Engine' },
+  detectsFoodType: { English: 'Detects fruits, meals & more', Hindi: 'फलों, भोजन और बहुत कुछ का पता लगाता है', Marathi: 'फळे, जेवण आणि बरेच काही शोधते', Hinglish: 'Fruits aur meals detect karta hai' },
+  uploadFromGallery: { English: 'Upload from Gallery', Hindi: 'गैलरी से अपलोड करें', Marathi: 'गॅलरीमधून अपलोड करा', Hinglish: 'Gallery se upload karo' },
+  selectExistingPhoto: { English: 'Select an existing photo', Hindi: 'एक मौजूदा फोटो चुनें', Marathi: 'विद्यमान फोटो निवडा', Hinglish: 'Purana photo select karo' },
 
   // Product Details
   grade: { English: 'Grade', Hindi: 'ग्रेड', Marathi: 'ग्रेड', Hinglish: 'Grade' },
@@ -62,6 +69,10 @@ export const translations: Translations = {
   scanAgain: { English: 'Scan Again', Hindi: 'फिर से स्कैन करें', Marathi: 'पुन्हा स्कॅन करा', Hinglish: 'Scan Phir Se' },
   shareResult: { English: 'Share Result', Hindi: 'परिणाम साझा करें', Marathi: 'निकाल शेअर करा', Hinglish: 'Result Share Karo' },
   noPreview: { English: 'No Preview', Hindi: 'कोई पूर्वावलोकन नहीं', Marathi: 'कोणतेही पूर्वावलोकन नाही', Hinglish: 'No Preview' },
+  confidence: { English: 'Confidence', Hindi: 'आत्मविश्वास', Marathi: 'आत्मविश्वास', Hinglish: 'Confidence' },
+  imageIntelligenceScan: { English: 'Image Intelligence Scan', Hindi: 'इमेज इंटेलिजेंस स्कैन', Marathi: 'इमेज इंटेलिजन्स स्कॅन', Hinglish: 'Image Intelligence Scan' },
+  likelyIngredients: { English: 'Likely Ingredients', Hindi: 'संभावित सामग्री', Marathi: 'संभाव्य साहित्य', Hinglish: 'Likely Ingredients' },
+  suggestedAlternatives: { English: 'Suggested Alternatives', Hindi: 'सुझाए गए विकल्प', Marathi: 'सुचवलेले पर्याय', Hinglish: 'Suggested Alternatives' },
 
   // Analysis Display
   nutritionAlerts: { English: 'Nutrition Alerts', Hindi: 'पोषण संबंधी अलर्ट', Marathi: 'पोषण सूचना', Hinglish: 'Nutrition Alerts' },
@@ -96,7 +107,7 @@ export const translations: Translations = {
   settingsTitle: { English: 'Settings', Hindi: 'सेटिंग्स', Marathi: 'सेटिंग्ज', Hinglish: 'Settings' },
   account: { English: 'Account', Hindi: 'खाता', Marathi: 'खाते', Hinglish: 'Account' },
   dietaryGoals: { English: 'Dietary & Goals', Hindi: 'आहार और लक्ष्य', Marathi: 'आहार आणि ध्येय', Hinglish: 'Dietary & Goals' },
-  appStyle: { English: 'App Style', Hindi: 'ऐप स्टाइल', Marathi: 'अॅप स्टाईल', Hinglish: 'App Style' },
+  appStyle: { English: 'App Style', Hindi: 'ऐप स्टाइल', Marathi: 'ऐप स्टाइल', Hinglish: 'App Style' },
   aiSettings: { English: 'AI Settings', Hindi: 'AI सेटिंग्स', Marathi: 'AI सेटिंग्ज', Hinglish: 'AI Settings' },
   privacy: { English: 'Privacy', Hindi: 'गोपनीयता', Marathi: 'गोपनीयता', Hinglish: 'Privacy' },
   support: { English: 'Support', Hindi: 'सहायता', Marathi: 'आधार', Hinglish: 'Support' },
@@ -127,7 +138,10 @@ export const translations: Translations = {
   discoveryMsg7: { English: "🌱 Expanding Knowledge\nYour scan helps improve the system. Insights coming soon.", Hindi: "🌱 ज्ञान का विस्तार\nआपका स्कैन सिस्टम को बेहतर बनाने में मदद करता है। जानकारी जल्द ही आ रही है।", Marathi: "🌱 ज्ञान विस्तार\nतुमचा स्कॅन सिस्टम सुधारण्यात मदत करतो. माहिती लवकरच येत आहे।", Hinglish: "🌱 System Seekh Raha Hai\nAapka scan help karta hai. Insights jald aayenge." },
   
   analysisInProgress: { English: "AI Analysis in progress...", Hindi: "AI विश्लेषण प्रगति पर है...", Marathi: "AI विश्लेषण सुरू आहे...", Hinglish: "AI Analysis ho raha hai..." },
+  systemInitializing: { English: "System Initializing...", Hindi: "सिस्टम शुरू हो रहा है...", Marathi: "सिस्टम सुरू होत आहे...", Hinglish: "System chalu ho raha hai..." },
   generatingInsights: { English: "Generating product insights...", Hindi: "उत्पाद जानकारी तैयार की जा रही है...", Marathi: "उत्पादन माहिती तयार करत आहे...", Hinglish: "Product insights ban rahe hain..." },
   aiEstimatedAnalysis: { English: 'AI Estimated Analysis', Hindi: 'एआई अनुमानित विश्लेषण', Marathi: 'AI अंदाजित विश्लेषण', Hinglish: 'AI Estimated Analysis' },
   generatingInsightError: { English: 'Unable to generate AI analysis at this moment.', Hindi: 'इस समय AI विश्लेषण तैयार करने में असमर्थ।', Marathi: 'यावेळी AI विश्लेषण व्युत्पन्न करण्यात अक्षम।', Hinglish: 'Abhi AI analysis nahi ho paa raha.' },
+  getAiEstimate: { English: 'Get AI Estimate', Hindi: 'एआई अनुमान प्राप्त करें', Marathi: 'AI अंदाज मिळवा', Hinglish: 'AI Estimate Lo' },
+  finalizingAnalysis: { English: 'Finalizing Analysis...', Hindi: 'विश्लेषण को अंतिम रूप दिया जा रहा है...', Marathi: 'विश्लेषण अंतिम करत आहे...', Hinglish: 'Analysis khatam ho raha hai...' },
 };

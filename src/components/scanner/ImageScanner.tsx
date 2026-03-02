@@ -14,10 +14,10 @@ import { cn } from '@/lib/utils';
 import { Card } from '@/components/ui/card';
 
 const LOADING_STEPS = [
-  "Analyzing image profile...",
-  "Detecting food content...",
-  "Calculating nutritional values...",
-  "Generating smart insights..."
+  "loadingImageProfile",
+  "detectingFoodContent",
+  "calculatingNutritionalValues",
+  "generatingSmartInsights"
 ];
 
 export default function ImageScanner() {
@@ -81,8 +81,8 @@ export default function ImageScanner() {
       } catch (err) {
         toast({
           variant: 'destructive',
-          title: 'Analysis Error',
-          description: 'Could not analyze this image. Please try again.',
+          title: t('support'),
+          description: t('generatingInsightError'),
         });
       } finally {
         clearInterval(interval);
@@ -110,7 +110,7 @@ export default function ImageScanner() {
         </div>
         
         <div className="space-y-6 w-full max-w-xs">
-          <h2 className="text-xl font-bold text-center mb-4">AI Photo Analysis...</h2>
+          <h2 className="text-xl font-bold text-center mb-4">{t('aiPhotoAnalysis')}</h2>
           {LOADING_STEPS.map((step, i) => (
             <div 
               key={i} 
@@ -129,7 +129,7 @@ export default function ImageScanner() {
                     loadingStep === i ? "border-primary border-t-transparent animate-spin" : "border-current"
                   )} />
                )}
-               <p className="text-base">{step}</p>
+               <p className="text-base">{t(step as any)}</p>
             </div>
           ))}
         </div>
@@ -149,7 +149,6 @@ export default function ImageScanner() {
 
   return (
     <div className="p-6 space-y-10 animate-in fade-in zoom-in-95 duration-700">
-      {/* 2. HERO SCAN AREA */}
       <div className="relative group">
         <Card className="rounded-[40px] border-none shadow-sm bg-card/50 overflow-hidden aspect-square flex items-center justify-center">
           <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
@@ -163,19 +162,18 @@ export default function ImageScanner() {
             <div className="flex flex-col items-center gap-4">
               <Sparkles className="w-16 h-16 text-primary/80" />
               <div className="space-y-1 text-center">
-                <p className="text-xs font-black uppercase tracking-widest text-primary/60">AI Vision Engine</p>
-                <p className="text-[10px] text-muted-foreground/60 font-bold italic">Detects fruits, meals & more</p>
+                <p className="text-xs font-black uppercase tracking-widest text-primary/60">{t('aiVisionEngine')}</p>
+                <p className="text-[10px] text-muted-foreground/60 font-bold italic">{t('detectsFoodType')}</p>
               </div>
             </div>
           </div>
         </Card>
       </div>
 
-      {/* 3. PRIMARY ACTION */}
       <div className="space-y-8">
         <div className="text-center space-y-2">
-          <h2 className="text-3xl font-black tracking-tight leading-none">AI Photo Scan</h2>
-          <p className="text-muted-foreground text-sm font-bold">Capture food to identify nutritional profile</p>
+          <h2 className="text-3xl font-black tracking-tight leading-none">{t('photoAnalysis')}</h2>
+          <p className="text-muted-foreground text-sm font-bold">{t('photoDesc')}</p>
         </div>
 
         <Button 
@@ -184,10 +182,9 @@ export default function ImageScanner() {
           onClick={() => captureInputRef.current?.click()}
         >
           <Camera className="h-6 w-6" />
-          Capture Photo
+          {t('capturePhoto')}
         </Button>
 
-        {/* 4. SECONDARY ACTION CARDS (Single for Gallery here, or could be a grid if needed) */}
         <div className="grid grid-cols-1">
           <button 
             onClick={() => fileInputRef.current?.click()}
@@ -197,8 +194,8 @@ export default function ImageScanner() {
               <ImageIcon className="h-6 w-6 text-primary" />
             </div>
             <div className="text-left">
-              <p className="text-xs font-black uppercase tracking-wider text-muted-foreground leading-none">Upload from Gallery</p>
-              <p className="text-[10px] text-muted-foreground/60 font-bold mt-1">Select an existing photo</p>
+              <p className="text-xs font-black uppercase tracking-wider text-muted-foreground leading-none">{t('uploadFromGallery')}</p>
+              <p className="text-[10px] text-muted-foreground/60 font-bold mt-1">{t('selectExistingPhoto')}</p>
             </div>
           </button>
         </div>
