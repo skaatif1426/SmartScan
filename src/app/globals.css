@@ -5,8 +5,8 @@
 @layer base {
   :root {
     /* --- LIGHT MODE: Premium soft off-white & Green Primary --- */
-    --background: 210 40% 98%; /* #F8FAFC */
-    --foreground: 221 39% 11%; /* #111827 */
+    --background: 210 40% 98.5%; /* #F8FAFC */
+    --foreground: 221 39% 11%;
     
     --card: 0 0% 100%;
     --card-foreground: 221 39% 11%;
@@ -26,7 +26,7 @@
     --accent: 142 71% 45% / 0.1;
     --accent-foreground: 142 71% 35%;
     
-    --destructive: 0 72% 51%; /* #DC2626 */
+    --destructive: 0 72% 51%;
     --destructive-foreground: 210 40% 98%;
     
     --border: 214.3 31.8% 91.4%;
@@ -36,34 +36,34 @@
   }
 
   .dark {
-    /* --- DARK MODE: Deep Navy & Softer Green --- */
-    --background: 222 47% 11%; /* #0F172A */
-    --foreground: 210 40% 98%; /* #F8FAFC */
+    /* --- DARK MODE: Deep Charcoal Blue & Balanced Green --- */
+    --background: 216 45% 4%; /* #0B0F14 */
+    --foreground: 210 40% 98%;
     
-    --card: 221 39% 11%; /* #111827 */
+    --card: 216 35% 10%; /* #121821 */
     --card-foreground: 210 40% 98%;
     
-    --popover: 222 47% 11%;
+    --popover: 216 45% 4%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 142 71% 58%; /* #4ADE80 */
-    --primary-foreground: 222 47% 11%;
+    --primary: 142 71% 55%; /* Softer green for dark mode */
+    --primary-foreground: 216 45% 4%;
     
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 216 35% 15%;
     --secondary-foreground: 210 40% 98%;
     
-    --muted: 217.2 32.6% 17.5%;
+    --muted: 216 35% 15%;
     --muted-foreground: 215 20.2% 65.1%;
     
-    --accent: 142 71% 58% / 0.15;
+    --accent: 142 71% 55% / 0.15;
     --accent-foreground: 142 71% 75%;
     
-    --destructive: 0 91% 71%; /* #F87171 */
-    --destructive-foreground: 222 47% 11%;
+    --destructive: 0 91% 71%;
+    --destructive-foreground: 216 45% 4%;
     
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 142 71% 58%;
+    --border: 216 35% 18%;
+    --input: 216 35% 18%;
+    --ring: 142 71% 55%;
   }
 }
 
@@ -99,7 +99,11 @@
   }
 
   .scan-frame-pulse {
-    @apply animate-[border-pulse_2s_infinite_ease-in-out];
+    @apply animate-[border-pulse_2.5s_infinite_ease-in-out];
+  }
+
+  .segmented-switch-indicator {
+    @apply absolute h-[calc(100%-8px)] top-1 rounded-full bg-background shadow-md transition-all duration-300 ease-in-out border border-white/10;
   }
 }
 
@@ -131,7 +135,7 @@
 }
 
 @keyframes border-pulse {
-  0% { border-color: hsl(var(--primary) / 0.4); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.2); }
-  50% { border-color: hsl(var(--primary) / 0.8); box-shadow: 0 0 0 10px hsl(var(--primary) / 0); }
-  100% { border-color: hsl(var(--primary) / 0.4); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.2); }
+  0% { border-color: hsl(var(--primary) / 0.3); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.1); }
+  50% { border-color: hsl(var(--primary) / 0.8); box-shadow: 0 0 0 8px hsl(var(--primary) / 0.05); }
+  100% { border-color: hsl(var(--primary) / 0.3); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.1); }
 }

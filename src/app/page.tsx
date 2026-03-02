@@ -17,7 +17,8 @@ import {
   QrCode,
   Sparkles,
   Image as ImageIcon,
-  Search
+  Search,
+  Focus
 } from 'lucide-react';
 import { Html5Qrcode } from 'html5-qrcode';
 
@@ -119,7 +120,6 @@ export default function ScannerPage() {
       });
     } finally {
       setIsProcessingFile(false);
-      // Clear the input so the same file can be selected again if needed
       if (barcodeFileInputRef.current) barcodeFileInputRef.current.value = '';
     }
   };
@@ -185,19 +185,26 @@ export default function ScannerPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background relative">
-      {/* Hidden div for html5-qrcode file shuttle */}
+    <div className="flex flex-col h-full bg-background relative overflow-hidden">
       <div id="barcode-shuttle-hidden" className="hidden"></div>
 
-      {/* Top Mode Switcher */}
+      {/* 1. PREMIUM SEGMENTED SWITCHER */}
       {!showScanner && (
         <div className="pt-8 px-6 flex justify-center z-10">
-          <div className="bg-muted p-1.5 rounded-full flex gap-1 shadow-inner border">
+          <div className="relative bg-muted p-1 rounded-full flex w-full max-w-[280px] shadow-inner border border-border/50">
+            {/* Sliding Indicator */}
+            <div 
+              className={cn(
+                "segmented-switch-indicator w-[calc(50%-4px)]",
+                mode === 'barcode' ? "left-1" : "left-[calc(50%+3px)]"
+              )} 
+            />
+            
             <button 
               onClick={() => setMode('barcode')}
               className={cn(
-                "flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all duration-300",
-                mode === 'barcode' ? "bg-background text-primary shadow-lg scale-105" : "text-muted-foreground hover:text-foreground"
+                "relative flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-black transition-colors duration-300",
+                mode === 'barcode' ? "text-primary" : "text-muted-foreground"
               )}
             >
               <QrCode className="h-4 w-4" />
@@ -206,8 +213,8 @@ export default function ScannerPage() {
             <button 
               onClick={() => setMode('photo')}
               className={cn(
-                "flex items-center gap-2 px-8 py-2.5 rounded-full text-sm font-black transition-all duration-300",
-                mode === 'photo' ? "bg-background text-primary shadow-lg scale-105" : "text-muted-foreground hover:text-foreground"
+                "relative flex-1 flex items-center justify-center gap-2 py-2.5 rounded-full text-xs font-black transition-colors duration-300",
+                mode === 'photo' ? "text-primary" : "text-muted-foreground"
               )}
             >
               <Camera className="h-4 w-4" />
@@ -217,48 +224,71 @@ export default function ScannerPage() {
         </div>
       )}
 
-      <div className="flex-1 overflow-auto flex flex-col justify-center">
+      <div className="flex-1 flex flex-col justify-center max-w-lg mx-auto w-full">
         {mode === 'barcode' ? (
           !showScanner ? (
-            <div className="flex flex-col items-center p-6 space-y-12 animate-in zoom-in-95 duration-500 max-w-sm mx-auto w-full">
-              <div className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
-                <ScanLine className="w-14 h-14 text-primary" />
-              </div>
-              
-              <div className="text-center space-y-3">
-                <h1 className="text-3xl font-black tracking-tight">Barcode Entry</h1>
-                <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">Scan instantly or add barcode manually</p>
+            <div className="p-6 space-y-10 animate-in fade-in zoom-in-95 duration-700">
+              {/* 2. HERO SCAN AREA */}
+              <div className="relative group">
+                <Card className="rounded-[40px] border-none shadow-sm bg-card/50 overflow-hidden aspect-square flex items-center justify-center">
+                  <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
+                  
+                  {/* Subtle pulsing frame */}
+                  <div className="relative w-48 h-48 rounded-3xl border-2 border-primary/30 flex items-center justify-center scan-frame-pulse">
+                    <Focus className="absolute -top-3 -left-3 h-8 w-8 text-primary/40" />
+                    <Focus className="absolute -top-3 -right-3 h-8 w-8 text-primary/40 rotate-90" />
+                    <Focus className="absolute -bottom-3 -left-3 h-8 w-8 text-primary/40 -rotate-90" />
+                    <Focus className="absolute -bottom-3 -right-3 h-8 w-8 text-primary/40 rotate-180" />
+                    
+                    <div className="flex flex-col items-center gap-4">
+                      <ScanLine className="w-16 h-16 text-primary/80" />
+                      <div className="space-y-1 text-center">
+                        <p className="text-xs font-black uppercase tracking-widest text-primary/60">Ready to detect</p>
+                        <p className="text-[10px] text-muted-foreground/60 font-bold italic">Better in good lighting</p>
+                      </div>
+                    </div>
+                  </div>
+                </Card>
               </div>
 
-              <div className="w-full space-y-4">
+              {/* 3. PRIMARY ACTION */}
+              <div className="space-y-8">
+                <div className="text-center space-y-2">
+                  <h1 className="text-3xl font-black tracking-tight leading-none">Barcode Entry</h1>
+                  <p className="text-muted-foreground text-sm font-bold">Scan instantly or add barcode manually</p>
+                </div>
+
                 <Button 
                   size="lg" 
-                  className="w-full rounded-2xl h-18 text-lg font-bold shadow-xl active:scale-95 gap-3 bg-gradient-to-r from-primary to-emerald-500 hover:opacity-90" 
+                  className="w-full rounded-2xl h-18 text-lg font-black shadow-xl shadow-primary/10 active:scale-[0.97] transition-all bg-gradient-to-r from-primary to-emerald-500 gap-3" 
                   onClick={() => setShowScanner(true)}
                 >
                   <Scan className="h-6 w-6" />
                   Scan with Camera
                 </Button>
-                
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="w-full rounded-2xl h-16 text-lg font-bold border-2 active:scale-95 gap-4 justify-start px-6 bg-card/50 hover:bg-card" 
-                  onClick={() => barcodeFileInputRef.current?.click()}
-                >
-                  <ImageIcon className="h-5 w-5 text-primary" />
-                  Upload Barcode Image
-                </Button>
 
-                <Button 
-                  variant="outline" 
-                  size="lg"
-                  className="w-full rounded-2xl h-16 text-lg font-bold border-2 active:scale-95 gap-4 justify-start px-6 bg-card/50 hover:bg-card" 
-                  onClick={() => setShowManualInput(true)}
-                >
-                  <Keyboard className="h-5 w-5 text-primary" />
-                  Enter Barcode Manually
-                </Button>
+                {/* 4. SECONDARY ACTION CARDS GRID */}
+                <div className="grid grid-cols-2 gap-4">
+                  <button 
+                    onClick={() => barcodeFileInputRef.current?.click()}
+                    className="flex flex-col items-center justify-center p-6 bg-card border-2 border-border/50 rounded-3xl gap-3 transition-all active:scale-95 hover:bg-muted/50 shadow-sm"
+                  >
+                    <div className="p-3 bg-primary/10 rounded-2xl">
+                      <ImageIcon className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">Upload Image</span>
+                  </button>
+                  
+                  <button 
+                    onClick={() => setShowManualInput(true)}
+                    className="flex flex-col items-center justify-center p-6 bg-card border-2 border-border/50 rounded-3xl gap-3 transition-all active:scale-95 hover:bg-muted/50 shadow-sm"
+                  >
+                    <div className="p-3 bg-primary/10 rounded-2xl">
+                      <Keyboard className="h-6 w-6 text-primary" />
+                    </div>
+                    <span className="text-xs font-black uppercase tracking-wider text-muted-foreground">Manual Entry</span>
+                  </button>
+                </div>
               </div>
 
               <input 
@@ -322,27 +352,28 @@ export default function ScannerPage() {
         )}
       </div>
 
+      {/* Manual Entry Sheet */}
       {showManualInput && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-[200] flex items-end sm:items-center justify-center p-6">
-          <Card className="w-full max-w-md animate-in slide-in-from-bottom-10 shadow-2xl border-2">
+          <Card className="w-full max-w-md animate-in slide-in-from-bottom-full duration-500 shadow-2xl border-2">
             <CardContent className="pt-8 space-y-6">
               <div className="flex justify-between items-center">
-                <h2 className="text-xl font-black">Manual Entry</h2>
-                <Button variant="ghost" size="sm" className="rounded-full h-8 px-4" onClick={() => setShowManualInput(false)}>Close</Button>
+                <h2 className="text-xl font-black tracking-tight">Enter Barcode</h2>
+                <Button variant="ghost" size="sm" className="rounded-full h-8 px-4" onClick={() => setShowManualInput(false)}>Cancel</Button>
               </div>
               <form onSubmit={onManualSubmit} className="space-y-4">
                 <div className="relative">
                   <Input 
-                    placeholder="Enter Barcode Number" 
+                    placeholder="e.g. 8901234567890" 
                     value={manualBarcode} 
                     onChange={e => setManualBarcode(e.target.value)}
                     type="number"
                     autoFocus
-                    className="h-14 text-lg font-mono tracking-widest text-center"
+                    className="h-16 text-xl font-mono tracking-widest text-center rounded-2xl"
                   />
-                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground h-5 w-5" />
+                  <Search className="absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground/40 h-5 w-5" />
                 </div>
-                <Button className="w-full h-14 rounded-2xl text-lg font-bold shadow-lg" disabled={!manualBarcode}>Search Database</Button>
+                <Button className="w-full h-16 rounded-2xl text-lg font-black shadow-lg" disabled={!manualBarcode}>Search Database</Button>
               </form>
             </CardContent>
           </Card>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import { Camera, Image as ImageIcon, Loader2, Sparkles, CheckCircle2 } from 'lucide-react';
+import { Camera, Image as ImageIcon, Loader2, Sparkles, CheckCircle2, Focus, Scan } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import { getFoodImageAnalysis } from '@/lib/actions';
@@ -11,6 +11,7 @@ import { useScanHistory } from '@/hooks/useScanHistory';
 import { useGamification } from '@/hooks/useGamification';
 import ImageAnalysisResult from '../product/ImageAnalysisResult';
 import { cn } from '@/lib/utils';
+import { Card } from '@/components/ui/card';
 
 const LOADING_STEPS = [
   "Analyzing image profile...",
@@ -147,25 +148,60 @@ export default function ImageScanner() {
   }
 
   return (
-    <div className="flex flex-col items-center justify-center p-6 space-y-12 animate-in zoom-in-95 duration-500">
-      <div className="w-28 h-28 rounded-full bg-primary/10 flex items-center justify-center animate-shadow-pulse">
-        <Sparkles className="w-14 h-14 text-primary" />
+    <div className="p-6 space-y-10 animate-in fade-in zoom-in-95 duration-700">
+      {/* 2. HERO SCAN AREA */}
+      <div className="relative group">
+        <Card className="rounded-[40px] border-none shadow-sm bg-card/50 overflow-hidden aspect-square flex items-center justify-center">
+          <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-primary/5" />
+          
+          <div className="relative w-48 h-48 rounded-3xl border-2 border-primary/30 flex items-center justify-center scan-frame-pulse">
+            <Focus className="absolute -top-3 -left-3 h-8 w-8 text-primary/40" />
+            <Focus className="absolute -top-3 -right-3 h-8 w-8 text-primary/40 rotate-90" />
+            <Focus className="absolute -bottom-3 -left-3 h-8 w-8 text-primary/40 -rotate-90" />
+            <Focus className="absolute -bottom-3 -right-3 h-8 w-8 text-primary/40 rotate-180" />
+            
+            <div className="flex flex-col items-center gap-4">
+              <Sparkles className="w-16 h-16 text-primary/80" />
+              <div className="space-y-1 text-center">
+                <p className="text-xs font-black uppercase tracking-widest text-primary/60">AI Vision Engine</p>
+                <p className="text-[10px] text-muted-foreground/60 font-bold italic">Detects fruits, meals & more</p>
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      <div className="text-center space-y-3">
-        <h2 className="text-3xl font-black tracking-tight">AI Photo Scan</h2>
-        <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed">Take a photo of any food item to get instant nutritional insights.</p>
-      </div>
+      {/* 3. PRIMARY ACTION */}
+      <div className="space-y-8">
+        <div className="text-center space-y-2">
+          <h2 className="text-3xl font-black tracking-tight leading-none">AI Photo Scan</h2>
+          <p className="text-muted-foreground text-sm font-bold">Capture food to identify nutritional profile</p>
+        </div>
 
-      <div className="w-full max-w-sm space-y-4">
-        <Button size="lg" className="w-full rounded-2xl h-18 text-xl font-bold shadow-xl active:scale-95" onClick={() => captureInputRef.current?.click()}>
-          <Camera className="mr-3 h-7 w-7" />
+        <Button 
+          size="lg" 
+          className="w-full rounded-2xl h-18 text-lg font-black shadow-xl shadow-primary/10 active:scale-[0.97] transition-all bg-gradient-to-r from-primary to-emerald-500 gap-3" 
+          onClick={() => captureInputRef.current?.click()}
+        >
+          <Camera className="h-6 w-6" />
           Capture Photo
         </Button>
-        <Button variant="ghost" className="w-full h-14 text-muted-foreground font-bold" onClick={() => fileInputRef.current?.click()}>
-          <ImageIcon className="mr-2 h-5 w-5" />
-          Upload from Gallery
-        </Button>
+
+        {/* 4. SECONDARY ACTION CARDS (Single for Gallery here, or could be a grid if needed) */}
+        <div className="grid grid-cols-1">
+          <button 
+            onClick={() => fileInputRef.current?.click()}
+            className="flex items-center justify-center p-6 bg-card border-2 border-border/50 rounded-3xl gap-4 transition-all active:scale-95 hover:bg-muted/50 shadow-sm"
+          >
+            <div className="p-3 bg-primary/10 rounded-2xl">
+              <ImageIcon className="h-6 w-6 text-primary" />
+            </div>
+            <div className="text-left">
+              <p className="text-xs font-black uppercase tracking-wider text-muted-foreground leading-none">Upload from Gallery</p>
+              <p className="text-[10px] text-muted-foreground/60 font-bold mt-1">Select an existing photo</p>
+            </div>
+          </button>
+        </div>
       </div>
 
       <input type="file" ref={captureInputRef} accept="image/*" capture="environment" onChange={onFileChange} className="hidden" />
