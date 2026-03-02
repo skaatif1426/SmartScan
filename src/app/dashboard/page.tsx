@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -17,11 +17,15 @@ import { useLanguage } from '@/contexts/AppProviders';
 
 const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
     const { t } = useLanguage();
-    const greetingText = useMemo(() => {
+    
+    // Fix hydration mismatch: Handle time-based greeting after mount
+    const [greetingText, setGreetingText] = useState('');
+
+    useEffect(() => {
         const hour = new Date().getHours();
-        if (hour < 12) return t('goodMorning');
-        if (hour < 18) return t('goodAfternoon');
-        return t('goodEvening');
+        if (hour < 12) setGreetingText(t('goodMorning'));
+        else if (hour < 18) setGreetingText(t('goodAfternoon'));
+        else setGreetingText(t('goodEvening'));
     }, [t]);
 
     const { averageScore, trendIcon: TrendIcon, trendColor } = useMemo(() => {
@@ -64,7 +68,7 @@ const HealthOverview = ({ history }: { history: ScanHistoryItem[] }) => {
     
     return (
         <div className="text-center animate-in fade-in slide-in-from-top-4 duration-500">
-            <h1 className="text-3xl font-black tracking-tight">{greetingText}</h1>
+            <h1 className="text-3xl font-black tracking-tight min-h-[36px]">{greetingText}</h1>
             <p className="text-muted-foreground font-bold mt-1">{message}</p>
             
             <div className="mt-12">

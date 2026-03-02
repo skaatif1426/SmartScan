@@ -1,7 +1,7 @@
 'use client';
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { Bot, Camera, Loader2, Sparkles, BrainCircuit } from 'lucide-react';
+import { Camera, Loader2, Sparkles, BrainCircuit } from 'lucide-react';
 
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -26,13 +26,14 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
     const { addXp, XP_PER_DISCOVERY } = useGamification();
     const { language, t } = useLanguage();
 
-    // Random message selection logic
-    const randomMessageKey = useMemo(() => {
-        const index = Math.floor(Math.random() * 7) + 1;
-        return `discoveryMsg${index}` as any;
-    }, []);
+    // Fix hydration mismatch: Set random message key after mount
+    const [randomMessageKey, setRandomMessageKey] = useState<any>(null);
 
     useEffect(() => {
+        // Pick random message on client side only
+        const index = Math.floor(Math.random() * 7) + 1;
+        setRandomMessageKey(`discoveryMsg${index}`);
+
         if (barcode) {
             addDiscovery(barcode);
             addScanToHistory({
@@ -86,15 +87,24 @@ export default function ProductNotFound({ barcode }: { barcode: string }) {
                             <BrainCircuit className="h-10 w-10 text-primary animate-pulse-subtle" />
                         </div>
                     </div>
-                    <CardTitle className="text-3xl font-black tracking-tight">
-                        {t(randomMessageKey).split('\n')[0]}
+                    <CardTitle className="text-3xl font-black tracking-tight h-8">
+                        {randomMessageKey ? t(randomMessageKey).split('\n')[0] : <Skeleton className="h-8 w-48 mx-auto" />}
                     </CardTitle>
                 </CardHeader>
                 <CardContent className="px-8 pb-10 space-y-8">
                     <div className="space-y-4">
-                        <p className="text-muted-foreground font-medium text-lg leading-relaxed whitespace-pre-line">
-                            {t(randomMessageKey).split('\n')[1]}
-                        </p>
+                        <div className="min-h-[60px]">
+                            {randomMessageKey ? (
+                                <p className="text-muted-foreground font-medium text-lg leading-relaxed whitespace-pre-line">
+                                    {t(randomMessageKey).split('\n')[1]}
+                                </p>
+                            ) : (
+                                <div className="space-y-2">
+                                    <Skeleton className="h-4 w-full" />
+                                    <Skeleton className="h-4 w-3/4 mx-auto" />
+                                </div>
+                            )}
+                        </div>
                         
                         <div className={cn(
                             "flex items-center justify-center gap-2 transition-all duration-500",
