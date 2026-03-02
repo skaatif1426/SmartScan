@@ -117,10 +117,17 @@ export const translations: Translations = {
   cancel: { English: 'Cancel', Hindi: 'रद्द करें', Marathi: 'रद्द करा', Hinglish: 'Cancel' },
   confirm: { English: 'Confirm', Hindi: 'पुष्टि करें', Marathi: 'पुष्टी करा', Hinglish: 'Confirm' },
 
-  // AI & Discovery
-  newDiscovery: { English: 'New Discovery!', Hindi: 'नई खोज!', Marathi: 'नवीन शोध!', Hinglish: 'Nayi Discovery!' },
-  thanksDiscovery: { English: "Thanks for discovering something new!", Hindi: "कुछ नया खोजने के लिए धन्यवाद!", Marathi: "काहीतरी नवीन शोधल्याबद्दल धन्यवाद!", Hinglish: "Kuch naya dhoondne ke liye thanks!" },
-  getAiEstimate: { English: 'Get AI Estimate', Hindi: 'एआई अनुमान प्राप्त करें', Marathi: 'AI अंदाज मिळवा', Hinglish: 'AI Estimate lo' },
+  // AI & Discovery (Randomized Messages)
+  discoveryMsg1: { English: "✨ New Discovery!\nWe haven't seen this product before. AI is analyzing it now.", Hindi: "✨ नई खोज!\nहमने पहले इस उत्पाद को नहीं देखा है। AI अब इसका विश्लेषण कर रहा है।", Marathi: "✨ नवीन शोध!\nआम्ही हे उत्पादन आधी पाहिलेले नाही. AI आता त्याचे विश्लेषण करत आहे।", Hinglish: "✨ Nayi Discovery!\nYe product pehle nahi dekha. AI analysis kar raha hai." },
+  discoveryMsg2: { English: "🧠 Learning in Progress\nThis item is new to our system. We're generating insights for you.", Hindi: "🧠 सीखने की प्रक्रिया जारी है\nयह आइटम हमारे सिस्टम के लिए नया है। हम आपके लिए जानकारी तैयार कर रहे हैं।", Marathi: "🧠 शिकण्याची प्रक्रिया सुरू आहे\nहे उत्पादन आमच्या सिस्टमसाठी नवीन आहे. आम्ही तुमच्यासाठी माहिती तयार करत आहोत।", Hinglish: "🧠 Learning Chalu Hai\nYe item naya hai. Insights generate ho rahe hain." },
+  discoveryMsg3: { English: "🚀 Fresh Scan Detected\nYou're ahead of the database. SmartScan is working on it.", Hindi: "🚀 नया स्कैन मिला\nआप डेटाबेस से आगे हैं। SmartScan इस पर काम कर रहा है।", Marathi: "🚀 नवीन स्कॅन सापडला\nतुम्ही डेटाबेसच्या पुढे आहात. SmartScan यावर काम करत आहे।", Hinglish: "🚀 Naya Scan Mila\nAap database se aage ho. SmartScan kaam kar raha hai." },
+  discoveryMsg4: { English: "🔍 Analyzing Product\nNo direct match found. AI is building details from scratch.", Hindi: "🔍 उत्पाद का विश्लेषण\nकोई सीधा मैच नहीं मिला। AI शुरुआत से विवरण तैयार कर रहा है।", Marathi: "🔍 उत्पादनाचे विश्लेषण\nकोणताही थेट सामना आढळला नाही. AI सुरुवातीपासून तपशील तयार करत आहे।", Hinglish: "🔍 Analyzing Product\nKoi match nahi mila. AI details bana raha hai." },
+  discoveryMsg5: { English: "📦 Unknown Product Detected\nWe're processing this item to generate useful insights.", Hindi: "📦 अज्ञात उत्पाद मिला\nहम उपयोगी जानकारी तैयार करने के लिए इस आइटम को प्रोसेस कर रहे हैं।", Marathi: "📦 अज्ञात उत्पादन आढळले\nआम्ही उपयुक्त माहिती तयार करण्यासाठी या उत्पादनावर प्रक्रिया करत आहोत।", Hinglish: "📦 Unknown Product Mila\nInsights ke liye process ho raha hai." },
+  discoveryMsg6: { English: "⚡ Processing Scan\nThis product isn't in our system yet. Creating data now.", Hindi: "⚡ स्कैन प्रोसेस हो रहा है\nयह उत्पाद अभी हमारे सिस्टम में नहीं है। अब डेटा तैयार किया जा रहा है।", Marathi: "⚡ स्कॅन प्रक्रिया सुरू आहे\nहे उत्पादन अद्याप आमच्या सिस्टममध्ये नाही. आता डेटा तयार करत आहे।", Hinglish: "⚡ Processing Scan\nYe product system mein nahi hai. Data bana rahe hain." },
+  discoveryMsg7: { English: "🌱 Expanding Knowledge\nYour scan helps improve the system. Insights coming soon.", Hindi: "🌱 ज्ञान का विस्तार\nआपका स्कैन सिस्टम को बेहतर बनाने में मदद करता है। जानकारी जल्द ही आ रही है।", Marathi: "🌱 ज्ञान विस्तार\nतुमचा स्कॅन सिस्टम सुधारण्यात मदत करतो. माहिती लवकरच येत आहे।", Hinglish: "🌱 System Seekh Raha Hai\nAapka scan help karta hai. Insights jald aayenge." },
+  
+  analysisInProgress: { English: "AI Analysis in progress...", Hindi: "AI विश्लेषण प्रगति पर है...", Marathi: "AI विश्लेषण सुरू आहे...", Hinglish: "AI Analysis ho raha hai..." },
+  generatingInsights: { English: "Generating product insights...", Hindi: "उत्पाद जानकारी तैयार की जा रही है...", Marathi: "उत्पादन माहिती तयार करत आहे...", Hinglish: "Product insights ban rahe hain..." },
   aiEstimatedAnalysis: { English: 'AI Estimated Analysis', Hindi: 'एआई अनुमानित विश्लेषण', Marathi: 'AI अंदाजित विश्लेषण', Hinglish: 'AI Estimated Analysis' },
   generatingInsightError: { English: 'Unable to generate AI analysis at this moment.', Hindi: 'इस समय AI विश्लेषण तैयार करने में असमर्थ।', Marathi: 'यावेळी AI विश्लेषण व्युत्पन्न करण्यात अक्षम।', Hinglish: 'Abhi AI analysis nahi ho paa raha.' },
 };
