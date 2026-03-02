@@ -33,6 +33,13 @@ const QrScanner = ({
   const lastHintRef = useRef<string>('');
   const hintTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Use a ref for the success callback to prevent re-initialization of hardware
+  // when the parent component's state changes (like isCapturing toggling).
+  const onScanSuccessRef = useRef(onScanSuccess);
+  useEffect(() => {
+    onScanSuccessRef.current = onScanSuccess;
+  }, [onScanSuccess]);
+
   const updateHint = useCallback((hint: string) => {
     if (hint !== lastHintRef.current) {
       lastHintRef.current = hint;
@@ -59,21 +66,29 @@ const QrScanner = ({
     try {
       const state = scannerRef.current.getState();
       
+      // If we are already scanning this exact camera, don't restart it
       if (state === Html5QrcodeScannerState.SCANNING && activeCameraId === cameraId) {
+        setIsReady(true);
+        isStarting.current = false;
         return;
       }
 
+      // If scanner is busy, stop it first
       if (state === Html5QrcodeScannerState.SCANNING || state === Html5QrcodeScannerState.PAUSED) {
         try {
           await scannerRef.current.stop();
         } catch (stopError) {
-          console.warn('Recoverable error stopping scanner:', stopError);
+          // Non-critical error during stop
         }
       }
 
-      await new Promise(resolve => setTimeout(resolve, 300));
+      // Give hardware a moment to settle
+      await new Promise(resolve => setTimeout(resolve, 400));
 
-      if (!isMounted.current) return;
+      if (!isMounted.current) {
+        isStarting.current = false;
+        return;
+      }
 
       await scannerRef.current.start(
         cameraId,
@@ -87,9 +102,9 @@ const QrScanner = ({
           aspectRatio: 1.0,
         },
         (decodedText: string) => {
-          if (isAutoScan || isCapturing) {
-            onScanSuccess(decodedText);
-          }
+          // Use the ref-based callback so we don't need to restart the scanner
+          // if the parent's logic changes
+          onScanSuccessRef.current(decodedText);
         },
         (error) => {
           const errorStr = String(error);
@@ -103,16 +118,19 @@ const QrScanner = ({
       
       setIsReady(true);
     } catch (err) {
-      console.error('Scanner start error:', err);
-      if (err instanceof Error && err.message.includes('Cannot stop')) {
+      // Ignore "Cannot clear while scan is ongoing" and "Cannot stop" errors 
+      // as they are usually race conditions that resolve themselves
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      if (errorMessage.includes('Cannot clear') || errorMessage.includes('Cannot stop')) {
+        isStarting.current = false;
         return;
       }
-      const message = err instanceof Error ? err.message : 'Camera initialization failed';
-      onCameraPermissionError(new Error(message));
+
+      onCameraPermissionError(new Error(errorMessage));
     } finally {
       isStarting.current = false;
     }
-  }, [isAutoScan, isCapturing, onScanSuccess, onScanFailure, onCameraPermissionError, updateHint, activeCameraId]);
+  }, [onScanFailure, onCameraPermissionError, updateHint, activeCameraId]);
 
   useEffect(() => {
     isMounted.current = true;
@@ -135,7 +153,7 @@ const QrScanner = ({
 
     const initialize = async () => {
       try {
-        await new Promise(r => setTimeout(r, 400));
+        await new Promise(r => setTimeout(r, 500));
         if (!isMounted.current) return;
 
         if (activeCameraId) {
@@ -194,7 +212,6 @@ const QrScanner = ({
         </div>
       )}
       
-      {/* Dynamic Scan Frame - Simplified */}
       <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
         <div className={cn(
           "w-[70vw] aspect-[1.3/1] rounded-2xl border-2 transition-all duration-300",
@@ -203,7 +220,6 @@ const QrScanner = ({
         )} />
       </div>
 
-      {/* Capture Flash Overlay */}
       {isCapturing && <div className="absolute inset-0 bg-white/50 flash-capture z-50 pointer-events-none" />}
     </div>
   );
