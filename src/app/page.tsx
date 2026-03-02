@@ -201,6 +201,42 @@ export default function ScannerPage() {
     }
   };
 
+  const triggerHaptic = () => {
+    if (typeof window !== 'undefined' && window.navigator && window.navigator.vibrate) {
+      window.navigator.vibrate(50);
+    }
+  };
+
+  const handlePrimaryAction = () => {
+    triggerHaptic();
+    if (mode === 'barcode') {
+      setShowScanner(true);
+    } else {
+      // Photo Analysis - Open Native Camera
+      photoCaptureInputRef.current?.click();
+    }
+  };
+
+  const handleLeftAction = () => {
+    triggerHaptic();
+    if (mode === 'barcode') {
+      setShowManualInput(true);
+    } else {
+      // Photo Analysis - Upload from Gallery
+      photoFileInputRef.current?.click();
+    }
+  };
+
+  const handleRightAction = () => {
+    triggerHaptic();
+    if (mode === 'barcode') {
+      barcodeFileInputRef.current?.click();
+    } else {
+      // Photo Analysis - Choose from Gallery (same as upload)
+      photoFileInputRef.current?.click();
+    }
+  };
+
   const switchCamera = () => {
     if (cameras.length < 2) return;
     const currentIndex = cameras.findIndex(c => c.id === activeCameraId);
@@ -278,7 +314,7 @@ export default function ScannerPage() {
     <div className="flex flex-col h-full bg-background relative overflow-hidden">
       <div id="barcode-shuttle-hidden" className="hidden"></div>
 
-      {/* 1. TOP TOGGLE - PREMIUM SEGMENTED CONTROL */}
+      {/* 1. TOP TOGGLE - PIXEL-LOCKED REPLICATION */}
       {!showScanner && (
         <div className="pt-8 px-6 flex justify-center z-10">
           <div className="bg-muted p-1 rounded-full flex w-full max-w-[280px] shadow-inner relative border border-white/5 active:scale-[0.98] transition-transform">
@@ -289,7 +325,7 @@ export default function ScannerPage() {
               )}
             />
             <button 
-              onClick={() => setMode('barcode')}
+              onClick={() => { triggerHaptic(); setMode('barcode'); }}
               className={cn(
                 "flex-1 py-2.5 rounded-full text-sm font-bold transition-all z-10",
                 mode === 'barcode' ? "text-foreground" : "text-muted-foreground opacity-60"
@@ -298,7 +334,7 @@ export default function ScannerPage() {
               Barcode
             </button>
             <button 
-              onClick={() => setMode('photo')}
+              onClick={() => { triggerHaptic(); setMode('photo'); }}
               className={cn(
                 "flex-1 py-2.5 rounded-full text-sm font-bold transition-all z-10",
                 mode === 'photo' ? "text-foreground" : "text-muted-foreground opacity-60"
@@ -363,24 +399,21 @@ export default function ScannerPage() {
           </div>
         ) : (
           <div className="flex flex-col items-center">
-            {/* 2. MAIN ICON - TACTILE & ANIMATED */}
+            {/* 2. MAIN ICON - PIXEL-LOCKED CENTERPIECE */}
             <div className="mb-10">
-              <div className="relative group">
-                <div className="absolute inset-0 rounded-full bg-primary/10 blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
-                <div 
-                  className={cn(
-                    "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
-                    "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
+              <div 
+                className={cn(
+                  "w-36 h-36 rounded-full flex items-center justify-center relative transition-all duration-300 active:scale-90 animate-pulse-subtle",
+                  "bg-gradient-to-br from-primary/10 to-primary/20 border-4 border-white dark:border-white/5 shadow-inner"
+                )}
+                onClick={handlePrimaryAction}
+              >
+                <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
+                  {mode === 'barcode' ? (
+                    <QrCode className="w-11 h-11 text-white" />
+                  ) : (
+                    <ImageIcon className="w-11 h-11 text-white" />
                   )}
-                  onClick={() => mode === 'barcode' ? setShowScanner(true) : photoCaptureInputRef.current?.click()}
-                >
-                  <div className="w-24 h-24 rounded-full bg-gradient-to-br from-primary to-primary/80 flex items-center justify-center shadow-lg">
-                    {mode === 'barcode' ? (
-                      <QrCode className="w-11 h-11 text-white" />
-                    ) : (
-                      <ImageIcon className="w-11 h-11 text-white" />
-                    )}
-                  </div>
                 </div>
               </div>
             </div>
@@ -389,8 +422,10 @@ export default function ScannerPage() {
               <h1 className="text-3xl font-black tracking-tight text-foreground transition-all">
                 {mode === 'barcode' ? "Barcode Entry" : "Photo Analysis"}
               </h1>
-              <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-medium">
-                Scan instantly or add {mode === 'barcode' ? 'barcode' : 'photo'} manually
+              <p className="text-muted-foreground text-sm max-w-[280px] mx-auto leading-relaxed font-bold">
+                {mode === 'barcode' 
+                  ? "Choose your preferred method to identify a product barcode." 
+                  : "Upload or capture a product image to analyze details using AI."}
               </p>
             </div>
 
@@ -403,13 +438,7 @@ export default function ScannerPage() {
                   "shadow-[0_8px_16px_rgba(34,197,94,0.12)] border-t border-white/20",
                   "active:scale-95 active:brightness-95 active:shadow-sm"
                 )}
-                onClick={() => {
-                  if (mode === 'barcode') {
-                    setShowScanner(true);
-                  } else {
-                    photoCaptureInputRef.current?.click();
-                  }
-                }}
+                onClick={handlePrimaryAction}
               >
                 <Camera className="h-6 w-6" />
                 Capture Photo
@@ -422,13 +451,7 @@ export default function ScannerPage() {
                     "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
-                  onClick={() => {
-                    if (mode === 'barcode') {
-                      setShowManualInput(true);
-                    } else {
-                      photoFileInputRef.current?.click();
-                    }
-                  }}
+                  onClick={handleLeftAction}
                 >
                   {mode === 'barcode' ? <Keyboard className="mr-2 h-4 w-4" /> : <ImageIcon className="mr-2 h-4 w-4" />}
                   {mode === 'barcode' ? "Enter Barcode Manually" : "Upload Image"}
@@ -440,13 +463,7 @@ export default function ScannerPage() {
                     "h-16 rounded-2xl border-border/40 font-bold text-xs px-2",
                     "bg-muted/5 hover:bg-muted/10 active:scale-[0.97] transition-all"
                   )}
-                  onClick={() => {
-                    if (mode === 'barcode') {
-                      barcodeFileInputRef.current?.click();
-                    } else {
-                      photoFileInputRef.current?.click();
-                    }
-                  }}
+                  onClick={handleRightAction}
                 >
                   <ImageIcon className="mr-2 h-4 w-4" />
                   {mode === 'barcode' ? "Upload Barcode Image" : "Choose from Gallery"}
@@ -454,6 +471,7 @@ export default function ScannerPage() {
               </div>
             </div>
 
+            {/* Hidden Inputs for different Intents */}
             <input 
               type="file" 
               ref={barcodeFileInputRef} 
@@ -486,7 +504,7 @@ export default function ScannerPage() {
         )}
       </div>
 
-      {showManualInput && (
+      {showManualInput && (mode === 'barcode') && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-md z-[200] flex items-end sm:items-center justify-center p-6 animate-in fade-in duration-300">
           <Card className="w-full max-w-md animate-in slide-in-from-bottom-full duration-500 shadow-2xl border-2 rounded-[2.5rem]">
             <CardContent className="pt-8 space-y-6">
