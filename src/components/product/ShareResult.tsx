@@ -70,10 +70,16 @@ export default function ShareResult({
       // 1. Try to generate image card
       if (cardRef.current) {
         try {
+          /**
+           * FIX: fontEmbedCSS: '' prevents the library from crawling cross-origin stylesheets 
+           * (like Google Fonts) which triggers a SecurityError in some environments when 
+           * accessing document.styleSheets rules.
+           */
           const blob = await toBlob(cardRef.current, {
             quality: 0.95,
             cacheBust: true,
-            backgroundColor: '#ffffff'
+            backgroundColor: '#ffffff',
+            fontEmbedCSS: '',
           });
           
           if (blob) {
