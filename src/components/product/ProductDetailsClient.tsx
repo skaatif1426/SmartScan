@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash, Database, Globe } from 'lucide-react';
+import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash, Database, Globe, BrainCircuit } from 'lucide-react';
 
 import type { Product, DataSource } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -63,6 +63,13 @@ export default function ProductDetailsClient({ product: productData, source }: {
 
     if (!product) return null;
 
+    const sourceInfo = {
+        'backend': { label: 'Verified Database', icon: Database, color: 'text-primary' },
+        'openfoodfacts': { label: 'Global Registry', icon: Globe, color: 'text-blue-500' },
+        'ai-estimate': { label: 'AI Prediction', icon: BrainCircuit, color: 'text-purple-500' },
+        'image-analysis': { label: 'Visual AI', icon: Sparkles, color: 'text-orange-500' },
+    }[source] || { label: 'External Source', icon: Globe, color: 'text-muted-foreground' };
+
     return (
         <div className="p-4 space-y-6 max-w-2xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {/* Header with Source Indicator */}
@@ -77,9 +84,9 @@ export default function ProductDetailsClient({ product: productData, source }: {
                     </div>
                 </div>
                 
-                <Badge variant="secondary" className="rounded-full gap-1.5 px-3 py-1 font-black text-[10px] uppercase tracking-tighter shadow-inner">
-                    {source === 'backend' ? <Database className="h-3 w-3 text-primary" /> : <Globe className="h-3 w-3 text-blue-500" />}
-                    {source}
+                <Badge variant="secondary" className="rounded-full gap-1.5 px-3 py-1 font-black text-[10px] uppercase tracking-tighter shadow-inner bg-background/50 border-2">
+                    <sourceInfo.icon className={cn("h-3 w-3", sourceInfo.color)} />
+                    {sourceInfo.label}
                 </Badge>
             </div>
             

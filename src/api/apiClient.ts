@@ -4,7 +4,7 @@
  */
 'use client';
 
-import axios, { AxiosResponse, AxiosError } from 'axios';
+import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 export interface ApiResponse<T = any> {
   timestamp: string;
@@ -17,11 +17,22 @@ const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000,
+  timeout: 15000, // Global timeout set to 15s for safety, but UI handles user-facing 7s
   headers: {
     'Content-Type': 'application/json',
   },
 });
+
+let isRefreshing = false;
+let refreshSubscribers: ((token: string) => void)[] = [];
+
+const subscribeTokenRefresh = (cb: (token: string) => void) => {
+  refreshSubscribers.push(cb);
+};
+
+const onTokenRefreshed = (token: string) => {
+  refreshSubscribers.map((cb) => cb(token));
+};
 
 // Debug Logger for Development
 const logDebug = (msg: string, data?: any) => {
@@ -60,24 +71,60 @@ apiClient.interceptors.response.use(
     throw new Error(mismatchMsg);
   },
   async (error: AxiosError) => {
+    const { config, response } = error;
+    const originalRequest = config as InternalAxiosRequestConfig & { _retry?: boolean };
+
+    // AUTH FLOW: Attempt token refresh on 401
+    if (response?.status === 401 && !originalRequest._retry) {
+      if (isRefreshing) {
+        return new Promise((resolve) => {
+          subscribeTokenRefresh((token: string) => {
+            if (originalRequest.headers) {
+              originalRequest.headers.Authorization = `Bearer ${token}`;
+            }
+            resolve(apiClient(originalRequest));
+          });
+        });
+      }
+
+      originalRequest._retry = true;
+      isRefreshing = true;
+
+      try {
+        logDebug('Attempting token refresh...');
+        // Simulate refresh call
+        // const { access_token } = await axios.post(`${BASE_URL}/auth/refresh`, { refresh_token: localStorage.getItem('refresh_token') });
+        // localStorage.setItem('access_token', access_token);
+        
+        // Mock failure for now as backend is non-existent
+        throw new Error('Refresh failed');
+        
+        // if successful:
+        // isRefreshing = false;
+        // onTokenRefreshed(access_token);
+        // return apiClient(originalRequest);
+      } catch (refreshError) {
+        isRefreshing = false;
+        logDebug('Refresh failed, logging out.');
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('access_token');
+          localStorage.removeItem('refresh_token');
+          // window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      }
+    }
+
     const responseData = error.response?.data as any;
     
     const apiError = {
       message: responseData?.message || error.message || 'Server connection failed',
       status: error.response?.status || 500,
-      code: responseData?.code || 'NETWORK_FAILURE',
+      code: error.response?.code || 'NETWORK_FAILURE',
       details: responseData?.errors || null
     };
     
     logDebug('API Failure', apiError);
-
-    // AUTH FLOW: Attempt token refresh on 401
-    if (error.response?.status === 401 && typeof window !== 'undefined') {
-      logDebug('401 detected. Session expired.');
-      localStorage.removeItem('access_token');
-      // In a real app, here you would trigger /auth/refresh
-    }
-    
     return Promise.reject(apiError);
   }
 );

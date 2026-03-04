@@ -10,14 +10,15 @@ import type { Product, DataSource } from '@/lib/types';
 
 export type ProductResult = 
   | { status: 'success'; source: DataSource; data: Product }
-  | { status: 'error'; type: 'backend_unavailable' | 'not_found' | 'network_error'; barcode: string };
+  | { status: 'error'; type: 'backend_unavailable' | 'not_found' | 'network_error' | 'timeout'; barcode: string };
 
 export const productService = {
   /**
    * Fetches product details. 
    * STRICT: No silent fallback to OpenFoodFacts.
+   * Includes 2 auto-retries for network errors.
    */
-  async getProductByBarcode(barcode: string): Promise<ProductResult> {
+  async getProductByBarcode(barcode: string, retryCount = 0): Promise<ProductResult> {
     try {
       const response = await apiClient.get(ENDPOINTS.PRODUCTS.BY_BARCODE(barcode));
       if (response) {
@@ -25,8 +26,18 @@ export const productService = {
       }
       return { status: 'error', type: 'not_found', barcode };
     } catch (error: any) {
+      // Auto-retry logic for network errors (max 2)
+      if (retryCount < 2 && (error.code === 'NETWORK_FAILURE' || error.message === 'Network Error')) {
+        console.warn(`[Service] Retrying request (${retryCount + 1}/2)...`);
+        await new Promise(r => setTimeout(r, 1000));
+        return this.getProductByBarcode(barcode, retryCount + 1);
+      }
+
       if (error.status === 404) {
         return { status: 'error', type: 'not_found', barcode };
+      }
+      if (error.code === 'ECONNABORTED' || error.message.includes('timeout')) {
+        return { status: 'error', type: 'timeout', barcode };
       }
       return { status: 'error', type: 'backend_unavailable', barcode };
     }
