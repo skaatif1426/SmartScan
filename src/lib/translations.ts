@@ -1,3 +1,4 @@
+
 import type { Language } from './types';
 
 type Translations = {
@@ -67,7 +68,7 @@ export const translations: Translations = {
   askAiAssistant: { English: 'Ask AI Assistant', Hindi: 'एआई सहायक से पूछें', Marathi: 'AI सहाय्यकाला विचारा', Hinglish: 'AI se pucho' },
   dietSafetyAnalysis: { English: 'Diet safety and expert analysis.', Hindi: 'आहार सुरक्षा और विशेषज्ञ विश्लेषण।', Marathi: 'आहार सुरक्षा आणि तज्ञ विश्लेषण।', Hinglish: 'Diet safety aur expert analysis.' },
   scanAgain: { English: 'Scan Again', Hindi: 'फिर से स्कैन करें', Marathi: 'पुन्हा स्कॅन करा', Hinglish: 'Scan Phir Se' },
-  shareResult: { English: 'Detailed Outlook', Hindi: 'विस्तृत दृष्टिकोण', Marathi: 'तपशीलवार दृष्टिकोन', Hinglish: 'Detailed Outlook' },
+  shareResult: { English: 'Share Result', Hindi: 'रिजल्ट शेयर करें', Marathi: 'निकाल शेअर करा', Hinglish: 'Result Share Karo' },
   noPreview: { English: 'No Preview', Hindi: 'कोई पूर्वावलोकन नहीं', Marathi: 'कोणतेही पूर्वावलोकन नाही', Hinglish: 'No Preview' },
   confidence: { English: 'Confidence', Hindi: 'आत्मविश्वास', Marathi: 'आत्मविश्वास', Hinglish: 'Confidence' },
   imageIntelligenceScan: { English: 'Image Intelligence Scan', Hindi: 'इमेज इंटेलिजेंस स्कैन', Marathi: 'इमेज इंटेलिजन्स स्कॅन', Hinglish: 'Image Intelligence Scan' },
@@ -75,6 +76,9 @@ export const translations: Translations = {
   suggestedAlternatives: { English: 'Suggested Alternatives', Hindi: 'सुझाए गए विकल्प', Marathi: 'सुचवलेले पर्याय', Hinglish: 'Suggested Alternatives' },
   futureOutlook: { English: 'Future Health Outlook', Hindi: 'भविष्य का प्रभाव', Marathi: 'भविष्यातील प्रभाव', Hinglish: 'Sehat ka Bhavishya' },
   longTermImpact: { English: 'Long-term Health Prediction (A-Z)', Hindi: 'दीर्घकालिक स्वास्थ्य भविष्यवाणी (A-Z)', Marathi: 'दीर्घकालीन आरोग्य भविष्य (A-Z)', Hinglish: 'Future Health Outlook' },
+  preparingShare: { English: 'Preparing share...', Hindi: 'शेयर तैयार हो रहा है...', Marathi: 'शेअर तयार होत आहे...', Hinglish: 'Taiyari chalu hai...' },
+  copiedToClipboard: { English: 'Copied to clipboard', Hindi: 'क्लिपबोर्ड पर कॉपी किया गया', Marathi: 'क्लिपबोर्डवर कॉपी केले', Hinglish: 'Copy ho gaya!' },
+  detailedOutlook: { English: 'Detailed Outlook', Hindi: 'विस्तृत दृष्टिकोण', Marathi: 'तपशीलवार दृष्टिकोन', Hinglish: 'Detailed Outlook' },
 
   // Analysis Display
   nutritionAlerts: { English: 'Nutrition Alerts', Hindi: 'पोषण संबंधी अलर्ट', Marathi: 'पोषण सूचना', Hinglish: 'Nutrition Alerts' },
@@ -136,7 +140,7 @@ export const translations: Translations = {
   discoveryMsg3: { English: "🚀 Fresh Scan Detected\nYou're ahead of the database. SmartScan is working on it.", Hindi: "🚀 नया स्कैन मिला\nआप डेटाबेस से आगे हैं। SmartScan इस पर काम कर रहा है।", Marathi: "🚀 नवीन स्कॅन सापडला\nतुम्ही डेटाबेसच्या पुढे आहात. SmartScan यावर काम करत आहे।", Hinglish: "🚀 Naya Scan Mila\nAap database se aage ho. SmartScan kaam kar raha hai." },
   discoveryMsg4: { English: "🔍 Analyzing Product\nNo direct match found. AI is building details from scratch.", Hindi: "🔍 उत्पाद का विश्लेषण\nकोई सीधा मैच नहीं मिला। AI शुरुआत से विवरण तैयार कर रहा है।", Marathi: "🔍 उत्पादनाचे विश्लेषण\nकोणताही थेट सामना आढळला नाही. AI सुरुवातीपासून तपशील तयार करत आहे।", Hinglish: "🔍 Analyzing Product\nKoi match nahi mila. AI details bana raha hai." },
   discoveryMsg5: { English: "📦 Unknown Product Detected\nWe're processing this item to generate useful insights.", Hindi: "📦 अज्ञात उत्पाद मिला\nहम उपयोगी जानकारी तैयार करने के लिए इस आइटम को प्रोसेस कर रहे हैं।", Marathi: "📦 अज्ञात उत्पादन आढळले\nआम्ही उपयुक्त माहिती तयार करण्यासाठी या उत्पादनावर प्रक्रिया करत आहोत।", Hinglish: "📦 Unknown Product Mila\nInsights ke liye process ho raha hai." },
-  discoveryMsg6: { English: "⚡ Processing Scan\nThis product isn't in our system yet. Creating data now.", Hindi: "⚡ स्कैन प्रोसेस हो रहा है\nयह उत्पाद अभी हमारे सिस्टम में नहीं है। अब डेटा तैयार किया जा रहा है।", Marathi: "⚡ स्कॅन प्रक्रिया सुरू आहे\nहे उत्पादन अद्याप आमच्या सिस्टममध्ये नाही. आता डेटा तयार करत आहे।", Hinglish: "⚡ Processing Scan\nYe product system mein nahi hai. Data bana rahe hain." },
+  discoveryMsg6: { English: "⚡ Processing Scan\nThis product isn't in our system yet. Creating data now.", Hindi: "⚡ स्कैन प्रोसेस हो रहा है\nयह उत्पाद अभी हमारे सिस्टम में नहीं है। अब डेटा तैयार किया जा रहा है।", Marathi: "⚡ स्कॅन प्रक्रिया सुरू आहे\nहे उत्पादन अद्याप आमच्या सिस्टममध्ये नाही. अब डेटा तयार करत आहे।", Hinglish: "⚡ Processing Scan\nYe product system mein nahi hai. Data bana rahe hain." },
   discoveryMsg7: { English: "🌱 Expanding Knowledge\nYour scan helps improve the system. Insights coming soon.", Hindi: "🌱 ज्ञान का विस्तार\nआपका स्कैन सिस्टम को बेहतर बनाने में मदद करता है। जानकारी जल्द ही आ रही है।", Marathi: "🌱 ज्ञान विस्तार\nतुमचा स्कॅन सिस्टम सुधारण्यात मदत करतो. माहिती लवकरच येत आहे।", Hinglish: "🌱 System Seekh Raha Hai\nAapka scan help karta hai. Insights jald aayenge." },
   
   analysisInProgress: { English: "AI Analysis in progress...", Hindi: "AI विश्लेषण प्रगति पर है...", Marathi: "AI विश्लेषण सुरू आहे...", Hinglish: "AI Analysis ho raha hai..." },

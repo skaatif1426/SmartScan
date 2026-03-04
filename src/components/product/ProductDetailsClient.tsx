@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -16,6 +17,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { calculateLocalScore } from '@/lib/scoring';
 import { useGamification } from '@/hooks/useGamification';
 import ProductChatbot from './ProductChatbot';
+import ShareResult from './ShareResult';
 import { cn } from '@/lib/utils';
 
 export default function ProductDetailsClient({ product, source }: { product: UnifiedProduct, source: DataSource }) {
@@ -62,7 +64,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
     };
 
     return (
-        <div className="p-4 space-y-6 max-w-2xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-6 duration-700">
+        <div className="p-4 space-y-6 max-w-2xl mx-auto pb-48 animate-in fade-in slide-in-from-bottom-6 duration-700">
             {/* Header with Source Indicator */}
             <div className="flex items-center justify-between">
                 <div className="flex items-center gap-3 truncate">
@@ -167,15 +169,29 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
                 </Card>
             )}
 
-            <div className="fixed bottom-20 inset-x-4 z-50 flex gap-3 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-500 delay-400">
-                <Button variant="outline" className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={() => router.push('/')}>
-                    <RotateCcw className="h-5 w-5" />
-                    {t('scanAgain')}
-                </Button>
-                <Button className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg active:scale-95 text-sm bg-gradient-to-r from-emerald-600 to-primary text-white" onClick={scrollToFuture}>
-                    <TrendingUp className="h-5 w-5" />
-                    {t('shareResult')}
-                </Button>
+            <div className="fixed bottom-20 inset-x-4 z-50 flex flex-col gap-3 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-500 delay-400">
+                <div className="flex gap-3">
+                    <Button variant="outline" className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={() => router.push('/')}>
+                        <RotateCcw className="h-5 w-5" />
+                        {t('scanAgain')}
+                    </Button>
+                    <Button className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg active:scale-95 text-sm bg-gradient-to-r from-emerald-600 to-primary text-white" onClick={scrollToFuture}>
+                        <TrendingUp className="h-5 w-5" />
+                        {t('detailedOutlook')}
+                    </Button>
+                </div>
+                <ShareResult 
+                    productName={product.name}
+                    healthScore={localAnalysis.score}
+                    nutrition={{
+                        calories: product.nutriments.calories,
+                        sugar: product.nutriments.sugar || 0,
+                        fat: product.nutriments.fat,
+                        protein: product.nutriments.protein
+                    }}
+                    summary={product.brand}
+                    className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xl"
+                />
             </div>
         </div>
     );
