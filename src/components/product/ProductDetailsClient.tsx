@@ -1,4 +1,3 @@
-
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -76,7 +75,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
                 </Badge>
             </div>
             
-            <Card className="rounded-2xl border shadow-md overflow-hidden group">
+            <Card className="rounded-3xl border shadow-md overflow-hidden group">
                 <div className="p-0 relative h-60 bg-muted flex items-center justify-center">
                     {(product.image && !imageError) ? (
                         <Image
@@ -109,7 +108,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
             />
             
             <Accordion type="single" collapsible className="w-full space-y-3">
-                <Card className="rounded-xl border shadow-none overflow-hidden">
+                <Card className="rounded-2xl border shadow-none overflow-hidden">
                     <AccordionItem value="nutrition-facts" className="border-none">
                         <AccordionTrigger className="px-5 py-4 hover:no-underline font-black text-sm">
                             <div className="flex items-center gap-2.5"><Info className="h-4 w-4 text-primary" /> {t('fullNutrition')}</div>
@@ -127,7 +126,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
                     </AccordionItem>
                 </Card>
 
-                <Card className="rounded-xl border shadow-none overflow-hidden">
+                <Card className="rounded-2xl border shadow-none overflow-hidden">
                     <AccordionItem value="ingredients" className="border-none">
                          <AccordionTrigger className="px-5 py-4 hover:no-underline font-black text-sm">
                              <div className="flex items-center gap-2.5"><Hash className="h-4 w-4 text-primary" /> {t('fullIngredients')}</div>
@@ -140,12 +139,12 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
             </Accordion>
 
             {preferences.aiChatEnabled && (
-                <Card className="overflow-hidden border border-primary/20 hover:border-primary/50 transition-all rounded-2xl shadow-md mt-6 active:scale-98">
+                <Card className="overflow-hidden border border-primary/20 hover:border-primary/50 transition-all rounded-3xl shadow-md mt-6 active:scale-98">
                     <Accordion type="single" collapsible value={showChat ? 'chat' : ''} onValueChange={(v) => setShowChat(!!v)}>
                         <AccordionItem value="chat" className="border-none">
                             <AccordionTrigger className="px-5 py-4 hover:no-underline">
                                 <div className="flex items-center gap-3 text-left">
-                                    <div className="p-2.5 bg-primary/10 rounded-xl">
+                                    <div className="p-2.5 bg-primary/10 rounded-2xl">
                                         <Sparkles className="h-6 w-6 text-primary animate-pulse" />
                                     </div>
                                     <div>
@@ -163,7 +162,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
             )}
 
             <div className="fixed bottom-20 inset-x-4 z-50 flex gap-3 max-w-2xl mx-auto animate-in slide-in-from-bottom-4 duration-500 delay-400">
-                <Button variant="outline" className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={() => router.push('/')}>
+                <Button variant="outline" className="flex-1 h-16 rounded-3xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={() => router.push('/')}>
                     <RotateCcw className="h-5 w-5" />
                     {t('scanAgain')}
                 </Button>
@@ -178,7 +177,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
                         protein: product.nutriments.protein
                     }}
                     summary={product.brand}
-                    className="flex-1 h-14 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xl"
+                    className="flex-1 h-16 bg-primary hover:bg-primary/90 text-white rounded-3xl shadow-xl"
                 />
             </div>
         </div>

@@ -231,7 +231,7 @@ export default function ScannerPage() {
               <Button 
                 size="lg" 
                 disabled={isAnalyzing}
-                className="w-full rounded-xl h-12 text-base font-bold bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white shadow-lg active:scale-95 transition-all" 
+                className="w-full rounded-2xl h-14 text-base font-bold bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white shadow-lg active:scale-95 transition-all" 
                 onClick={() => setIsCameraOpen(true)}
               >
                 <Camera className="mr-2 h-4 w-4" /> 
@@ -240,7 +240,7 @@ export default function ScannerPage() {
               <Button 
                 variant="outline" 
                 disabled={isAnalyzing}
-                className="w-full h-12 rounded-xl border-2 font-bold text-sm active:scale-95 transition-all" 
+                className="w-full h-14 rounded-2xl border-2 font-bold text-sm active:scale-95 transition-all" 
                 onClick={handleUploadImage}
               >
                 <ImageIcon className="mr-2 h-4 w-4" /> {t('uploadImage')}
@@ -275,7 +275,7 @@ export default function ScannerPage() {
                         <Button 
                           disabled={!manualBarcode || manualBarcode.length < 5 || isAnalyzing}
                           onClick={() => handleBarcodeAnalysisFlow(manualBarcode)}
-                          className="h-12 w-full rounded-xl font-black text-base bg-gradient-to-r from-primary to-emerald-600 shadow-xl"
+                          className="h-12 w-full rounded-2xl font-black text-base bg-gradient-to-r from-primary to-emerald-600 shadow-xl"
                         >
                           {t('analyzeProduct')}
                           <ArrowRight className="ml-2 w-4 h-4" />

@@ -91,7 +91,7 @@ const QuickStats = ({ history }: { history: ScanHistoryItem[] }) => {
     
     return (
         <div className="space-y-3">
-            <Card className="border shadow-sm rounded-2xl overflow-hidden">
+            <Card className="border shadow-sm rounded-3xl overflow-hidden">
                 <CardContent className="p-4 grid grid-cols-3 divide-x divide-border text-center">
                     <div className="space-y-0.5">
                         <Scan className="mx-auto h-4 w-4 text-muted-foreground" />
@@ -121,14 +121,14 @@ const RecentScan = ({ lastScan }: { lastScan: ScanHistoryItem }) => {
         <div className="space-y-3">
             <h2 className="font-black text-sm uppercase tracking-widest text-muted-foreground">{t('latestAnalysis')}</h2>
             <Link href={lastScan.type === 'image' && lastScan.imageAnalysis ? '#' : `/product/${lastScan.barcode}`} passHref className="block transition-all active:scale-[0.98] rounded-2xl">
-                <Card className="hover:bg-muted/50 border shadow-sm rounded-2xl overflow-hidden">
+                <Card className="hover:bg-muted/50 border shadow-sm rounded-3xl overflow-hidden">
                     <CardContent className="p-4 flex items-center gap-4">
                         {lastScan.imageUrl ? (
-                            <div className="relative w-14 h-14 bg-white rounded-xl border p-1 shadow-sm">
+                            <div className="relative w-14 h-14 bg-white rounded-2xl border p-1 shadow-sm">
                                 <Image src={lastScan.imageUrl} alt={lastScan.productName} fill className="object-contain p-1.5" />
                             </div>
                         ) : (
-                            <div className="w-14 h-14 rounded-xl bg-secondary flex items-center justify-center"><ScanLine className="w-6 h-6 text-muted-foreground" /></div>
+                            <div className="w-14 h-14 rounded-2xl bg-secondary flex items-center justify-center"><ScanLine className="w-6 h-6 text-muted-foreground" /></div>
                         )}
                         <div className="flex-1 min-w-0">
                             <p className="font-black text-base truncate leading-none mb-1">{lastScan.productName}</p>
@@ -191,7 +191,7 @@ export default function DashboardPage() {
                     <Button 
                         size="lg" 
                         className={cn(
-                            "rounded-2xl h-16 px-12 text-lg font-bold transition-all",
+                            "rounded-3xl h-16 px-12 text-lg font-bold transition-all",
                             "bg-gradient-to-b from-[#22C55E] to-[#16A34A] text-white",
                             "shadow-lg active:scale-95"
                         )}
