@@ -74,11 +74,6 @@ export default function ShareResult({
       // 1. Try to generate image card
       if (cardRef.current) {
         try {
-          /**
-           * PERFORMANCE FIX: 
-           * - skipFonts: true avoids heavy CSS font crawling which often causes timeouts
-           * - fontEmbedCSS: '' prevents cross-origin security errors with Google Fonts
-           */
           const blob = await toBlob(cardRef.current, {
             quality: 0.9,
             cacheBust: true,
@@ -98,32 +93,41 @@ export default function ShareResult({
 
       // 2. Try Web Share API
       if (typeof navigator !== 'undefined' && navigator.share) {
+        const canShareFiles = files.length > 0 && navigator.canShare?.({ files });
         const shareData: ShareData = {
           title: shareTitle,
           text: shareText,
-          files: files.length > 0 && navigator.canShare?.({ files }) ? files : undefined
+          files: canShareFiles ? files : undefined
         };
 
         await navigator.share(shareData);
       } else {
-        // 3. Fallback: Copy to Clipboard
+        throw new Error('Share API not supported');
+      }
+    } catch (error) {
+      const err = error as Error;
+      
+      // If it's a cancellation, do nothing
+      if (err.name === 'AbortError') {
+        setIsPreparing(false);
+        return;
+      }
+
+      console.warn('Sharing failed or was denied, using clipboard fallback:', err.message);
+      
+      // Fallback: Copy to Clipboard
+      try {
         await navigator.clipboard.writeText(shareText);
         toast({
           title: t('shareResult'),
           description: t('copiedToClipboard'),
         });
-      }
-    } catch (error) {
-      // Don't show error for user cancellation
-      if ((error as Error).name !== 'AbortError') {
-        console.error('Share failure:', error);
-        // Secondary fallback to clipboard even if share API existed but failed
-        try {
-            await navigator.clipboard.writeText(shareText);
-            toast({ title: t('shareResult'), description: t('copiedToClipboard') });
-        } catch (clipErr) {
-            toast({ variant: 'destructive', title: 'Error', description: 'Could not share or copy result.' });
-        }
+      } catch (clipErr) {
+        toast({
+          variant: 'destructive',
+          title: 'Error',
+          description: 'Could not share or copy result.',
+        });
       }
     } finally {
       setIsPreparing(false);
@@ -147,11 +151,6 @@ export default function ShareResult({
         {isPreparing ? t('preparingShare') : t('shareResult')}
       </Button>
 
-      {/* 
-          HIDDEN SHAREABLE CARD 
-          Used by html-to-image. We use standard <img> instead of next/image
-          because next/image optimization wrappers break canvas capture.
-      */}
       <div className="fixed -left-[9999px] top-0 pointer-events-none" aria-hidden="true">
         <div 
           ref={cardRef} 
@@ -168,7 +167,6 @@ export default function ShareResult({
 
            {imageUrl && (
              <div className="relative w-32 h-32 bg-neutral-50 rounded-2xl border flex items-center justify-center overflow-hidden">
-                {/* Standard <img> with crossOrigin is essential for canvas capture of external images */}
                 <img 
                     src={imageUrl} 
                     alt="" 
