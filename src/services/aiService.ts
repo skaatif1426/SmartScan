@@ -1,6 +1,6 @@
 /**
- * @fileOverview Service layer for AI-driven insights and analysis.
- * Wraps Genkit flows to allow easy migration to backend endpoints.
+ * @fileOverview Service layer for AI insights.
+ * Encapsulates Genkit flows with a readiness for future API migration.
  */
 
 import { generateNutritionInsights } from '@/ai/flows/ai-nutrition-insights';
@@ -12,40 +12,57 @@ import apiClient from '@/api/apiClient';
 import { ENDPOINTS } from '@/api/endpoints';
 
 export const aiService = {
+  /**
+   * Generates nutritional insights.
+   * Can be switched to a backend call easily by uncommenting the API line.
+   */
   async getNutritionInsight(input: any) {
     try {
-      // Future integration: return await apiClient.post(ENDPOINTS.AI.INSIGHTS, input);
+      // Future: return await apiClient.post(ENDPOINTS.AI.INSIGHTS, input);
       return await generateNutritionInsights(input);
     } catch (error) {
-      return await generateNutritionInsights(input);
+      console.error('AI Insight Flow Error:', error);
+      return null;
     }
   },
 
-  async getChatResponse(input: any) {
+  /**
+   * Chatbot interface.
+   */
+  async getChatResponse(input: any): Promise<string> {
     try {
       const response = await multilingualProductChatbot(input);
       return response.answer;
     } catch (error) {
-      throw error;
+      return 'I am currently unable to process your question.';
     }
   },
 
+  /**
+   * AI Estimation for missing products.
+   */
   async getBarcodeEstimate(input: any) {
     try {
       return await generateEstimateFromBarcode(input);
     } catch (error) {
-      throw error;
+      return null;
     }
   },
 
+  /**
+   * Vision analysis.
+   */
   async getImageAnalysis(input: any) {
     try {
       return await analyzeFoodImage(input);
     } catch (error) {
-      throw error;
+      return null;
     }
   },
 
+  /**
+   * Category classification.
+   */
   async getAICategory(input: any) {
     try {
       const result = await categorizeProduct(input);

@@ -1,6 +1,6 @@
 /**
  * @fileOverview Service layer for Product-related business logic.
- * Handles data fetching with fallbacks to external APIs.
+ * Implements a strict "Backend-First" pattern with external API fallback.
  */
 
 import { fetchProductFromApi } from '@/lib/openfoodfacts-api';
@@ -10,32 +10,47 @@ import type { Product } from '@/lib/types';
 
 export const productService = {
   /**
-   * Fetches product details. First tries custom backend, then falls back to OpenFoodFacts.
+   * Fetches product details. 
+   * STRATEGY: 
+   * 1. Try internal Spring Boot API.
+   * 2. If fail/404, fallback to OpenFoodFacts.
    */
   async getProductByBarcode(barcode: string): Promise<Product | null> {
     try {
-      // Logic: Try backend first if it's connected
-      // const response = await apiClient.get(ENDPOINTS.PRODUCTS.BY_BARCODE(barcode));
-      // if (response) return response;
+      // Step 1: Attempt to fetch from our Enterprise Backend
+      const response = await apiClient.get(ENDPOINTS.PRODUCTS.BY_BARCODE(barcode));
+      if (response) return response;
       
-      // Fallback to current external API
       return await fetchProductFromApi(barcode);
-    } catch (error) {
-      // If backend fails or is not found, use fallback
-      console.warn('Backend service unavailable, using OpenFoodFacts fallback.');
-      return await fetchProductFromApi(barcode);
+    } catch (error: any) {
+      // Step 2: Fallback if backend is unavailable (ECONNREFUSED) or returns 404
+      if (error.status === 404 || error.code === 'ERR_NETWORK' || error.status === 500) {
+        return await fetchProductFromApi(barcode).catch(() => null);
+      }
+      return null;
     }
   },
 
   /**
-   * Reports a new product discovery.
+   * Reports a discovery to the backend.
    */
   async reportDiscovery(productData: any): Promise<void> {
     try {
       await apiClient.post(ENDPOINTS.PRODUCTS.DISCOVERY, productData);
     } catch (error) {
-      // In prototype mode, we just log locally
-      console.log('Discovery logged locally. Backend report pending integration.');
+      // Silent fail for discoveries in prototype mode
+      console.warn('Backend discovery sync skipped.');
+    }
+  },
+
+  /**
+   * Search for products.
+   */
+  async searchProducts(query: string) {
+    try {
+      return await apiClient.get(ENDPOINTS.PRODUCTS.SEARCH, { params: { q: query } });
+    } catch (error) {
+      return [];
     }
   }
 };
