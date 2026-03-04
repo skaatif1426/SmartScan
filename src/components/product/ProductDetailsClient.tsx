@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useEffect, useState, useMemo } from 'react';
@@ -169,6 +170,7 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
                 <ShareResult 
                     productName={product.name}
                     healthScore={localAnalysis.score}
+                    imageUrl={product.image}
                     nutrition={{
                         calories: product.nutriments.calories,
                         sugar: product.nutriments.sugar || 0,

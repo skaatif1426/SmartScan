@@ -2,7 +2,7 @@
 'use client';
 
 import React, { useRef, useState } from 'react';
-import { Share2, Copy, Check, Loader2, Apple, Flame, Info, ShieldCheck } from 'lucide-react';
+import { Share2, Loader2, Apple, Flame, ShieldCheck } from 'lucide-react';
 import { toBlob } from 'html-to-image';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
@@ -13,6 +13,7 @@ import { cn } from '@/lib/utils';
 interface ShareResultProps {
   productName: string;
   healthScore?: number;
+  imageUrl?: string | null;
   nutrition?: {
     calories: number;
     sugar: number;
@@ -28,6 +29,7 @@ interface ShareResultProps {
 export default function ShareResult({ 
   productName, 
   healthScore, 
+  imageUrl,
   nutrition, 
   summary,
   className,
@@ -60,7 +62,9 @@ export default function ShareResult({
   };
 
   const handleShare = async () => {
+    if (isPreparing) return;
     setIsPreparing(true);
+    
     const shareText = generateShareText();
     const shareTitle = `SmartScan: ${productName}`;
 
@@ -71,18 +75,19 @@ export default function ShareResult({
       if (cardRef.current) {
         try {
           /**
-           * FIX: fontEmbedCSS: '' prevents the library from crawling cross-origin stylesheets 
-           * (like Google Fonts) which triggers a SecurityError in some environments when 
-           * accessing document.styleSheets rules.
+           * PERFORMANCE FIX: 
+           * - skipFonts: true avoids heavy CSS font crawling which often causes timeouts
+           * - fontEmbedCSS: '' prevents cross-origin security errors with Google Fonts
            */
           const blob = await toBlob(cardRef.current, {
-            quality: 0.95,
+            quality: 0.9,
             cacheBust: true,
             backgroundColor: '#ffffff',
             fontEmbedCSS: '',
+            skipFonts: true,
           });
           
-          if (blob) {
+          if (blob && blob.size > 0) {
             const file = new File([blob], 'smartscan-result.png', { type: 'image/png' });
             files = [file];
           }
@@ -92,7 +97,7 @@ export default function ShareResult({
       }
 
       // 2. Try Web Share API
-      if (navigator.share) {
+      if (typeof navigator !== 'undefined' && navigator.share) {
         const shareData: ShareData = {
           title: shareTitle,
           text: shareText,
@@ -109,12 +114,16 @@ export default function ShareResult({
         });
       }
     } catch (error) {
+      // Don't show error for user cancellation
       if ((error as Error).name !== 'AbortError') {
-        toast({
-          variant: 'destructive',
-          title: 'Sharing Error',
-          description: 'Could not complete share operation.',
-        });
+        console.error('Share failure:', error);
+        // Secondary fallback to clipboard even if share API existed but failed
+        try {
+            await navigator.clipboard.writeText(shareText);
+            toast({ title: t('shareResult'), description: t('copiedToClipboard') });
+        } catch (clipErr) {
+            toast({ variant: 'destructive', title: 'Error', description: 'Could not share or copy result.' });
+        }
       }
     } finally {
       setIsPreparing(false);
@@ -138,8 +147,12 @@ export default function ShareResult({
         {isPreparing ? t('preparingShare') : t('shareResult')}
       </Button>
 
-      {/* Hidden Shareable Card for Image Generation */}
-      <div className="fixed -left-[9999px] top-0 pointer-events-none">
+      {/* 
+          HIDDEN SHAREABLE CARD 
+          Used by html-to-image. We use standard <img> instead of next/image
+          because next/image optimization wrappers break canvas capture.
+      */}
+      <div className="fixed -left-[9999px] top-0 pointer-events-none" aria-hidden="true">
         <div 
           ref={cardRef} 
           className="w-[400px] bg-white p-8 rounded-[40px] border-8 border-primary/20 flex flex-col items-center text-center gap-6"
@@ -152,6 +165,18 @@ export default function ShareResult({
               <h1 className="text-2xl font-black tracking-tight text-neutral-900 leading-none">{productName || 'Unknown Product'}</h1>
               <p className="text-neutral-500 font-bold text-sm uppercase tracking-widest">SmartScan AI Intelligence</p>
            </div>
+
+           {imageUrl && (
+             <div className="relative w-32 h-32 bg-neutral-50 rounded-2xl border flex items-center justify-center overflow-hidden">
+                {/* Standard <img> with crossOrigin is essential for canvas capture of external images */}
+                <img 
+                    src={imageUrl} 
+                    alt="" 
+                    className="max-w-full max-h-full object-contain p-2" 
+                    crossOrigin="anonymous"
+                />
+             </div>
+           )}
 
            {healthScore !== undefined && (
              <div className="space-y-2">
