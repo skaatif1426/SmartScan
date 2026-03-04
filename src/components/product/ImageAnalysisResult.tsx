@@ -1,13 +1,10 @@
-
 'use client';
 
 import { useState } from 'react';
 import Image from 'next/image';
 import { 
   RotateCcw, 
-  TrendingUp, 
-  Sparkles,
-  ChevronDown
+  Sparkles
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -16,7 +13,6 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import ProductChatbot from './ProductChatbot';
 import AnalysisDisplay from './AnalysisDisplay';
 import ShareResult from './ShareResult';
-import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/AppProviders';
 
 interface ImageAnalysisResultProps {
@@ -28,13 +24,6 @@ interface ImageAnalysisResultProps {
 export default function ImageAnalysisResult({ result, image, onReset }: ImageAnalysisResultProps) {
   const [showChat, setShowChat] = useState(false);
   const { t } = useLanguage();
-
-  const scrollToFuture = () => {
-    const element = document.getElementById('future-outlook');
-    if (element) {
-        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
-    }
-  };
 
   return (
     <div className="space-y-8 pb-48 animate-in fade-in slide-in-from-bottom-10 duration-700 max-w-2xl mx-auto px-4">
@@ -54,7 +43,6 @@ export default function ImageAnalysisResult({ result, image, onReset }: ImageAna
         title={result.productName}
         score={result.healthScore}
         summary={result.summary}
-        longTermImpact={result.insights.futureOutlook}
         recommendation={result.insights.healthImpact}
         risks={result.insights.whoShouldAvoid.split(',').map((s: string) => s.trim())}
         nutrition={result.nutrition}
@@ -86,23 +74,17 @@ export default function ImageAnalysisResult({ result, image, onReset }: ImageAna
         </Accordion>
       </Card>
 
-      <div className="fixed bottom-20 inset-x-4 z-50 flex flex-col gap-3 max-w-2xl mx-auto animate-in slide-in-from-bottom-8 duration-500 delay-300">
-        <div className="flex gap-3">
-            <Button variant="outline" className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={onReset}>
-                <RotateCcw className="h-5 w-5" />
-                {t('scanAgain')}
-            </Button>
-            <Button className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg active:scale-95 text-sm bg-gradient-to-r from-emerald-600 to-primary text-white" onClick={scrollToFuture}>
-                <TrendingUp className="h-5 w-5" />
-                {t('detailedOutlook')}
-            </Button>
-        </div>
+      <div className="fixed bottom-20 inset-x-4 z-50 flex gap-3 max-w-2xl mx-auto animate-in slide-in-from-bottom-8 duration-500 delay-300">
+        <Button variant="outline" className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg bg-background/80 backdrop-blur-xl border-2 active:scale-95 text-sm" onClick={onReset}>
+            <RotateCcw className="h-5 w-5" />
+            {t('scanAgain')}
+        </Button>
         <ShareResult 
             productName={result.productName}
             healthScore={result.healthScore}
             nutrition={result.nutrition}
             summary={result.summary}
-            className="w-full h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-xl shadow-xl"
+            className="flex-1 h-14 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xl"
         />
       </div>
     </div>
