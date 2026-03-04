@@ -144,4 +144,5 @@ export const translations: Translations = {
   generatingInsightError: { English: 'Unable to generate AI analysis at this moment.', Hindi: 'इस समय AI विश्लेषण तैयार करने में असमर्थ।', Marathi: 'यावेळी AI विश्लेषण व्युत्पन्न करण्यात अक्षम।', Hinglish: 'Abhi AI analysis nahi ho paa raha.' },
   getAiEstimate: { English: 'Get AI Estimate', Hindi: 'एआई अनुमान प्राप्त करें', Marathi: 'AI अंदाज मिळवा', Hinglish: 'AI Estimate Lo' },
   finalizingAnalysis: { English: 'Finalizing Analysis...', Hindi: 'विश्लेषण को अंतिम रूप दिया जा रहा है...', Marathi: 'विश्लेषण अंतिम करत आहे...', Hinglish: 'Analysis khatam ho raha hai...' },
+  chatbotPlaceholder: { English: 'Ask me anything about this product...', Hindi: 'इस उत्पाद के बारे में कुछ भी पूछें...', Marathi: 'या उत्पादनाबद्दल काहीही विचारा...', Hinglish: 'Product ke baare mein kuch bhi pucho...' },
 };
