@@ -49,14 +49,14 @@ const AnalysisDisplay = ({
     return (
         <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
             {warningTitle && (
-                <Alert variant="destructive" className="border shadow-sm py-3 px-4">
+                <Alert variant="destructive" className="border shadow-sm py-3 px-4 rounded-2xl">
                     <AlertCircle className="h-4 w-4" />
                     <AlertTitle className="font-bold text-sm">{warningTitle}</AlertTitle>
                 </Alert>
             )}
 
             {summary && (
-                 <Card className="border-primary/20 bg-primary/5 shadow-none rounded-xl">
+                 <Card className="border-primary/20 bg-primary/5 shadow-none rounded-2xl">
                     <CardContent className="p-4 flex gap-3 items-start">
                         <CheckCircle className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
                         <p className="text-sm font-bold leading-tight">{summary}</p>
@@ -95,7 +95,7 @@ const AnalysisDisplay = ({
                      </div>
                      <div className="flex flex-wrap gap-1.5">
                         {risks.map((risk, i) => (
-                            <Badge key={i} variant="destructive" className="rounded-lg px-2 py-0.5 font-bold text-[10px] lowercase first-letter:uppercase">
+                            <Badge key={i} variant="destructive" className="rounded-xl px-3 py-1 font-bold text-[10px] lowercase first-letter:uppercase">
                                 {risk} ⚠️
                             </Badge>
                         ))}
@@ -104,7 +104,7 @@ const AnalysisDisplay = ({
             )}
 
             {recommendation && (
-                <div className="p-4 rounded-xl border bg-muted/20">
+                <div className="p-4 rounded-2xl border bg-muted/20">
                     <Label className="text-[9px] uppercase tracking-widest font-black text-muted-foreground block mb-1">{t('expertTake')}</Label>
                     <p className="text-xs font-medium leading-relaxed">{recommendation}</p>
                 </div>
@@ -115,7 +115,7 @@ const AnalysisDisplay = ({
 
 function NutritionCard({ label, value, unit, icon: Icon, color }: any) {
   return (
-    <Card className="border shadow-none rounded-xl bg-muted/10">
+    <Card className="border shadow-none rounded-2xl bg-muted/10">
       <CardContent className="p-3 flex flex-col items-center text-center gap-0.5">
         <Icon className={cn("h-4 w-4", color)} />
         <div className="text-base font-black">{Math.round(value)}{unit}</div>

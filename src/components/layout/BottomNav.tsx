@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { QrCode, History, LayoutGrid, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useLanguage } from '@/contexts/AppProviders';
+import { useState, useEffect } from 'react';
 
 const navItems = [
   { href: '/', icon: QrCode, labelKey: 'navScan' },
@@ -16,6 +17,13 @@ const navItems = [
 export default function BottomNav() {
   const pathname = usePathname();
   const { t } = useLanguage();
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  if (!isMounted) return null;
 
   return (
     <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card/85 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom-8 duration-300 ease-in-out">

@@ -1,6 +1,6 @@
 'use client';
 
-import { ReactNode } from 'react';
+import { ReactNode, useState, useEffect } from 'react';
 import { usePathname } from 'next/navigation';
 import { AppProviders } from '@/contexts/AppProviders';
 import BottomNav from './BottomNav';
@@ -10,7 +10,13 @@ const pathsWithNav = ['/', '/history', '/dashboard', '/profile', '/settings'];
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const showNav = pathsWithNav.includes(pathname);
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+
+  const showNav = isMounted && pathsWithNav.includes(pathname);
 
   return (
     <AppProviders>
@@ -19,10 +25,9 @@ export function AppShell({ children }: { children: ReactNode }) {
           key={pathname} 
           className={cn(
             'flex-1 overflow-y-auto animate-in fade-in-0 duration-200 ease-out',
-            showNav ? 'pb-24 pt-2' : '' // Reduced padding, added tiny top breathing space
+            showNav ? 'pb-24 pt-2' : ''
           )}
         >
-          {/* Subtle global scaling wrapper for content only */}
           <div className={cn(
             "max-w-screen-xl mx-auto w-full h-full transition-all duration-300",
             showNav ? "px-4" : ""
