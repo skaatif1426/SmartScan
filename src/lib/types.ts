@@ -87,6 +87,7 @@ export const NutritionInsightOutputSchema = z.object({
   healthScore: z.number().min(0).max(100),
   risks: z.array(z.string()),
   recommendation: z.string(),
+  longTermImpact: z.string().describe("Predict the long-term health impact of regular consumption (A to Z details)."),
   category: z.string().optional()
 });
 
@@ -108,6 +109,7 @@ export const ImageAnalysisOutputSchema = z.object({
     healthImpact: z.string(),
     whoShouldAvoid: z.string(),
     betterAlternatives: z.string(),
+    futureOutlook: z.string().describe("Predict the future long-term health outlook of this product if consumed regularly."),
   })
 });
 

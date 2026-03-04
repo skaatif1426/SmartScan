@@ -67,12 +67,14 @@ export const translations: Translations = {
   askAiAssistant: { English: 'Ask AI Assistant', Hindi: 'एआई सहायक से पूछें', Marathi: 'AI सहाय्यकाला विचारा', Hinglish: 'AI se pucho' },
   dietSafetyAnalysis: { English: 'Diet safety and expert analysis.', Hindi: 'आहार सुरक्षा और विशेषज्ञ विश्लेषण।', Marathi: 'आहार सुरक्षा आणि तज्ञ विश्लेषण।', Hinglish: 'Diet safety aur expert analysis.' },
   scanAgain: { English: 'Scan Again', Hindi: 'फिर से स्कैन करें', Marathi: 'पुन्हा स्कॅन करा', Hinglish: 'Scan Phir Se' },
-  shareResult: { English: 'Share Result', Hindi: 'परिणाम साझा करें', Marathi: 'निकाल शेअर करा', Hinglish: 'Result Share Karo' },
+  shareResult: { English: 'Detailed Outlook', Hindi: 'विस्तृत दृष्टिकोण', Marathi: 'तपशीलवार दृष्टिकोन', Hinglish: 'Detailed Outlook' },
   noPreview: { English: 'No Preview', Hindi: 'कोई पूर्वावलोकन नहीं', Marathi: 'कोणतेही पूर्वावलोकन नाही', Hinglish: 'No Preview' },
   confidence: { English: 'Confidence', Hindi: 'आत्मविश्वास', Marathi: 'आत्मविश्वास', Hinglish: 'Confidence' },
   imageIntelligenceScan: { English: 'Image Intelligence Scan', Hindi: 'इमेज इंटेलिजेंस स्कैन', Marathi: 'इमेज इंटेलिजन्स स्कॅन', Hinglish: 'Image Intelligence Scan' },
   likelyIngredients: { English: 'Likely Ingredients', Hindi: 'संभावित सामग्री', Marathi: 'संभाव्य साहित्य', Hinglish: 'Likely Ingredients' },
   suggestedAlternatives: { English: 'Suggested Alternatives', Hindi: 'सुझाए गए विकल्प', Marathi: 'सुचवलेले पर्याय', Hinglish: 'Suggested Alternatives' },
+  futureOutlook: { English: 'Future Health Outlook', Hindi: 'भविष्य का प्रभाव', Marathi: 'भविष्यातील प्रभाव', Hinglish: 'Sehat ka Bhavishya' },
+  longTermImpact: { English: 'Long-term Health Prediction (A-Z)', Hindi: 'दीर्घकालिक स्वास्थ्य भविष्यवाणी (A-Z)', Marathi: 'दीर्घकालीन आरोग्य भविष्य (A-Z)', Hinglish: 'Future Health Outlook' },
 
   // Analysis Display
   nutritionAlerts: { English: 'Nutrition Alerts', Hindi: 'पोषण संबंधी अलर्ट', Marathi: 'पोषण सूचना', Hinglish: 'Nutrition Alerts' },

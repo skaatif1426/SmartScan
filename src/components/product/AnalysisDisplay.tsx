@@ -1,7 +1,7 @@
 'use client';
 
-import { useEffect } from 'react';
-import { AlertCircle, CheckCircle, Flame, Apple, Info, ShieldCheck } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { AlertCircle, CheckCircle, Flame, Apple, Info, ShieldCheck, Sparkles, TrendingUp } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
@@ -18,6 +18,7 @@ interface AnalysisDisplayProps {
   risks?: string[];
   recommendation?: string;
   summary?: string;
+  longTermImpact?: string;
   isLocal?: boolean;
   warningTitle?: string;
   nutrition?: {
@@ -33,12 +34,14 @@ const AnalysisDisplay = ({
   risks, 
   recommendation, 
   summary, 
+  longTermImpact,
   isLocal = false, 
   warningTitle,
   nutrition 
 }: AnalysisDisplayProps) => {
     const scoreInfo = getScoreInfo(score);
     const { t } = useLanguage();
+    const futureOutlookRef = useRef<HTMLDivElement>(null);
     
     useEffect(() => {
         if (navigator.vibrate && !isLocal) {
@@ -88,9 +91,34 @@ const AnalysisDisplay = ({
                 </div>
             )}
 
+            {/* NEW: Future Health Outlook Section */}
+            {longTermImpact && (
+                <div id="future-outlook" ref={futureOutlookRef} className="animate-in slide-in-from-bottom-8 duration-700">
+                    <Card className="rounded-3xl border-2 border-primary/20 overflow-hidden shadow-lg bg-gradient-to-br from-primary/5 via-background to-emerald-500/5">
+                        <CardContent className="p-6 space-y-4">
+                            <div className="flex items-center gap-3">
+                                <div className="p-2 bg-primary/10 rounded-xl">
+                                    <Sparkles className="h-6 w-6 text-primary animate-pulse" />
+                                </div>
+                                <div>
+                                    <h3 className="font-black text-lg tracking-tight leading-none">{t('futureOutlook')}</h3>
+                                    <p className="text-[10px] uppercase font-black tracking-widest text-muted-foreground mt-1">{t('longTermImpact')}</p>
+                                </div>
+                            </div>
+                            <Separator className="opacity-50" />
+                            <p className="text-sm font-medium leading-relaxed italic text-foreground/80">
+                                "{longTermImpact}"
+                            </p>
+                        </CardContent>
+                    </Card>
+                </div>
+            )}
+
             {risks && risks.length > 0 && (
                 <div className="space-y-2">
-                     <Label className="text-[9px] uppercase tracking-widest font-black text-muted-foreground">{t('nutritionAlerts')}</Label>
+                     <div className="flex items-center justify-between">
+                         <Label className="text-[9px] uppercase tracking-widest font-black text-muted-foreground">{t('nutritionAlerts')}</Label>
+                     </div>
                      <div className="flex flex-wrap gap-1.5">
                         {risks.map((risk, i) => (
                             <Badge key={i} variant="destructive" className="rounded-lg px-2 py-0.5 font-bold text-[10px] lowercase first-letter:uppercase">
@@ -122,5 +150,9 @@ function NutritionCard({ label, value, unit, icon: Icon, color }: any) {
     </Card>
   );
 }
+
+const Separator = ({ className }: { className?: string }) => (
+    <div className={cn("h-px w-full bg-border", className)} />
+);
 
 export default AnalysisDisplay;

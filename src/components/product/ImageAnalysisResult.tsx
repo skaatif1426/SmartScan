@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { 
   RotateCcw, 
-  Share2, 
+  TrendingUp, 
   Sparkles,
   ChevronDown
 } from 'lucide-react';
@@ -27,6 +27,13 @@ export default function ImageAnalysisResult({ result, image, onReset }: ImageAna
   const [showChat, setShowChat] = useState(false);
   const { t } = useLanguage();
 
+  const scrollToFuture = () => {
+    const element = document.getElementById('future-outlook');
+    if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  };
+
   return (
     <div className="space-y-8 pb-32 animate-in fade-in slide-in-from-bottom-10 duration-700 max-w-2xl mx-auto px-4">
       <div className="relative h-72 w-full rounded-3xl overflow-hidden shadow-2xl bg-muted group">
@@ -45,6 +52,7 @@ export default function ImageAnalysisResult({ result, image, onReset }: ImageAna
         title={result.productName}
         score={result.healthScore}
         summary={result.summary}
+        longTermImpact={result.insights.futureOutlook}
         recommendation={result.insights.healthImpact}
         risks={result.insights.whoShouldAvoid.split(',').map((s: string) => s.trim())}
         nutrition={result.nutrition}
@@ -81,8 +89,8 @@ export default function ImageAnalysisResult({ result, image, onReset }: ImageAna
             <RotateCcw className="h-6 w-6" />
             {t('scanAgain')}
         </Button>
-        <Button className="flex-1 h-16 rounded-2xl gap-3 font-black shadow-2xl active:scale-95">
-            <Share2 className="h-6 w-6" />
+        <Button className="flex-1 h-16 rounded-2xl gap-3 font-black shadow-2xl active:scale-95 bg-gradient-to-r from-emerald-600 to-primary text-white" onClick={scrollToFuture}>
+            <TrendingUp className="h-6 w-6" />
             {t('shareResult')}
         </Button>
       </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash, Database, Globe, BrainCircuit } from 'lucide-react';
+import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, TrendingUp, Info, Hash, Database, Globe, BrainCircuit } from 'lucide-react';
 
 import type { UnifiedProduct, DataSource } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -53,6 +53,13 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
         'ai-estimate': { label: 'AI Prediction', icon: BrainCircuit, color: 'text-purple-500' },
         'image-analysis': { label: 'Visual AI', icon: Sparkles, color: 'text-orange-500' },
     }[source] || { label: 'External Source', icon: Globe, color: 'text-muted-foreground' };
+
+    const scrollToFuture = () => {
+        const element = document.getElementById('future-outlook');
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+    };
 
     return (
         <div className="p-4 space-y-6 max-w-2xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-6 duration-700">
@@ -165,8 +172,8 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
                     <RotateCcw className="h-5 w-5" />
                     {t('scanAgain')}
                 </Button>
-                <Button className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg active:scale-95 text-sm">
-                    <Share2 className="h-5 w-5" />
+                <Button className="flex-1 h-14 rounded-xl gap-2 font-black shadow-lg active:scale-95 text-sm bg-gradient-to-r from-emerald-600 to-primary text-white" onClick={scrollToFuture}>
+                    <TrendingUp className="h-5 w-5" />
                     {t('shareResult')}
                 </Button>
             </div>

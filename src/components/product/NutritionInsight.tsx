@@ -155,6 +155,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
                 score={aiInsight.healthScore}
                 summary={aiInsight.summary}
                 recommendation={aiInsight.recommendation}
+                longTermImpact={aiInsight.longTermImpact}
                 risks={aiInsight.risks}
                 nutrition={nutritionGrid}
             />

@@ -15,7 +15,7 @@ const ImageAnalysisInputSchema = z.object({
 export type ImageAnalysisInput = z.infer<typeof ImageAnalysisInputSchema>;
 
 const analyzeFoodImagePrompt = ai.definePrompt({
-  name: 'analyzeFoodImagePrompt_v1',
+  name: 'analyzeFoodImagePrompt_v2',
   input: { schema: ImageAnalysisInputSchema },
   output: { schema: ImageAnalysisOutputSchema },
   prompt: `You are an expert AI food analyst. Analyze the provided image of food and provide a detailed nutritional breakdown.
@@ -30,8 +30,8 @@ Instructions:
 1. Identify the food name.
 2. Estimate nutritional values per a standard serving size.
 3. Provide a healthScore (0-100) based on nutritional quality.
-4. Language of response MUST be: {{{language}}}.
-5. If identification is difficult, set confidence to 'Low'.
+4. **FUTURE OUTLOOK:** In the 'futureOutlook' field, explain the A to Z long-term health impact of eating this specific meal/food regularly for several years.
+5. Language of response MUST be: {{{language}}}.
 
 Photo: {{media url=imageDataUri}}`,
 });
