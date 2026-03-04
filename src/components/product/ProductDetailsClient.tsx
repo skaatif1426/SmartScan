@@ -15,7 +15,6 @@ import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { calculateLocalScore } from '@/lib/scoring';
 import { useGamification } from '@/hooks/useGamification';
-import { getAICategory } from '@/lib/actions';
 import ProductChatbot from './ProductChatbot';
 import { cn } from '@/lib/utils';
 
@@ -31,28 +30,21 @@ export default function ProductDetailsClient({ product, source }: { product: Uni
     const localAnalysis = useMemo(() => calculateLocalScore(product), [product]);
 
     useEffect(() => {
-        const addScanWithCategory = async () => {
-            if (product) {
-                let productCategory = product.nutriscoreGrade || 'Other'; // Fallback logic
-                
-                addScanToHistory({
-                    barcode: product.barcode,
-                    productName: product.name,
-                    brand: product.brand,
-                    imageUrl: product.image,
-                    categories: productCategory,
-                    healthScore: localAnalysis.score,
-                    isDiscovery: false,
-                    source: source
-                });
-                addXp(XP_PER_SCAN);
-            }
-        };
-
-        addScanWithCategory();
+        if (product) {
+            addScanToHistory({
+                barcode: product.barcode,
+                productName: product.name,
+                brand: product.brand,
+                imageUrl: product.image,
+                categories: product.nutriscoreGrade || 'General',
+                healthScore: localAnalysis.score,
+                isDiscovery: false,
+                source: source
+            });
+            addXp(XP_PER_SCAN);
+        }
     }, [product.barcode, localAnalysis.score, source]);
     
-    // contract does not mandate allergens_tags but we check if mapped
     const hasAllergens = preferences.allergies.some(allergy => product.allergens?.some(tag => tag.includes(allergy)));
 
     const sourceInfo = {
