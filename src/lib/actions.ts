@@ -1,12 +1,12 @@
 /**
  * @fileOverview Next.js Server Actions.
- * These actions now delegate logic to the service layer for enterprise cleanliness.
+ * Surfaces explicit service errors to the UI.
  */
 'use server';
 
-import { productService } from '@/services/productService';
+import { productService, ProductResult } from '@/services/productService';
 import { aiService } from '@/services/aiService';
-import { Product, NutritionInsightOutput, ImageAnalysisOutput } from './types';
+import { NutritionInsightOutput, ImageAnalysisOutput } from './types';
 import { sanitizeInput } from '@/ai/prompt-firewall';
 import { NutritionInsightInput } from '@/ai/flows/ai-nutrition-insights';
 import { MultilingualProductChatbotInput } from '@/ai/flows/multilingual-product-chatbot';
@@ -14,15 +14,12 @@ import { EstimateInput } from '@/ai/flows/estimate-from-barcode';
 import { CategorizeProductInput } from '@/ai/flows/categorize-product';
 import { ImageAnalysisInput } from '@/ai/flows/analyze-food-image';
 
-type GetProductResult = { status: 'success', product: Product | null } | { status: 'error' };
+export async function getProduct(barcode: string): Promise<ProductResult> {
+  return await productService.getProductByBarcode(barcode);
+}
 
-export async function getProduct(barcode: string): Promise<GetProductResult> {
-  try {
-    const product = await productService.getProductByBarcode(barcode);
-    return { status: 'success', product };
-  } catch (error: any) {
-    return { status: 'error' };
-  }
+export async function getExternalProduct(barcode: string): Promise<ProductResult> {
+  return await productService.getProductFromExternal(barcode);
 }
 
 export async function getAINutritionInsight(productData: NutritionInsightInput): Promise<NutritionInsightOutput | null> {
@@ -41,19 +38,16 @@ export async function getAIChatResponse(chatData: MultilingualProductChatbotInpu
     };
     return await aiService.getChatResponse(sanitizedInput);
   } catch (error: any) {
-    if (error instanceof Error && error.message.includes('malicious')) {
-        return "Your question seems to contain inappropriate content. Please rephrase.";
-    }
     return 'I am unable to respond at this moment.';
   }
 }
 
 export async function getAIEstimate(input: EstimateInput): Promise<NutritionInsightOutput | null> {
-    try {
-        return await aiService.getBarcodeEstimate(input);
-    } catch (error: any) {
-        return null;
-    }
+  try {
+    return await aiService.getBarcodeEstimate(input);
+  } catch (error: any) {
+    return null;
+  }
 }
 
 export async function getAICategory(input: CategorizeProductInput): Promise<string> {

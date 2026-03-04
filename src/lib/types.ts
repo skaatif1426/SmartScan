@@ -1,13 +1,14 @@
 import { z } from 'zod';
 
 /**
- * Robust Product Schema with defensive transforms for missing backend data.
+ * Strict Product Schema. 
+ * Removed silent transforms that hide missing data.
  */
 export const ProductSchema = z.object({
   code: z.string(),
   product: z.object({
-    product_name: z.string().nullish().transform(v => v ?? 'Unknown Product'),
-    brands: z.string().nullish().transform(v => v ?? 'Unknown Brand'),
+    product_name: z.string().nullish(),
+    brands: z.string().nullish(),
     image_front_url: z.string().url().nullish(),
     nutriments: z.object({
       "energy-kcal_100g": z.coerce.number().nullish(),
@@ -17,17 +18,19 @@ export const ProductSchema = z.object({
       sugars_100g: z.coerce.number().nullish(),
       proteins_100g: z.coerce.number().nullish(),
       salt_100g: z.coerce.number().nullish(),
-    }).passthrough().nullish().transform(v => v ?? {}),
-    ingredients_text_with_allergens: z.string().nullish().transform(v => v ?? 'Not available'),
+    }).passthrough().nullish(),
+    ingredients_text_with_allergens: z.string().nullish(),
     nutriscore_grade: z.string().nullish(),
     nova_group: z.coerce.number().nullish(),
-    allergens_tags: z.array(z.string()).nullish().transform(v => v ?? []),
-    categories: z.string().nullish().transform(v => v ?? ''),
-  }).passthrough().nullish().transform(v => v ?? {}),
+    allergens_tags: z.array(z.string()).nullish(),
+    categories: z.string().nullish(),
+  }).passthrough().nullish(),
   status: z.coerce.number().or(z.string()).transform(v => typeof v === 'string' ? parseInt(v, 10) : v),
 });
+
 export type Product = z.infer<typeof ProductSchema>;
 
+export type DataSource = 'backend' | 'openfoodfacts' | 'ai-estimate' | 'image-analysis';
 
 export interface ScanHistoryItem {
   barcode: string;
@@ -39,6 +42,7 @@ export interface ScanHistoryItem {
   healthScore?: number;
   isDiscovery?: boolean;
   type?: 'barcode' | 'image';
+  source: DataSource;
   imageAnalysis?: ImageAnalysisOutput;
 }
 
@@ -57,7 +61,6 @@ export type DietType = 'none' | 'vegetarian' | 'vegan' | 'non-vegetarian' | 'ket
 export type DataRetention = '30d' | '90d' | 'forever';
 export type Theme = 'light' | 'dark';
 export type UnitSystem = 'metric' | 'imperial';
-
 
 export interface UserSettings {
   name: string;
@@ -123,34 +126,36 @@ export const UserPreferencesSchema = z.object({
   aiVerbosity: z.enum(['concise', 'balanced', 'detailed']),
   strictMode: z.boolean(),
 });
+
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 
-
 export const NutritionInsightOutputSchema = z.object({
-  summary: z.string().describe("A one-line, easy-to-understand summary of the product's nutritional profile."),
-  healthScore: z.number().min(0).max(100).describe('An overall health score from 0 (unhealthy) to 100 (very healthy), based on all available data.'),
-  risks: z.array(z.string()).describe('A list of potential health risks or warnings (e.g., "High in sugar", "Contains allergens").'),
-  recommendation: z.string().describe('A short recommendation for consumption (e.g., "Good for a quick snack", "Enjoy in moderation").'),
-  category: z.string().optional().describe("A plausible product category (e.g., 'Snacks', 'Beverages').")
+  summary: z.string(),
+  healthScore: z.number().min(0).max(100),
+  risks: z.array(z.string()),
+  recommendation: z.string(),
+  category: z.string().optional()
 });
+
 export type NutritionInsightOutput = z.infer<typeof NutritionInsightOutputSchema>;
 
 export const ImageAnalysisOutputSchema = z.object({
-  productName: z.string().describe('The identified name of the food item.'),
-  summary: z.string().describe('A 1-2 line smart insight summary.'),
-  confidence: z.enum(['Low', 'Medium', 'High']).describe('AI confidence level in detection.'),
+  productName: z.string(),
+  summary: z.string(),
+  confidence: z.enum(['Low', 'Medium', 'High']),
   healthScore: z.number().min(0).max(100),
   nutrition: z.object({
-    calories: z.number().describe('Estimated calories per serving.'),
-    sugar: z.number().describe('Estimated sugar in grams.'),
-    fat: z.number().describe('Estimated fat in grams.'),
-    protein: z.number().describe('Estimated protein in grams.'),
+    calories: z.number(),
+    sugar: z.number(),
+    fat: z.number(),
+    protein: z.number(),
   }),
   insights: z.object({
-    ingredients: z.string().describe('Breakdown of likely ingredients.'),
-    healthImpact: z.string().describe('General health impact analysis.'),
-    whoShouldAvoid: z.string().describe('Who should avoid this food.'),
-    betterAlternatives: z.string().describe('Healthier alternatives.'),
+    ingredients: z.string(),
+    healthImpact: z.string(),
+    whoShouldAvoid: z.string(),
+    betterAlternatives: z.string(),
   })
 });
+
 export type ImageAnalysisOutput = z.infer<typeof ImageAnalysisOutputSchema>;

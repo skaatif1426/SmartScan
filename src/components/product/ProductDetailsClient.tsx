@@ -3,10 +3,9 @@
 import { useEffect, useState, useMemo } from 'react';
 import Image from 'next/image';
 import { useRouter } from 'next/navigation';
-import dynamic from 'next/dynamic';
-import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash } from 'lucide-react';
+import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash, Database, Globe } from 'lucide-react';
 
-import type { Product } from '@/lib/types';
+import type { Product, DataSource } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -14,13 +13,13 @@ import NutritionInsight from './NutritionInsight';
 import { usePreferences, useLanguage } from '@/contexts/AppProviders';
 import { Button } from '@/components/ui/button';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
-import { Skeleton } from '@/components/ui/skeleton';
 import { calculateLocalScore } from '@/lib/scoring';
 import { useGamification } from '@/hooks/useGamification';
 import { getAICategory } from '@/lib/actions';
 import ProductChatbot from './ProductChatbot';
+import { cn } from '@/lib/utils';
 
-export default function ProductDetailsClient({ product: productData }: { product: Product }) {
+export default function ProductDetailsClient({ product: productData, source }: { product: Product, source: DataSource }) {
     const router = useRouter();
     const { addScanToHistory } = useScanHistory();
     const { product } = productData;
@@ -38,26 +37,27 @@ export default function ProductDetailsClient({ product: productData }: { product
                 let productCategory = product.categories;
                 if (!productCategory || productCategory.trim() === '') {
                     productCategory = await getAICategory({
-                        productName: product.product_name,
-                        ingredients: product.ingredients_text_with_allergens,
+                        productName: product.product_name || 'Unknown',
+                        ingredients: product.ingredients_text_with_allergens || '',
                     });
                 }
 
                 addScanToHistory({
                     barcode: productData.code,
-                    productName: product.product_name,
-                    brand: product.brands,
+                    productName: product.product_name || 'Unknown Product',
+                    brand: product.brands || 'Unknown Brand',
                     imageUrl: product.image_front_url,
                     categories: productCategory,
                     healthScore: localAnalysis.score,
                     isDiscovery: false,
+                    source: source
                 });
                 addXp(XP_PER_SCAN);
             }
         };
 
         addScanWithCategory();
-    }, [productData.code, localAnalysis.score]);
+    }, [productData.code, localAnalysis.score, source]);
     
     const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));
 
@@ -65,14 +65,22 @@ export default function ProductDetailsClient({ product: productData }: { product
 
     return (
         <div className="p-4 space-y-6 max-w-2xl mx-auto pb-32 animate-in fade-in slide-in-from-bottom-6 duration-700">
-            <div className="flex items-center gap-3">
-                <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 rounded-full flex-shrink-0 bg-muted/30 active:scale-90" aria-label="Go back">
-                    <ChevronLeft className="h-6 w-6" />
-                </Button>
-                <div className="flex-1 truncate">
-                    <h1 className="text-xl font-black truncate leading-tight">{product.product_name}</h1>
-                    <p className="text-muted-foreground text-xs font-bold">{product.brands}</p>
+            {/* Header with Source Indicator */}
+            <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3 truncate">
+                    <Button variant="ghost" size="icon" onClick={() => router.back()} className="h-10 w-10 rounded-full flex-shrink-0 bg-muted/30 active:scale-90">
+                        <ChevronLeft className="h-6 w-6" />
+                    </Button>
+                    <div className="truncate">
+                        <h1 className="text-xl font-black truncate leading-tight">{product.product_name || 'Data Unavailable'}</h1>
+                        <p className="text-muted-foreground text-xs font-bold">{product.brands || 'Unknown Brand'}</p>
+                    </div>
                 </div>
+                
+                <Badge variant="secondary" className="rounded-full gap-1.5 px-3 py-1 font-black text-[10px] uppercase tracking-tighter shadow-inner">
+                    {source === 'backend' ? <Database className="h-3 w-3 text-primary" /> : <Globe className="h-3 w-3 text-blue-500" />}
+                    {source}
+                </Badge>
             </div>
             
             <Card className="rounded-2xl border shadow-md overflow-hidden group">
@@ -80,7 +88,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                     {(product.image_front_url && !imageError) ? (
                         <Image
                             src={product.image_front_url}
-                            alt={product.product_name}
+                            alt={product.product_name || 'Product'}
                             fill
                             className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
                             onError={() => setImageError(true)}
@@ -114,12 +122,14 @@ export default function ProductDetailsClient({ product: productData }: { product
                             <div className="flex items-center gap-2.5"><Info className="h-4 w-4 text-primary" /> {t('fullNutrition')}</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-5 pb-4">
-                             {Object.entries(product.nutriments).slice(0, 8).map(([key, value]) => (
+                             {product.nutriments ? Object.entries(product.nutriments).slice(0, 8).map(([key, value]) => (
                                  <div key={key} className="flex justify-between py-1.5 border-b border-muted last:border-0 text-xs font-medium">
                                      <span className="text-muted-foreground capitalize">{key.replace(/_100g|-/g, ' ')}</span>
                                      <span>{typeof value === 'number' ? value.toFixed(1) : value}</span>
                                  </div>
-                             ))}
+                             )) : (
+                                 <p className="text-xs text-muted-foreground italic">Nutrition facts unavailable for this product.</p>
+                             )}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>
@@ -130,7 +140,7 @@ export default function ProductDetailsClient({ product: productData }: { product
                              <div className="flex items-center gap-2.5"><Hash className="h-4 w-4 text-primary" /> {t('fullIngredients')}</div>
                          </AccordionTrigger>
                         <AccordionContent className="px-5 pb-4 text-xs leading-relaxed text-muted-foreground font-medium">
-                             {product.ingredients_text_with_allergens || "No ingredients list available."}
+                             {product.ingredients_text_with_allergens || "Ingredients list not provided by source."}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>

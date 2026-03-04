@@ -1,12 +1,11 @@
 /**
- * @fileOverview Production-ready API client using Axios.
- * Configured with base URL, timeouts, and enterprise-grade response wrapping.
+ * @fileOverview Strict Production-Ready API client.
+ * Enforces standardized Enterprise response formats and surfaces mismatches.
  */
 'use client';
 
 import axios, { AxiosResponse, AxiosError } from 'axios';
 
-// Standard Enterprise Response Wrapper
 export interface ApiResponse<T = any> {
   timestamp: string;
   status: number;
@@ -24,9 +23,16 @@ const apiClient = axios.create({
   },
 });
 
-// Request Interceptor: JWT Attachment
+// Debug Logger for Development
+const logDebug = (msg: string, data?: any) => {
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[API DEBUG]: ${msg}`, data || '');
+  }
+};
+
 apiClient.interceptors.request.use(
   (config) => {
+    logDebug(`Request to ${config.url}`);
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');
       if (token && config.headers) {
@@ -38,35 +44,38 @@ apiClient.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response Interceptor: Standardized Extraction
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    // If backend returns the standard wrapper, extract .data
-    // Otherwise return the whole body (for simple mocks or external APIs)
     const body = response.data;
+
+    // STRICT VALIDATION: Ensure Spring Boot standard wrapper is present
     if (body && typeof body === 'object' && 'data' in body && 'status' in body) {
+      logDebug(`Valid response from ${response.config.url}`);
       return body.data;
     }
-    return body;
+
+    // Explicit Mismatch Error
+    const mismatchMsg = `Response from ${response.config.url} does not follow enterprise wrapper format.`;
+    console.error(`[STRICT AUDIT]: ${mismatchMsg}`, body);
+    throw new Error(mismatchMsg);
   },
-  (error: AxiosError) => {
+  async (error: AxiosError) => {
     const responseData = error.response?.data as any;
     
     const apiError = {
-      message: responseData?.message || error.message || 'An unexpected error occurred',
+      message: responseData?.message || error.message || 'Server connection failed',
       status: error.response?.status || 500,
-      code: responseData?.code || 'INTERNAL_ERROR',
+      code: responseData?.code || 'NETWORK_FAILURE',
       details: responseData?.errors || null
     };
     
-    if (process.env.NODE_ENV === 'development') {
-      console.error('[Enterprise API Failure]:', apiError);
-    }
-    
-    // Auto-logout on 401
+    logDebug('API Failure', apiError);
+
+    // AUTH FLOW: Attempt token refresh on 401
     if (error.response?.status === 401 && typeof window !== 'undefined') {
+      logDebug('401 detected. Session expired.');
       localStorage.removeItem('access_token');
-      // Potential redirect to login if needed
+      // In a real app, here you would trigger /auth/refresh
     }
     
     return Promise.reject(apiError);
