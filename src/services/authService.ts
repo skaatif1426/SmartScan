@@ -1,6 +1,6 @@
 /**
  * @fileOverview Authentication service layer.
- * Structured to handle Stateless JWT flows once Spring Boot is connected.
+ * STRICTLY aligned with Backend Auth APIs Contract.
  */
 
 import apiClient from '@/api/apiClient';
@@ -8,13 +8,16 @@ import { ENDPOINTS } from '@/api/endpoints';
 
 export const authService = {
   /**
-   * Logs in a user and stores the access token.
+   * Logs in a user.
+   * Aligned with POST /api/v1/auth/login
    */
   async login(credentials: { email: string; password: any }) {
     try {
-      const response = await apiClient.post(ENDPOINTS.AUTH.LOGIN, credentials);
-      if (response && response.access_token) {
-        localStorage.setItem('access_token', response.access_token);
+      // Contract: returns data: { accessToken, refreshToken, user }
+      const response: any = await apiClient.post(ENDPOINTS.AUTH.LOGIN, credentials);
+      if (response && response.accessToken) {
+        localStorage.setItem('access_token', response.accessToken);
+        localStorage.setItem('refresh_token', response.refreshToken);
       }
       return response;
     } catch (error) {
@@ -37,6 +40,7 @@ export const authService = {
       await apiClient.post(ENDPOINTS.AUTH.LOGOUT);
     } finally {
       localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
       window.location.href = '/';
     }
   },

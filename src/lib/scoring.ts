@@ -1,4 +1,4 @@
-import type { Product } from './types';
+import type { UnifiedProduct } from './types';
 import { CheckCircle, Shield, AlertTriangle, ShieldQuestion } from 'lucide-react';
 
 export interface LocalAnalysis {
@@ -6,54 +6,66 @@ export interface LocalAnalysis {
     warnings: string[];
 }
 
-export function calculateLocalScore(product: Product['product']): LocalAnalysis {
+/**
+ * Calculates a local health score based on unified product data.
+ * Used when backend healthScore is unavailable or for local validation.
+ */
+export function calculateLocalScore(product: UnifiedProduct): LocalAnalysis {
     if (!product) {
         return { score: 0, warnings: ['No product data'] };
     }
     
+    // If backend provided a score, we could use it directly, 
+    // but for the scanner flow we often want real-time local logic.
     let score = 100;
     const warnings: string[] = [];
-    const nutriments = product.nutriments || {};
+    const nutriments = product.nutriments;
 
     const HIGH_SUGAR_THRESHOLD = 22.5;
     const HIGH_SALT_THRESHOLD = 1.5;
     const HIGH_SATFAT_THRESHOLD = 5;
 
-    if (nutriments.sugars_100g !== undefined && nutriments.sugars_100g !== null) {
-      if (nutriments.sugars_100g >= HIGH_SUGAR_THRESHOLD) {
+    // Mapping Unified keys to scoring logic
+    if (nutriments.sugar !== undefined) {
+      if (nutriments.sugar >= HIGH_SUGAR_THRESHOLD) {
         warnings.push('High in sugar');
         score -= 25;
-      } else if (nutriments.sugars_100g > 10) {
+      } else if (nutriments.sugar > 10) {
         score -= 10;
       }
     }
 
-    if (nutriments.salt_100g !== undefined && nutriments.salt_100g !== null) {
-        if (nutriments.salt_100g >= HIGH_SALT_THRESHOLD) {
+    if (nutriments.salt !== undefined) {
+        if (nutriments.salt >= HIGH_SALT_THRESHOLD) {
             warnings.push('High in salt');
             score -= 25;
-        } else if (nutriments.salt_100g > 0.3) {
+        } else if (nutriments.salt > 0.3) {
             score -= 10;
         }
     }
 
-    if (nutriments['saturated-fat_100g'] !== undefined && nutriments['saturated-fat_100g'] !== null) {
-        if (nutriments['saturated-fat_100g'] >= HIGH_SATFAT_THRESHOLD) {
+    if (nutriments.saturatedFat !== undefined) {
+        if (nutriments.saturatedFat >= HIGH_SATFAT_THRESHOLD) {
             warnings.push('High in saturated fat');
             score -= 20;
-        } else if (nutriments['saturated-fat_100g'] > 1.5) {
+        } else if (nutriments.saturatedFat > 1.5) {
             score -= 10;
         }
     }
     
-    if (product.nova_group) {
-      if (product.nova_group === 4) {
+    if (product.novaGroup) {
+      if (product.novaGroup === 4) {
         warnings.push('Ultra-processed food (NOVA 4)');
         score -= 20;
-      } else if (product.nova_group === 3) {
+      } else if (product.novaGroup === 3) {
         warnings.push('Processed food (NOVA 3)');
         score -= 10;
       }
+    }
+
+    // If backend already has a score, we give it high weight or use it as override
+    if (product.source === 'backend' && product.healthScore > 0) {
+        return { score: product.healthScore, warnings };
     }
 
     const finalScore = Math.max(0, Math.min(100, Math.round(score)));

@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { Wheat, Sparkles, ChevronLeft, Package, RotateCcw, Share2, Info, Hash, Database, Globe, BrainCircuit } from 'lucide-react';
 
-import type { Product, DataSource } from '@/lib/types';
+import type { UnifiedProduct, DataSource } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useScanHistory } from '@/hooks/useScanHistory';
@@ -19,10 +19,9 @@ import { getAICategory } from '@/lib/actions';
 import ProductChatbot from './ProductChatbot';
 import { cn } from '@/lib/utils';
 
-export default function ProductDetailsClient({ product: productData, source }: { product: Product, source: DataSource }) {
+export default function ProductDetailsClient({ product, source }: { product: UnifiedProduct, source: DataSource }) {
     const router = useRouter();
     const { addScanToHistory } = useScanHistory();
-    const { product } = productData;
     const { preferences } = usePreferences();
     const { t } = useLanguage();
     const [imageError, setImageError] = useState(false);
@@ -34,19 +33,13 @@ export default function ProductDetailsClient({ product: productData, source }: {
     useEffect(() => {
         const addScanWithCategory = async () => {
             if (product) {
-                let productCategory = product.categories;
-                if (!productCategory || productCategory.trim() === '') {
-                    productCategory = await getAICategory({
-                        productName: product.product_name || 'Unknown',
-                        ingredients: product.ingredients_text_with_allergens || '',
-                    });
-                }
-
+                let productCategory = product.nutriscoreGrade || 'Other'; // Fallback logic
+                
                 addScanToHistory({
-                    barcode: productData.code,
-                    productName: product.product_name || 'Unknown Product',
-                    brand: product.brands || 'Unknown Brand',
-                    imageUrl: product.image_front_url,
+                    barcode: product.barcode,
+                    productName: product.name,
+                    brand: product.brand,
+                    imageUrl: product.image,
                     categories: productCategory,
                     healthScore: localAnalysis.score,
                     isDiscovery: false,
@@ -57,11 +50,10 @@ export default function ProductDetailsClient({ product: productData, source }: {
         };
 
         addScanWithCategory();
-    }, [productData.code, localAnalysis.score, source]);
+    }, [product.barcode, localAnalysis.score, source]);
     
-    const hasAllergens = preferences.allergies.some(allergy => product?.allergens_tags?.some(tag => tag.includes(allergy)));
-
-    if (!product) return null;
+    // contract does not mandate allergens_tags but we check if mapped
+    const hasAllergens = preferences.allergies.some(allergy => product.allergens?.some(tag => tag.includes(allergy)));
 
     const sourceInfo = {
         'backend': { label: 'Verified Database', icon: Database, color: 'text-primary' },
@@ -79,8 +71,8 @@ export default function ProductDetailsClient({ product: productData, source }: {
                         <ChevronLeft className="h-6 w-6" />
                     </Button>
                     <div className="truncate">
-                        <h1 className="text-xl font-black truncate leading-tight">{product.product_name || 'Data Unavailable'}</h1>
-                        <p className="text-muted-foreground text-xs font-bold">{product.brands || 'Unknown Brand'}</p>
+                        <h1 className="text-xl font-black truncate leading-tight">{product.name}</h1>
+                        <p className="text-muted-foreground text-xs font-bold">{product.brand}</p>
                     </div>
                 </div>
                 
@@ -92,10 +84,10 @@ export default function ProductDetailsClient({ product: productData, source }: {
             
             <Card className="rounded-2xl border shadow-md overflow-hidden group">
                 <div className="p-0 relative h-60 bg-muted flex items-center justify-center">
-                    {(product.image_front_url && !imageError) ? (
+                    {(product.image && !imageError) ? (
                         <Image
-                            src={product.image_front_url}
-                            alt={product.product_name || 'Product'}
+                            src={product.image}
+                            alt={product.name}
                             fill
                             className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
                             onError={() => setImageError(true)}
@@ -109,8 +101,8 @@ export default function ProductDetailsClient({ product: productData, source }: {
                 </div>
                 <CardContent className="p-4">
                     <div className="flex flex-wrap gap-1.5">
-                        {product.nutriscore_grade && <Badge variant="outline" className="rounded-full px-3 py-0.5 font-black text-[10px]">{t('grade')}: {product.nutriscore_grade.toUpperCase()}</Badge>}
-                        {product.nova_group && <Badge variant="outline" className="rounded-full px-3 py-0.5 font-black text-[10px]">{t('nova')}: {product.nova_group}</Badge>}
+                        {product.nutriscoreGrade && <Badge variant="outline" className="rounded-full px-3 py-0.5 font-black text-[10px]">{t('grade')}: {product.nutriscoreGrade.toUpperCase()}</Badge>}
+                        {product.novaGroup && <Badge variant="outline" className="rounded-full px-3 py-0.5 font-black text-[10px]">{t('nova')}: {product.novaGroup}</Badge>}
                         {hasAllergens && <Badge variant="destructive" className="rounded-full px-3 py-0.5 font-black text-[10px]"><Wheat className="mr-1 h-3 w-3" /> {t('allergensAlert')}</Badge>}
                     </div>
                 </CardContent>
@@ -118,7 +110,7 @@ export default function ProductDetailsClient({ product: productData, source }: {
 
             <NutritionInsight 
                 product={product} 
-                barcode={productData.code} 
+                barcode={product.barcode} 
                 localAnalysis={localAnalysis} 
             />
             
@@ -129,13 +121,13 @@ export default function ProductDetailsClient({ product: productData, source }: {
                             <div className="flex items-center gap-2.5"><Info className="h-4 w-4 text-primary" /> {t('fullNutrition')}</div>
                         </AccordionTrigger>
                         <AccordionContent className="px-5 pb-4">
-                             {product.nutriments ? Object.entries(product.nutriments).slice(0, 8).map(([key, value]) => (
+                             {product.nutriments ? Object.entries(product.nutriments).map(([key, value]) => (
                                  <div key={key} className="flex justify-between py-1.5 border-b border-muted last:border-0 text-xs font-medium">
-                                     <span className="text-muted-foreground capitalize">{key.replace(/_100g|-/g, ' ')}</span>
+                                     <span className="text-muted-foreground capitalize">{key.replace(/([A-Z])/g, ' $1').trim()}</span>
                                      <span>{typeof value === 'number' ? value.toFixed(1) : value}</span>
                                  </div>
                              )) : (
-                                 <p className="text-xs text-muted-foreground italic">Nutrition facts unavailable for this product.</p>
+                                 <p className="text-xs text-muted-foreground italic">Nutrition facts unavailable.</p>
                              )}
                         </AccordionContent>
                     </AccordionItem>
@@ -147,7 +139,7 @@ export default function ProductDetailsClient({ product: productData, source }: {
                              <div className="flex items-center gap-2.5"><Hash className="h-4 w-4 text-primary" /> {t('fullIngredients')}</div>
                          </AccordionTrigger>
                         <AccordionContent className="px-5 pb-4 text-xs leading-relaxed text-muted-foreground font-medium">
-                             {product.ingredients_text_with_allergens || "Ingredients list not provided by source."}
+                             {product.ingredients.length > 0 ? product.ingredients.join(', ') : "Ingredients not provided."}
                         </AccordionContent>
                     </AccordionItem>
                 </Card>

@@ -1,23 +1,27 @@
 /**
  * @fileOverview Strict Production-Ready API client.
- * Enforces standardized Enterprise response formats and surfaces mismatches.
+ * Enforces standardized Enterprise API Contract.
  */
 'use client';
 
 import axios, { AxiosResponse, AxiosError, InternalAxiosRequestConfig } from 'axios';
 
 export interface ApiResponse<T = any> {
-  timestamp: string;
-  status: number;
-  data: T;
-  errors: any;
+  status: 'success' | 'error';
+  data?: T;
+  error?: {
+    code: string;
+    message: string;
+  };
+  message?: string;
+  timestamp: number;
 }
 
 const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:8080/api/v1';
 
 const apiClient = axios.create({
   baseURL: BASE_URL,
-  timeout: 15000, // Global timeout set to 15s for safety, but UI handles user-facing 7s
+  timeout: 7000, // Strict 7s timeout as per contract requirement
   headers: {
     'Content-Type': 'application/json',
   },
@@ -32,18 +36,11 @@ const subscribeTokenRefresh = (cb: (token: string) => void) => {
 
 const onTokenRefreshed = (token: string) => {
   refreshSubscribers.map((cb) => cb(token));
-};
-
-// Debug Logger for Development
-const logDebug = (msg: string, data?: any) => {
-  if (process.env.NODE_ENV === 'development') {
-    console.log(`[API DEBUG]: ${msg}`, data || '');
-  }
+  refreshSubscribers = [];
 };
 
 apiClient.interceptors.request.use(
   (config) => {
-    logDebug(`Request to ${config.url}`);
     if (typeof window !== 'undefined') {
       const token = localStorage.getItem('access_token');
       if (token && config.headers) {
@@ -57,24 +54,32 @@ apiClient.interceptors.request.use(
 
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => {
-    const body = response.data;
+    const body = response.data as ApiResponse;
 
-    // STRICT VALIDATION: Ensure Spring Boot standard wrapper is present
-    if (body && typeof body === 'object' && 'data' in body && 'status' in body) {
-      logDebug(`Valid response from ${response.config.url}`);
-      return body.data;
+    // CONTRACT RULE: Must have status
+    if (!body || !body.status) {
+      throw new Error(`Response from ${response.config.url} missing status field.`);
     }
 
-    // Explicit Mismatch Error
-    const mismatchMsg = `Response from ${response.config.url} does not follow enterprise wrapper format.`;
-    console.error(`[STRICT AUDIT]: ${mismatchMsg}`, body);
-    throw new Error(mismatchMsg);
+    if (body.status === 'success') {
+      return body.data; // Services receive the raw data object
+    }
+
+    if (body.status === 'error') {
+      throw {
+        message: body.error?.message || 'Server error',
+        code: body.error?.code || 'UNKNOWN_ERROR',
+        status: response.status
+      };
+    }
+
+    throw new Error('Inconsistent API response status.');
   },
   async (error: AxiosError) => {
     const { config, response } = error;
     const originalRequest = config as InternalAxiosRequestConfig & { _retry?: boolean };
 
-    // AUTH FLOW: Attempt token refresh on 401
+    // AUTH FLOW: Handle Refresh Token on 401
     if (response?.status === 401 && !originalRequest._retry) {
       if (isRefreshing) {
         return new Promise((resolve) => {
@@ -91,40 +96,36 @@ apiClient.interceptors.response.use(
       isRefreshing = true;
 
       try {
-        logDebug('Attempting token refresh...');
-        // Simulate refresh call
-        // const { access_token } = await axios.post(`${BASE_URL}/auth/refresh`, { refresh_token: localStorage.getItem('refresh_token') });
-        // localStorage.setItem('access_token', access_token);
-        
-        // Mock failure for now as backend is non-existent
-        throw new Error('Refresh failed');
-        
-        // if successful:
-        // isRefreshing = false;
-        // onTokenRefreshed(access_token);
-        // return apiClient(originalRequest);
+        const refreshToken = localStorage.getItem('refresh_token');
+        if (!refreshToken) throw new Error('No refresh token');
+
+        // Contract POST /api/v1/auth/refresh
+        const refreshResponse = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
+        const { accessToken } = refreshResponse.data.data;
+
+        localStorage.setItem('access_token', accessToken);
+        isRefreshing = false;
+        onTokenRefreshed(accessToken);
+
+        if (originalRequest.headers) {
+          originalRequest.headers.Authorization = `Bearer ${accessToken}`;
+        }
+        return apiClient(originalRequest);
       } catch (refreshError) {
         isRefreshing = false;
-        logDebug('Refresh failed, logging out.');
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('access_token');
-          localStorage.removeItem('refresh_token');
-          // window.location.href = '/login';
-        }
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
         return Promise.reject(refreshError);
       }
     }
 
-    const responseData = error.response?.data as any;
-    
+    // Standardize non-contractual network errors
     const apiError = {
-      message: responseData?.message || error.message || 'Server connection failed',
+      message: (error.response?.data as any)?.error?.message || error.message || 'Connection failed',
       status: error.response?.status || 500,
-      code: error.response?.code || 'NETWORK_FAILURE',
-      details: responseData?.errors || null
+      code: (error.response?.data as any)?.error?.code || 'NETWORK_ERROR',
     };
     
-    logDebug('API Failure', apiError);
     return Promise.reject(apiError);
   }
 );

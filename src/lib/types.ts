@@ -1,8 +1,57 @@
 import { z } from 'zod';
 
 /**
- * Strict Product Schema. 
- * Removed silent transforms that hide missing data.
+ * Unified Data Source Type
+ */
+export type DataSource = 'backend' | 'openfoodfacts' | 'ai-estimate' | 'image-analysis';
+
+/**
+ * Unified Product structure used by the Frontend UI.
+ * This decouples the UI from specific API response keys.
+ */
+export interface UnifiedProduct {
+  barcode: string;
+  name: string;
+  brand: string;
+  image: string | null;
+  nutriments: {
+    calories: number;
+    protein: number;
+    carbs: number;
+    fat: number;
+    sugar?: number;
+    salt?: number;
+    saturatedFat?: number;
+  };
+  healthScore: number;
+  ingredients: string[];
+  source: DataSource;
+  nutriscoreGrade?: string;
+  novaGroup?: number;
+  allergens?: string[];
+}
+
+/**
+ * Backend Product Contract Schema
+ */
+export const BackendProductSchema = z.object({
+  barcode: z.string(),
+  name: z.string(),
+  brand: z.string(),
+  image: z.string().url().nullable(),
+  nutriments: z.object({
+    calories: z.number().default(0),
+    protein: z.number().default(0),
+    carbs: z.number().default(0),
+    fat: z.number().default(0),
+  }),
+  healthScore: z.number().min(0).max(100).default(0),
+  ingredients: z.array(z.string()).default([]),
+  source: z.literal('backend'),
+});
+
+/**
+ * Legacy OpenFoodFacts Schema (for mapping)
  */
 export const ProductSchema = z.object({
   code: z.string(),
@@ -30,27 +79,43 @@ export const ProductSchema = z.object({
 
 export type Product = z.infer<typeof ProductSchema>;
 
-export type DataSource = 'backend' | 'openfoodfacts' | 'ai-estimate' | 'image-analysis';
+/**
+ * AI Service Contract Schemas
+ */
+export const NutritionInsightOutputSchema = z.object({
+  summary: z.string(),
+  healthScore: z.number().min(0).max(100),
+  risks: z.array(z.string()),
+  recommendation: z.string(),
+  category: z.string().optional()
+});
 
-export interface ScanHistoryItem {
-  barcode: string;
-  productName: string;
-  brand: string;
-  imageUrl?: string | null;
-  scanDate: string;
-  categories?: string | null;
-  healthScore?: number;
-  isDiscovery?: boolean;
-  type?: 'barcode' | 'image';
-  source: DataSource;
-  imageAnalysis?: ImageAnalysisOutput;
-}
+export type NutritionInsightOutput = z.infer<typeof NutritionInsightOutputSchema>;
 
-export interface DiscoveryItem {
-  barcode: string;
-  date: string;
-}
+export const ImageAnalysisOutputSchema = z.object({
+  productName: z.string(),
+  summary: z.string(),
+  confidence: z.enum(['Low', 'Medium', 'High']),
+  healthScore: z.number().min(0).max(100),
+  nutrition: z.object({
+    calories: z.number(),
+    sugar: z.number(),
+    fat: z.number(),
+    protein: z.number(),
+  }),
+  insights: z.object({
+    ingredients: z.string(),
+    healthImpact: z.string(),
+    whoShouldAvoid: z.string(),
+    betterAlternatives: z.string(),
+  })
+});
 
+export type ImageAnalysisOutput = z.infer<typeof ImageAnalysisOutputSchema>;
+
+/**
+ * Global User Settings types (Persistence)
+ */
 export type Language = 'English' | 'Hindi' | 'Marathi' | 'Hinglish';
 export const LanguageSchema = z.enum(['English', 'Hindi', 'Marathi', 'Hinglish']);
 export type AiVerbosity = 'concise' | 'balanced' | 'detailed';
@@ -129,33 +194,21 @@ export const UserPreferencesSchema = z.object({
 
 export type UserPreferences = z.infer<typeof UserPreferencesSchema>;
 
-export const NutritionInsightOutputSchema = z.object({
-  summary: z.string(),
-  healthScore: z.number().min(0).max(100),
-  risks: z.array(z.string()),
-  recommendation: z.string(),
-  category: z.string().optional()
-});
+export interface ScanHistoryItem {
+  barcode: string;
+  productName: string;
+  brand: string;
+  imageUrl?: string | null;
+  scanDate: string;
+  categories?: string | null;
+  healthScore?: number;
+  isDiscovery?: boolean;
+  type?: 'barcode' | 'image';
+  source: DataSource;
+  imageAnalysis?: ImageAnalysisOutput;
+}
 
-export type NutritionInsightOutput = z.infer<typeof NutritionInsightOutputSchema>;
-
-export const ImageAnalysisOutputSchema = z.object({
-  productName: z.string(),
-  summary: z.string(),
-  confidence: z.enum(['Low', 'Medium', 'High']),
-  healthScore: z.number().min(0).max(100),
-  nutrition: z.object({
-    calories: z.number(),
-    sugar: z.number(),
-    fat: z.number(),
-    protein: z.number(),
-  }),
-  insights: z.object({
-    ingredients: z.string(),
-    healthImpact: z.string(),
-    whoShouldAvoid: z.string(),
-    betterAlternatives: z.string(),
-  })
-});
-
-export type ImageAnalysisOutput = z.infer<typeof ImageAnalysisOutputSchema>;
+export interface DiscoveryItem {
+  barcode: string;
+  date: string;
+}

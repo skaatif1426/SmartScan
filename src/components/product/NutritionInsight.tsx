@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { Sparkles, RefreshCcw } from 'lucide-react';
 import { getAINutritionInsight } from '@/lib/actions';
 import { Button } from '@/components/ui/button';
-import type { Product, NutritionInsightOutput, UserPreferences } from '@/lib/types';
+import type { UnifiedProduct, NutritionInsightOutput, UserPreferences } from '@/lib/types';
 import { useLanguage, usePreferences } from '@/contexts/AppProviders';
 import { useAiUsage } from '@/hooks/useAiUsage';
 import { useAnalytics } from '@/hooks/useAnalytics';
@@ -25,7 +25,7 @@ function getCacheKey(barcode: string, language: string, preferences: UserPrefere
     return `${barcode}-${language}-${prefsString}`;
 }
 
-export default function NutritionInsight({ product, barcode, localAnalysis }: { product: Product['product'], barcode: string, localAnalysis: LocalAnalysis }) {
+export default function NutritionInsight({ product, barcode, localAnalysis }: { product: UnifiedProduct, barcode: string, localAnalysis: LocalAnalysis }) {
   const [aiInsight, setAiInsight] = useState<NutritionInsightOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [aiError, setAiError] = useState<string | null>(null);
@@ -73,19 +73,19 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
     try {
       incrementAiCallCount();
       const insightData: NutritionInsightInput = {
-        productName: product.product_name,
-        ingredientsText: product.ingredients_text_with_allergens,
-        nutriscoreGrade: product.nutriscore_grade,
-        novaGroup: product.nova_group,
-        allergens: product.allergens_tags,
+        productName: product.name,
+        ingredientsText: product.ingredients.join(', '),
+        nutriscoreGrade: product.nutriscoreGrade,
+        novaGroup: product.novaGroup,
+        allergens: product.allergens,
         nutritionFacts: {
-          energy_kcal_100g: product.nutriments?.['energy-kcal_100g'],
-          fat_100g: product.nutriments?.fat_100g,
-          saturated_fat_100g: product.nutriments?.['saturated-fat_100g'],
-          carbohydrates_100g: product.nutriments?.carbohydrates_100g,
-          sugars_100g: product.nutriments?.sugars_100g,
-          proteins_100g: product.nutriments?.proteins_100g,
-          salt_100g: product.nutriments?.salt_100g,
+          energy_kcal_100g: product.nutriments.calories,
+          fat_100g: product.nutriments.fat,
+          saturated_fat_100g: product.nutriments.saturatedFat,
+          carbohydrates_100g: product.nutriments.carbs,
+          sugars_100g: product.nutriments.sugar,
+          proteins_100g: product.nutriments.protein,
+          salt_100g: product.nutriments.salt,
         },
         healthScore: localAnalysis.score,
         warnings: localAnalysis.warnings,
@@ -122,10 +122,10 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
   }, [fetchInsight]);
   
   const nutritionGrid = {
-    calories: product.nutriments?.['energy-kcal_100g'] || 0,
-    sugar: product.nutriments?.sugars_100g || 0,
-    fat: product.nutriments?.fat_100g || 0,
-    protein: product.nutriments?.proteins_100g || 0,
+    calories: product.nutriments.calories || 0,
+    sugar: product.nutriments.sugar || 0,
+    fat: product.nutriments.fat || 0,
+    protein: product.nutriments.protein || 0,
   };
 
   return (
@@ -137,7 +137,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
                         <Sparkles className="w-8 h-8 text-primary animate-pulse" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-black">AI is Thinking...</h3>
+                        <h3 className="text-xl font-black">{t('analysisInProgress')}</h3>
                         <p className="text-muted-foreground font-bold">Generating personalized health insights.</p>
                     </div>
                 </div>

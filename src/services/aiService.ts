@@ -1,6 +1,6 @@
 /**
  * @fileOverview Service layer for AI insights.
- * Encapsulates Genkit flows with a readiness for future API migration.
+ * Aligned with Backend AI APIs Contract.
  */
 
 import { generateNutritionInsights } from '@/ai/flows/ai-nutrition-insights';
@@ -14,7 +14,6 @@ import { ENDPOINTS } from '@/api/endpoints';
 export const aiService = {
   /**
    * Generates nutritional insights.
-   * Can be switched to a backend call easily by uncommenting the API line.
    */
   async getNutritionInsight(input: any) {
     try {
@@ -28,9 +27,11 @@ export const aiService = {
 
   /**
    * Chatbot interface.
+   * Aligned with POST /api/v1/ai/chat
    */
   async getChatResponse(input: any): Promise<string> {
     try {
+      // Logic: return await apiClient.post(ENDPOINTS.AI.CHAT, { message: input.userQuestion, language: input.language });
       const response = await multilingualProductChatbot(input);
       return response.answer;
     } catch (error) {
@@ -51,9 +52,11 @@ export const aiService = {
 
   /**
    * Vision analysis.
+   * Aligned with POST /api/v1/ai/analyze-image (Multipart)
    */
   async getImageAnalysis(input: any) {
     try {
+      // Mocking backend Multipart flow if needed
       return await analyzeFoodImage(input);
     } catch (error) {
       return null;
