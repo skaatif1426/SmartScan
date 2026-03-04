@@ -1,6 +1,6 @@
 /**
  * @fileOverview Service layer for Product-related business logic.
- * Implements a strict "Backend-First" pattern with external API fallback.
+ * Implements a strict "Backend-First" pattern with robust external API fallback.
  */
 
 import { fetchProductFromApi } from '@/lib/openfoodfacts-api';
@@ -13,7 +13,7 @@ export const productService = {
    * Fetches product details. 
    * STRATEGY: 
    * 1. Try internal Spring Boot API.
-   * 2. If fail/404, fallback to OpenFoodFacts.
+   * 2. If fail/404/500/Timeout, fallback to OpenFoodFacts.
    */
   async getProductByBarcode(barcode: string): Promise<Product | null> {
     try {
@@ -21,12 +21,24 @@ export const productService = {
       const response = await apiClient.get(ENDPOINTS.PRODUCTS.BY_BARCODE(barcode));
       if (response) return response;
       
+      // If backend returns 200 but empty data, we still fallback
       return await fetchProductFromApi(barcode);
     } catch (error: any) {
-      // Step 2: Fallback if backend is unavailable (ECONNREFUSED) or returns 404
-      if (error.status === 404 || error.code === 'ERR_NETWORK' || error.status === 500) {
+      // Step 2: Fallback if backend is unavailable or crashes
+      // Specifically catching Network Errors, Timeouts, 404s and 500s.
+      if (
+        error.status === 404 || 
+        error.status === 500 || 
+        error.code === 'ERR_NETWORK' || 
+        error.message?.includes('timeout')
+      ) {
+        if (process.env.NODE_ENV === 'development') {
+          console.warn(`[ProductService] Backend Simulation: ${error.message}. Triggering fallback.`);
+        }
         return await fetchProductFromApi(barcode).catch(() => null);
       }
+      
+      // For all other errors, return null (handled by UI error cards)
       return null;
     }
   },
@@ -38,7 +50,7 @@ export const productService = {
     try {
       await apiClient.post(ENDPOINTS.PRODUCTS.DISCOVERY, productData);
     } catch (error) {
-      // Silent fail for discoveries in prototype mode
+      // Silent fail for discoveries in prototype mode to prevent UI blockage
       console.warn('Backend discovery sync skipped.');
     }
   },

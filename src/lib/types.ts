@@ -1,5 +1,8 @@
 import { z } from 'zod';
 
+/**
+ * Robust Product Schema with defensive transforms for missing backend data.
+ */
 export const ProductSchema = z.object({
   code: z.string(),
   product: z.object({
@@ -20,7 +23,7 @@ export const ProductSchema = z.object({
     nova_group: z.coerce.number().nullish(),
     allergens_tags: z.array(z.string()).nullish().transform(v => v ?? []),
     categories: z.string().nullish().transform(v => v ?? ''),
-  }).passthrough().nullish(),
+  }).passthrough().nullish().transform(v => v ?? {}),
   status: z.coerce.number().or(z.string()).transform(v => typeof v === 'string' ? parseInt(v, 10) : v),
 });
 export type Product = z.infer<typeof ProductSchema>;

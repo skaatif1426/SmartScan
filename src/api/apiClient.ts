@@ -63,6 +63,12 @@ apiClient.interceptors.response.use(
       console.error('[Enterprise API Failure]:', apiError);
     }
     
+    // Auto-logout on 401
+    if (error.response?.status === 401 && typeof window !== 'undefined') {
+      localStorage.removeItem('access_token');
+      // Potential redirect to login if needed
+    }
+    
     return Promise.reject(apiError);
   }
 );
