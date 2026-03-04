@@ -18,7 +18,7 @@ export default function BottomNav() {
   const { t } = useLanguage();
 
   return (
-    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card/80 backdrop-blur-xl border-2 rounded-full shadow-2xl animate-in slide-in-from-bottom-8 duration-300 ease-in-out">
+    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card/85 backdrop-blur-xl border border-white/10 rounded-2xl shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom-8 duration-300 ease-in-out">
       <div className="flex justify-around items-center h-full max-w-lg mx-auto p-1.5">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -29,14 +29,14 @@ export default function BottomNav() {
               href={item.href}
               aria-label={label}
               className={cn(
-                'flex items-center justify-center p-2 rounded-full transition-all duration-300 ease-in-out h-12',
+                'flex items-center justify-center p-2 rounded-xl transition-all duration-200 ease-out h-12 select-none active:scale-90',
                  isActive 
-                  ? 'bg-primary text-primary-foreground shadow-lg gap-2 px-4 scale-105' 
-                  : 'text-muted-foreground w-12 hover:bg-muted/50 active:scale-90'
+                  ? 'bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(22,163,74,0.3)] gap-2 px-5' 
+                  : 'text-muted-foreground w-12 hover:bg-muted/50'
               )}
             >
               <item.icon className={cn("shrink-0", isActive ? "h-5 w-5" : "h-6 w-6")} />
-              {isActive && <span className="text-sm font-bold whitespace-nowrap" aria-hidden="true">{label}</span>}
+              {isActive && <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap" aria-hidden="true">{label}</span>}
             </Link>
           );
         })}

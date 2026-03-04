@@ -4,8 +4,8 @@
 
 @layer base {
   :root {
-    /* --- LIGHT MODE: Premium soft off-white & Green Primary --- */
-    --background: 210 40% 98.5%; /* #F8FAFC */
+    /* --- LIGHT MODE: Premium soft off-white & Depth --- */
+    --background: 210 40% 98.5%; /* Soft Off-white */
     --foreground: 221 39% 11%;
     
     --card: 0 0% 100%;
@@ -14,7 +14,7 @@
     --popover: 0 0% 100%;
     --popover-foreground: 221 39% 11%;
     
-    --primary: 142 71% 45%; /* #22C55E */
+    --primary: 142 71% 45%; 
     --primary-foreground: 0 0% 100%;
     
     --secondary: 210 40% 96.1%;
@@ -32,21 +32,21 @@
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
     --ring: 142 71% 45%;
-    --radius: 1rem; /* Slightly tighter radius */
+    --radius: 1rem;
   }
 
   .dark {
-    /* --- DARK MODE: Deep Charcoal Blue & Balanced Green --- */
-    --background: 216 45% 4%; /* #0B0F14 */
+    /* --- DARK MODE: Layered Charcoal Blue (No Pure Black) --- */
+    --background: 216 45% 4%; /* Deepest layer */
     --foreground: 210 40% 98%;
     
-    --card: 216 35% 10%; /* #121821 */
+    --card: 216 35% 10%; /* Surface layer */
     --card-foreground: 210 40% 98%;
     
     --popover: 216 45% 4%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 142 71% 55%; /* Softer green for dark mode */
+    --primary: 142 71% 55%; 
     --primary-foreground: 216 45% 4%;
     
     --secondary: 216 35% 15%;
@@ -73,42 +73,24 @@
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300 antialiased;
-    font-size: 15px; /* Subtle global text reduction */
+    font-size: 15px;
   }
 }
 
 @layer components {
+  /* Surface Depth */
+  .depth-surface {
+    @apply shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 border-white/5;
+  }
+
+  /* Tactile Interactive Depth */
+  .depth-interactive {
+    @apply shadow-[0_8px_16px_-4px_rgba(0,0,0,0.1)] active:shadow-[0_2px_4px_rgba(0,0,0,0.05)] active:translate-y-0.5 transition-all duration-150;
+  }
+
   .scanner-line {
     @apply absolute left-0 w-full h-[3px] bg-primary/80 shadow-[0_0_20px_2px_hsl(var(--primary))];
     animation: scan-vertical 2.5s infinite ease-in-out;
-  }
-  
-  .success-tick {
-    @apply animate-[success-tick-animation_0.5s_ease-out_forwards];
-  }
-
-  .animate-shadow-pulse {
-    @apply animate-[shadow-pulse_2s_infinite];
-  }
-
-  .camera-flip {
-    @apply animate-[flip-360_0.4s_ease-in-out];
-  }
-
-  .flash-capture {
-    @apply animate-[flash-animation_0.5s_ease-out];
-  }
-
-  .scan-frame-pulse {
-    @apply animate-[border-pulse_2.5s_infinite_ease-in-out];
-  }
-
-  .segmented-switch-indicator {
-    @apply absolute h-[calc(100%-8px)] top-1 rounded-full bg-background shadow-md transition-all duration-300 ease-in-out border border-white/10;
-  }
-
-  .animate-pulse-subtle {
-    animation: pulse-subtle 2.5s infinite ease-in-out;
   }
 }
 
@@ -119,35 +101,11 @@
   100% { top: 100%; opacity: 0; }
 }
 
-@keyframes success-tick-animation {
-  0% { transform: scale(0.5); opacity: 0; }
-  50% { transform: scale(1.2); opacity: 1; }
-  100% { transform: scale(1); opacity: 1; }
-}
-
-@keyframes shadow-pulse {
-  0% { box-shadow: 0 0 0 0px hsl(var(--primary) / 0.3); }
-  100% { box-shadow: 0 0 0 15px hsl(var(--primary) / 0); }
-}
-
-@keyframes flip-360 {
-  0% { transform: rotateY(0deg); }
-  100% { transform: rotateY(180deg); }
-}
-
-@keyframes flash-animation {
-  0% { opacity: 0; }
-  25% { opacity: 0.8; }
-  100% { opacity: 0; }
-}
-
-@keyframes border-pulse {
-  0% { border-color: hsl(var(--primary) / 0.3); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.1); }
-  50% { border-color: hsl(var(--primary) / 0.8); box-shadow: 0 0 0 8px hsl(var(--primary) / 0.05); }
-  100% { border-color: hsl(var(--primary) / 0.3); box-shadow: 0 0 0 0px hsl(var(--primary) / 0.1); }
-}
-
 @keyframes pulse-subtle {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.08); opacity: 0.8; }
+  50% { transform: scale(1.05); opacity: 0.9; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2s infinite ease-in-out;
 }
