@@ -62,10 +62,11 @@ export const productService = {
   /**
    * Fetches product via Backend. 
    * Strict adherence to Backend API Contract.
+   * Re-enabled automatic fallback for seamless UX.
    */
   async getProductByBarcode(barcode: string, retryCount = 0): Promise<ProductResult> {
     try {
-      // apiClient handles status checks and data extraction
+      // Step 1: Try Backend
       const response = await apiClient.get(ENDPOINTS.PRODUCTS.BY_BARCODE(barcode));
       
       if (response) {
@@ -77,21 +78,20 @@ export const productService = {
       }
       return { status: 'error', type: 'not_found', barcode };
     } catch (error: any) {
-      // Handle Contract specific errors
-      if (error.code === 'PRODUCT_NOT_FOUND') {
-        return { status: 'error', type: 'not_found', barcode, code: error.code };
+      // Step 2: Handle 404 (Backend explicitly says it doesn't have it)
+      if (error.code === 'PRODUCT_NOT_FOUND' || error.status === 404) {
+        // Even if 404, we try External Registry before giving up
+        console.log(`[Service] Product ${barcode} not in backend. Trying Global Registry...`);
+        return this.getProductFromExternal(barcode);
       }
 
-      // Auto-retry logic for network errors (max 2)
-      if (retryCount < 2 && (error.code === 'NETWORK_ERROR' || error.status === 0)) {
-        await new Promise(r => setTimeout(r, 1000));
-        return this.getProductByBarcode(barcode, retryCount + 1);
+      // Step 3: Handle Network Failures / Unreachable Server
+      // Instead of showing error screen, we fallback AUTOMATICALLY for a "Direct Result" feel.
+      if (error.code === 'NETWORK_ERROR' || error.status === 0 || error.code === 'ECONNABORTED') {
+        console.warn(`[Service] Backend unreachable or timeout. Falling back to External API for ${barcode}...`);
+        return this.getProductFromExternal(barcode);
       }
 
-      if (error.status === 404) return { status: 'error', type: 'not_found', barcode };
-      if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
-        return { status: 'error', type: 'timeout', barcode };
-      }
       return { status: 'error', type: 'backend_unavailable', barcode };
     }
   },
