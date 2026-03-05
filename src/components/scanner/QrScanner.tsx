@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { Zap, ZapOff, X, Image as ImageIcon, User } from 'lucide-react';
+import { Zap, X, Image as ImageIcon, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -48,8 +48,9 @@ const QrScanner = ({
         {
           fps: 30,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
+            // Wider box for barcode optimization as requested
             const width = Math.min(viewfinderWidth * 0.85, 450);
-            const height = width * 0.55;
+            const height = width * 0.5; 
             return { width, height };
           },
           aspectRatio: 1.0,
@@ -57,7 +58,7 @@ const QrScanner = ({
         (decodedText) => {
           onScanSuccess(decodedText);
         },
-        () => {} // Silent failures for search
+        () => {} // Silent failures
       );
 
       setIsReady(true);
@@ -127,10 +128,14 @@ const QrScanner = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[300] bg-black flex flex-col font-sans">
-      <div className="relative flex-1 bg-black overflow-hidden">
+    <div className="fixed inset-0 z-[300] bg-black flex flex-col font-sans overflow-hidden">
+      <div className="relative flex-1 bg-black">
+        {/* Full region video */}
         <div id={qrcodeRegionId} className="w-full h-full object-cover" />
         
+        {/* Dimmed Overlay with cutout handled via CSS masks or just layered divs */}
+        <div className="absolute inset-0 bg-black/40 pointer-events-none" />
+
         {!isReady && (
           <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
             <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
@@ -143,7 +148,7 @@ const QrScanner = ({
             variant="ghost" 
             size="icon" 
             onClick={onClose}
-            className="w-10 h-10 rounded-full text-white/80 hover:bg-white/10 active:scale-90"
+            className="w-10 h-10 rounded-full text-white bg-black/20 backdrop-blur-md hover:bg-white/10"
           >
             <X className="w-5 h-5" />
           </Button>
@@ -155,48 +160,56 @@ const QrScanner = ({
               disabled={!hasFlash}
               onClick={toggleFlash}
               className={cn(
-                "w-10 h-10 rounded-full text-white/80 hover:bg-white/10",
+                "w-10 h-10 rounded-full text-white bg-black/20 backdrop-blur-md hover:bg-white/10",
                 isFlashOn && "bg-white/20 text-yellow-400"
               )}
             >
-              {isFlashOn ? <Zap className="w-5 h-5 fill-current" /> : <Zap className="w-5 h-5" />}
+              <Zap className={cn("w-5 h-5", isFlashOn && "fill-current")} />
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              className="w-10 h-10 rounded-full text-white/80 hover:bg-white/10"
+              className="w-10 h-10 rounded-full text-white bg-black/20 backdrop-blur-md hover:bg-white/10"
             >
               <User className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        {/* --- Viewfinder Frame (Match Reference) --- */}
+        {/* --- Viewfinder Frame (Reference Match) --- */}
         <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-30">
-          <div className="relative w-[85vw] max-w-[420px] aspect-[1.8/1] rounded-[2.5rem]">
+          <div className="relative w-[85vw] max-w-[420px] aspect-[1.8/1]">
             
             {/* Brackets - Top Left */}
-            <div className="absolute -top-1 -left-1 w-12 h-12 border-t-[5px] border-l-[5px] border-white rounded-tl-[2rem]" />
+            <div className="absolute top-0 left-0 w-12 h-12 border-t-[4px] border-l-[4px] border-white rounded-tl-3xl" />
             {/* Brackets - Top Right */}
-            <div className="absolute -top-1 -right-1 w-12 h-12 border-t-[5px] border-r-[5px] border-white rounded-tr-[2rem]" />
+            <div className="absolute top-0 right-0 w-12 h-12 border-t-[4px] border-r-[4px] border-white rounded-tr-3xl" />
             
-            {/* Brackets - Bottom Left (Extended per Sketch) */}
-            <div className="absolute -bottom-1 -left-1 flex flex-col items-start">
-                <div className="w-12 h-12 border-b-[5px] border-l-[5px] border-white rounded-bl-[2rem]" />
-                <div className="absolute -bottom-4 -left-2 w-8 h-[5px] bg-white opacity-80" />
+            {/* Brackets - Bottom Left (With extra tick matching reference) */}
+            <div className="absolute bottom-0 left-0">
+                {/* Horizontal tick below */}
+                <div className="absolute -bottom-4 left-0 w-8 h-[4px] bg-white rounded-full opacity-90" />
+                {/* Vertical tick side */}
+                <div className="absolute -left-4 bottom-0 w-[4px] h-8 bg-white rounded-full opacity-90" />
+                {/* Main corner */}
+                <div className="w-12 h-12 border-b-[4px] border-l-[4px] border-white rounded-bl-3xl" />
             </div>
 
-            {/* Brackets - Bottom Right (Extended per Sketch) */}
-            <div className="absolute -bottom-1 -right-1 flex flex-col items-end">
-                <div className="w-12 h-12 border-b-[5px] border-r-[5px] border-white rounded-br-[2rem]" />
-                <div className="absolute -bottom-4 -right-2 w-8 h-[5px] bg-white opacity-80" />
+            {/* Brackets - Bottom Right (With extra tick matching reference) */}
+            <div className="absolute bottom-0 right-0">
+                {/* Horizontal tick below */}
+                <div className="absolute -bottom-4 right-0 w-8 h-[4px] bg-white rounded-full opacity-90" />
+                {/* Vertical tick side */}
+                <div className="absolute -right-4 bottom-0 w-[4px] h-8 bg-white rounded-full opacity-90" />
+                {/* Main corner */}
+                <div className="w-12 h-12 border-b-[4px] border-r-[4px] border-white rounded-br-3xl" />
             </div>
             
-            {/* The Scanning Line */}
-            <div className="absolute left-[10%] right-[10%] h-[3px] bg-emerald-400/80 shadow-[0_0_15px_rgba(52,199,89,0.8)] animate-scan-y rounded-full" />
+            {/* Scanning Line */}
+            <div className="absolute left-[5%] right-[5%] h-[2.5px] bg-[#20BF5A] shadow-[0_0_15px_rgba(32,191,90,0.8)] animate-scan-y rounded-full" />
           </div>
           
-          <p className="mt-12 text-white/90 font-semibold text-lg tracking-wide bg-black/20 px-6 py-2 rounded-full backdrop-blur-md border border-white/5">
+          <p className="mt-16 text-white font-black text-sm uppercase tracking-[0.2em] bg-black/40 px-6 py-2.5 rounded-full backdrop-blur-xl border border-white/10">
             Scan barcode
           </p>
         </div>
@@ -205,9 +218,9 @@ const QrScanner = ({
         <div className="absolute bottom-16 left-0 right-0 flex justify-center z-30 px-6">
           <Button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 text-white rounded-full px-8 h-14 font-bold text-sm gap-3 active:scale-95 transition-all shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
+            className="bg-white/10 backdrop-blur-3xl border border-white/20 text-white rounded-full px-8 h-14 font-black text-xs uppercase tracking-widest gap-3 active:scale-95 transition-all shadow-2xl"
           >
-            <ImageIcon className="w-5 h-5 text-emerald-400" />
+            <ImageIcon className="w-5 h-5 text-[#20BF5A]" />
             Scan from photo
           </Button>
           <input 
@@ -222,8 +235,8 @@ const QrScanner = ({
 
       <style jsx global>{`
         @keyframes scan-y {
-          0%, 100% { top: 15%; opacity: 0.2; }
-          50% { top: 85%; opacity: 1; }
+          0%, 100% { top: 10%; opacity: 0.3; }
+          50% { top: 90%; opacity: 1; }
         }
         .animate-scan-y {
           animation: scan-y 2.5s ease-in-out infinite;
