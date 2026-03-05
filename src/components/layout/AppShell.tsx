@@ -24,12 +24,12 @@ export function AppShell({ children }: { children: ReactNode }) {
         <main 
           key={pathname} 
           className={cn(
-            'flex-1 overflow-y-auto animate-in fade-in-0 duration-200 ease-out',
+            'flex-1 overflow-y-auto',
             showNav ? 'pb-24 pt-2' : ''
           )}
         >
           <div className={cn(
-            "max-w-screen-xl mx-auto w-full h-full transition-all duration-300",
+            "max-w-screen-xl mx-auto w-full h-full",
             showNav ? "px-4" : ""
           )}>
             {children}

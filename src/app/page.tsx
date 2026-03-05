@@ -72,7 +72,7 @@ export default function ScannerPage() {
     if (!barcode.trim()) return;
 
     const now = Date.now();
-    if (now - lastScanTimeRef.current < 1500) return;
+    if (now - lastScanTimeRef.current < 1000) return;
     lastScanTimeRef.current = now;
 
     if (abortControllerRef.current) abortControllerRef.current.abort();
@@ -85,7 +85,7 @@ export default function ScannerPage() {
     try {
         for (let i = 0; i < BARCODE_LOADING_STEPS.length; i++) {
             await new Promise((resolve, reject) => {
-                const timeout = setTimeout(resolve, 600);
+                const timeout = setTimeout(resolve, 400);
                 abortControllerRef.current?.signal.addEventListener('abort', () => {
                     clearTimeout(timeout);
                     reject(new Error('Request cancelled'));
@@ -150,18 +150,18 @@ export default function ScannerPage() {
   if (isAnalyzing) {
     return (
       <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background">
-        <div className="relative mb-12">
-          <div className="w-24 h-24 rounded-full bg-primary/5 flex items-center justify-center shadow-inner">
-             <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-                <Sparkles className="w-8 h-8 text-primary animate-pulse" />
+        <div className="relative mb-8">
+          <div className="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center">
+             <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
+                <Sparkles className="w-6 h-6 text-primary" />
              </div>
           </div>
           <Loader2 className="absolute -bottom-1 -right-1 w-6 h-6 text-primary animate-spin" />
         </div>
-        <div className="space-y-4 w-full max-w-xs">
-          <h2 className="text-2xl font-black text-center tracking-tight">{mode === 'barcode' ? t('processingScan') : t('aiPhotoAnalysis')}</h2>
+        <div className="space-y-3 w-full max-w-xs">
+          <h2 className="text-xl font-black text-center tracking-tight">{mode === 'barcode' ? t('processingScan') : t('aiPhotoAnalysis')}</h2>
           {BARCODE_LOADING_STEPS.map((step, idx) => (
-            <div key={step} className={cn("flex items-center gap-3 text-sm transition-all duration-500 font-bold", analysisStep > idx ? "text-primary opacity-100" : "opacity-30")}>
+            <div key={step} className={cn("flex items-center gap-3 text-sm transition-opacity duration-200 font-bold", analysisStep > idx ? "text-primary opacity-100" : "opacity-30")}>
               {analysisStep > idx ? <CheckCircle2 className="w-4 h-4" /> : <Loader2 className={cn("w-4 h-4", analysisStep === idx && "animate-spin")} />}
               <p>{t(step as any)}</p>
             </div>
@@ -185,71 +185,70 @@ export default function ScannerPage() {
       )}
 
       <div className="pt-6 px-4 flex justify-center z-10">
-        <div className="bg-secondary p-1.5 rounded-full flex w-full max-w-[240px] shadow-inner">
-          <button onClick={() => setMode('barcode')} className={cn("flex-1 py-2 rounded-full text-xs font-black tracking-tight transition-all active:scale-95", mode === 'barcode' ? "bg-background shadow-md text-foreground" : "text-muted-foreground")}>{t('barcodeMode')}</button>
-          <button onClick={() => setMode('photo')} className={cn("flex-1 py-2 rounded-full text-xs font-black tracking-tight transition-all active:scale-95", mode === 'photo' ? "bg-background shadow-md text-foreground" : "text-muted-foreground")}>{t('photoMode')}</button>
+        <div className="bg-secondary p-1 rounded-full flex w-full max-w-[220px]">
+          <button onClick={() => setMode('barcode')} className={cn("flex-1 py-2 rounded-full text-[10px] font-black tracking-tight transition-all", mode === 'barcode' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}>{t('barcodeMode')}</button>
+          <button onClick={() => setMode('photo')} className={cn("flex-1 py-2 rounded-full text-[10px] font-black tracking-tight transition-all", mode === 'photo' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}>{t('photoMode')}</button>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full px-6">
           <div className="flex flex-col items-center">
-            <div className="mb-12 relative group">
-                <div className="absolute inset-0 bg-primary/10 rounded-full blur-3xl animate-pulse" />
-                <div className="relative w-32 h-32 rounded-full bg-card flex items-center justify-center border-4 border-primary/20 shadow-2xl depth-surface overflow-hidden">
-                    <div className="scanner-line absolute w-full h-1 bg-primary/40 shadow-[0_0_15px_hsl(var(--primary))] z-10" />
+            <div className="mb-10 relative">
+                <div className="relative w-28 h-28 rounded-full bg-card flex items-center justify-center border-2 border-primary/10 shadow-md overflow-hidden">
+                    <div className="scanner-line" />
                     {mode === 'barcode' ? (
-                        <QrCode className="w-14 h-14 text-primary animate-pulse-subtle" />
+                        <QrCode className="w-12 h-12 text-primary opacity-80" />
                     ) : (
-                        <ImageIcon className="w-14 h-14 text-primary animate-pulse-subtle" />
+                        <ImageIcon className="w-12 h-12 text-primary opacity-80" />
                     )}
                 </div>
             </div>
 
-            <div className="text-center space-y-2 mb-12">
-              <h1 className="text-4xl font-black tracking-tighter">{mode === 'barcode' ? t('barcodeEntry') : t('photoAnalysis')}</h1>
-              <p className="text-muted-foreground text-sm max-w-[260px] font-bold leading-relaxed">{mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}</p>
+            <div className="text-center space-y-1 mb-10">
+              <h1 className="text-3xl font-black tracking-tighter">{mode === 'barcode' ? t('barcodeEntry') : t('photoAnalysis')}</h1>
+              <p className="text-muted-foreground text-xs max-w-[240px] font-bold">{mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}</p>
             </div>
 
-            <div className="w-full space-y-4">
+            <div className="w-full space-y-3">
               <Button 
                 size="lg" 
                 disabled={isAnalyzing}
-                className="w-full rounded-3xl h-18 text-xl font-black bg-primary text-primary-foreground shadow-lg btn-tactile" 
+                className="w-full rounded-2xl h-16 text-lg font-black bg-primary text-primary-foreground shadow-md btn-tactile" 
                 onClick={() => setIsCameraOpen(true)}
               >
-                <Camera className="mr-3 h-6 w-6" /> 
+                <Camera className="mr-2 h-5 w-5" /> 
                 {t('capturePhoto')}
               </Button>
               <Button 
                 variant="outline" 
                 disabled={isAnalyzing}
-                className="w-full h-16 rounded-3xl font-black text-lg btn-tactile" 
+                className="w-full h-14 rounded-2xl font-black text-base btn-tactile" 
                 onClick={handleUploadImage}
               >
-                <ImageIcon className="mr-3 h-6 w-6" /> {t('uploadImage')}
+                <ImageIcon className="mr-2 h-5 w-5" /> {t('uploadImage')}
               </Button>
 
               {mode === 'barcode' && (
-                <div className="pt-6 w-full flex justify-center">
+                <div className="pt-4 w-full flex justify-center">
                   <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="ghost" disabled={isAnalyzing} className="text-primary font-black hover:bg-primary/5 rounded-full px-6 py-3 h-auto text-sm gap-2">
-                        <Keyboard className="h-5 w-5" />
+                      <Button variant="ghost" disabled={isAnalyzing} className="text-primary font-black rounded-full px-4 py-2 h-auto text-xs gap-2">
+                        <Keyboard className="h-4 w-4" />
                         {t('enterManually')}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="rounded-[2.5rem] border-none p-10 shadow-2xl animate-in zoom-in-95 duration-300">
+                    <DialogContent className="rounded-3xl p-8 border-none shadow-xl">
                       <DialogHeader>
-                        <DialogTitle className="text-3xl font-black text-center mb-8 tracking-tighter">{t('manualEntry')}</DialogTitle>
+                        <DialogTitle className="text-2xl font-black text-center mb-6">{t('manualEntry')}</DialogTitle>
                       </DialogHeader>
-                      <div className="flex flex-col gap-8">
-                        <div className="space-y-3">
-                          <Label className="text-xs font-black uppercase tracking-widest text-muted-foreground ml-2">{t('barcodeMode')}</Label>
+                      <div className="flex flex-col gap-6">
+                        <div className="space-y-2">
+                          <Label className="text-[10px] font-black uppercase text-muted-foreground ml-1">{t('barcodeMode')}</Label>
                           <Input 
                             value={manualBarcode}
                             onChange={(e) => setManualBarcode(e.target.value)}
                             placeholder={t('barcodePlaceholder')}
-                            className="h-16 rounded-2xl border-none font-black px-6 text-xl shadow-inner bg-secondary focus:ring-2 focus:ring-primary/20 transition-all"
+                            className="h-14 rounded-xl border-none font-black px-4 text-lg bg-secondary"
                             type="number"
                             autoFocus
                             onKeyDown={(e) => { if (e.key === 'Enter') handleBarcodeAnalysisFlow(manualBarcode); }}
@@ -258,10 +257,9 @@ export default function ScannerPage() {
                         <Button 
                           disabled={!manualBarcode || manualBarcode.length < 5 || isAnalyzing}
                           onClick={() => handleBarcodeAnalysisFlow(manualBarcode)}
-                          className="h-18 w-full rounded-3xl font-black text-xl bg-primary text-primary-foreground shadow-xl btn-tactile"
+                          className="h-16 w-full rounded-2xl font-black text-lg bg-primary text-primary-foreground shadow-md"
                         >
                           {t('analyzeProduct')}
-                          <ChevronRight className="ml-2 w-6 h-6" />
                         </Button>
                       </div>
                     </DialogContent>

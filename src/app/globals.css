@@ -1,12 +1,11 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @layer base {
   :root {
-    /* --- LIGHT MODE: Premium Tactile Depth --- */
-    --background: 0 0% 100%; /* Pure White */
+    /* --- LIGHT MODE: Clean & Crisp --- */
+    --background: 0 0% 100%;
     --foreground: 222 47% 11%;
     
     --card: 0 0% 100%;
@@ -24,7 +23,7 @@
     --muted: 142 10% 92%;
     --muted-foreground: 215.4 16.3% 46.9%;
     
-    --accent: 17 100% 74%; /* NutriScan Soft Orange #FFA07A */
+    --accent: 17 100% 74%;
     --accent-foreground: 222 47% 11%;
     
     --destructive: 0 84.2% 60.2%;
@@ -37,17 +36,17 @@
   }
 
   .dark {
-    /* --- DARK MODE: Layered Midnight Blue --- */
-    --background: 222 47% 6%; /* Deep Blue-Black */
+    /* --- DARK MODE: High Performance Layered --- */
+    --background: 222 47% 6%;
     --foreground: 210 40% 98%;
     
-    --card: 222 47% 10%; /* Slightly Elevated Deep Card */
+    --card: 222 47% 10%;
     --card-foreground: 210 40% 98%;
     
     --popover: 222 47% 10%;
     --popover-foreground: 210 40% 98%;
     
-    --primary: 142 71% 55%; /* Brighter Green for Dark Mode */
+    --primary: 142 71% 55%;
     --primary-foreground: 222 47% 6%;
     
     --secondary: 222 47% 15%;
@@ -73,49 +72,40 @@
     @apply border-border;
   }
   body {
-    @apply bg-background text-foreground transition-colors duration-300 antialiased;
+    @apply bg-background text-foreground antialiased;
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   }
 }
 
 @layer components {
-  /* Tactile Depth Surfaces */
+  /* High Performance Surface */
   .depth-surface {
-    @apply shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.3)] transition-all duration-300;
+    @apply shadow-sm border border-border/50 transition-colors duration-150;
   }
 
-  /* Interactive Button Physics */
+  /* Snappy Button Physics */
   .btn-tactile {
-    @apply transition-all duration-200 active:scale-[0.96] active:brightness-95 active:shadow-inner;
+    @apply transition-all duration-100 active:scale-[0.97] active:brightness-95;
   }
 
   .scanner-line {
-    @apply absolute left-0 w-full h-[3px] bg-primary/80 shadow-[0_0_15px_hsl(var(--primary))];
-    animation: scan-vertical 3s infinite ease-in-out;
+    @apply absolute left-0 w-full h-[2px] bg-primary/60;
+    animation: scan-vertical 2s infinite linear;
   }
 }
 
 @keyframes scan-vertical {
   0% { top: 0%; opacity: 0; }
-  20% { opacity: 1; }
-  80% { opacity: 1; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
 }
 
 .animate-pulse-subtle {
-  animation: pulse-subtle 2.5s infinite ease-in-out;
+  animation: pulse-subtle 2s infinite ease-in-out;
 }
 
 @keyframes pulse-subtle {
-  0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.03); opacity: 0.9; }
-}
-
-.scan-frame-pulse {
-  animation: frame-pulse 2s infinite ease-in-out;
-}
-
-@keyframes frame-pulse {
-  0%, 100% { border-color: rgba(var(--primary), 0.3); }
-  50% { border-color: rgba(var(--primary), 0.6); }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
 }

@@ -26,7 +26,7 @@ export default function BottomNav() {
   if (!isMounted) return null;
 
   return (
-    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card text-card-foreground border shadow-lg rounded-full animate-in slide-in-from-bottom-8 duration-500 ease-out">
+    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card text-card-foreground border shadow-lg rounded-full">
       <div className="flex justify-around items-center h-full px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
@@ -37,13 +37,13 @@ export default function BottomNav() {
               href={item.href}
               aria-label={label}
               className={cn(
-                'flex items-center justify-center p-2 rounded-full transition-all duration-300 active:scale-90',
-                isActive ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:bg-secondary'
+                'flex items-center justify-center p-2 rounded-full transition-all duration-200 active:scale-90',
+                isActive ? 'bg-primary text-primary-foreground' : 'text-muted-foreground'
               )}
             >
               <item.icon className={cn("h-6 w-6", isActive ? "stroke-[2.5]" : "stroke-[1.5]")} />
               {isActive && (
-                <span className="ml-2 text-xs font-black uppercase tracking-tight overflow-hidden whitespace-nowrap animate-in slide-in-from-left-2 duration-300">
+                <span className="ml-2 text-xs font-black uppercase tracking-tight overflow-hidden whitespace-nowrap">
                   {label}
                 </span>
               )}
