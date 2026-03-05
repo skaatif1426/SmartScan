@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { Html5Qrcode, Html5QrcodeSupportedFormats } from 'html5-qrcode';
-import { Zap, ZapOff, RefreshCcw, X, Image as ImageIcon, Settings } from 'lucide-react';
+import { Zap, ZapOff, X, Image as ImageIcon, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -25,8 +25,6 @@ const QrScanner = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isReady, setIsReady] = useState(false);
   const [isFlashOn, setIsFlashOn] = useState(false);
-  const [cameras, setCameras] = useState<any[]>([]);
-  const [activeCameraIndex, setActiveCameraIndex] = useState(0);
   const [hasFlash, setHasFlash] = useState(false);
 
   const stopScanner = async () => {
@@ -48,11 +46,10 @@ const QrScanner = ({
       await scannerRef.current.start(
         cameraId,
         {
-          fps: 30, // Increased for smoother auto-detect
+          fps: 30,
           qrbox: (viewfinderWidth, viewfinderHeight) => {
-            // Optimized for barcodes (wider than square)
-            const width = Math.min(viewfinderWidth * 0.8, 400);
-            const height = width * 0.5; // Barcode aspect ratio
+            const width = Math.min(viewfinderWidth * 0.85, 450);
+            const height = width * 0.55;
             return { width, height };
           },
           aspectRatio: 1.0,
@@ -60,22 +57,15 @@ const QrScanner = ({
         (decodedText) => {
           onScanSuccess(decodedText);
         },
-        (errorMessage) => {
-          // Silent failure during search
-        }
+        () => {} // Silent failures for search
       );
 
       setIsReady(true);
 
-      // Check if flash is supported
-      try {
-        const track = scannerRef.current.getVideoTrack();
-        if (track) {
-          const capabilities = track.getCapabilities() as any;
-          setHasFlash(!!capabilities.torch);
-        }
-      } catch (e) {
-        setHasFlash(false);
+      const track = scannerRef.current.getVideoTrack();
+      if (track) {
+        const capabilities = track.getCapabilities() as any;
+        setHasFlash(!!capabilities.torch);
       }
     } catch (err) {
       onCameraPermissionError(err instanceof Error ? err : new Error('Start failed'));
@@ -90,7 +80,6 @@ const QrScanner = ({
         Html5QrcodeSupportedFormats.UPC_A,
         Html5QrcodeSupportedFormats.UPC_E,
         Html5QrcodeSupportedFormats.CODE_128,
-        Html5QrcodeSupportedFormats.QR_CODE, // Still support QR just in case
       ],
       verbose: false
     });
@@ -99,13 +88,9 @@ const QrScanner = ({
     const init = async () => {
       try {
         const devs = await Html5Qrcode.getCameras();
-        setCameras(devs);
         if (devs.length > 0) {
-          // Auto-select rear camera
           const backIdx = devs.findIndex(c => c.label.toLowerCase().includes('back') || c.label.toLowerCase().includes('rear'));
-          const startIdx = backIdx !== -1 ? backIdx : 0;
-          setActiveCameraIndex(startIdx);
-          await startScanner(devs[startIdx].id);
+          await startScanner(devs[backIdx !== -1 ? backIdx : 0].id);
         }
       } catch (err) {
         onCameraPermissionError(err instanceof Error ? err : new Error('Camera access failed'));
@@ -113,10 +98,7 @@ const QrScanner = ({
     };
 
     init();
-
-    return () => {
-      stopScanner();
-    };
+    return () => { stopScanner(); };
   }, []);
 
   const toggleFlash = async () => {
@@ -145,26 +127,25 @@ const QrScanner = ({
   };
 
   return (
-    <div className="fixed inset-0 z-[300] bg-black flex flex-col">
+    <div className="fixed inset-0 z-[300] bg-black flex flex-col font-sans">
       <div className="relative flex-1 bg-black overflow-hidden">
-        {/* The Camera Feed */}
         <div id={qrcodeRegionId} className="w-full h-full object-cover" />
         
         {!isReady && (
-          <div className="absolute inset-0 flex items-center justify-center bg-black">
+          <div className="absolute inset-0 flex items-center justify-center bg-black z-20">
             <div className="w-10 h-10 border-4 border-white/20 border-t-white rounded-full animate-spin" />
           </div>
         )}
 
-        {/* --- Top Controls (Reference Style) --- */}
-        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-10">
+        {/* --- Top Controls --- */}
+        <div className="absolute top-0 left-0 right-0 p-6 flex justify-between items-center z-30">
           <Button 
             variant="ghost" 
             size="icon" 
             onClick={onClose}
-            className="w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-90 transition-all"
+            className="w-10 h-10 rounded-full text-white/80 hover:bg-white/10 active:scale-90"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </Button>
 
           <div className="flex gap-4">
@@ -174,8 +155,8 @@ const QrScanner = ({
               disabled={!hasFlash}
               onClick={toggleFlash}
               className={cn(
-                "w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-90 transition-all",
-                isFlashOn && "bg-white/20"
+                "w-10 h-10 rounded-full text-white/80 hover:bg-white/10",
+                isFlashOn && "bg-white/20 text-yellow-400"
               )}
             >
               {isFlashOn ? <Zap className="w-5 h-5 fill-current" /> : <Zap className="w-5 h-5" />}
@@ -183,38 +164,50 @@ const QrScanner = ({
             <Button
               variant="ghost"
               size="icon"
-              className="w-10 h-10 rounded-full text-white hover:bg-white/10 active:scale-90 transition-all"
+              className="w-10 h-10 rounded-full text-white/80 hover:bg-white/10"
             >
-              <Settings className="w-5 h-5" />
+              <User className="w-5 h-5" />
             </Button>
           </div>
         </div>
 
-        {/* --- Central Viewfinder Frame (Reference Style) --- */}
-        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-          <div className="relative w-[80vw] max-w-[400px] aspect-[2/1] border-2 border-white/10 rounded-[2rem] overflow-hidden">
-            {/* Corner Accents */}
-            <div className="absolute top-0 left-0 w-10 h-10 border-t-4 border-l-4 border-white rounded-tl-[1.5rem]" />
-            <div className="absolute top-0 right-0 w-10 h-10 border-t-4 border-r-4 border-white rounded-tr-[1.5rem]" />
-            <div className="absolute bottom-0 left-0 w-10 h-10 border-b-4 border-l-4 border-white rounded-bl-[1.5rem]" />
-            <div className="absolute bottom-0 right-0 w-10 h-10 border-b-4 border-r-4 border-white rounded-br-[1.5rem]" />
+        {/* --- Viewfinder Frame (Match Reference) --- */}
+        <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center z-30">
+          <div className="relative w-[85vw] max-w-[420px] aspect-[1.8/1] rounded-[2.5rem]">
             
-            {/* Scanning Line */}
-            <div className="scanner-line opacity-40" />
+            {/* Brackets - Top Left */}
+            <div className="absolute -top-1 -left-1 w-12 h-12 border-t-[5px] border-l-[5px] border-white rounded-tl-[2rem]" />
+            {/* Brackets - Top Right */}
+            <div className="absolute -top-1 -right-1 w-12 h-12 border-t-[5px] border-r-[5px] border-white rounded-tr-[2rem]" />
+            
+            {/* Brackets - Bottom Left (Extended per Sketch) */}
+            <div className="absolute -bottom-1 -left-1 flex flex-col items-start">
+                <div className="w-12 h-12 border-b-[5px] border-l-[5px] border-white rounded-bl-[2rem]" />
+                <div className="absolute -bottom-4 -left-2 w-8 h-[5px] bg-white opacity-80" />
+            </div>
+
+            {/* Brackets - Bottom Right (Extended per Sketch) */}
+            <div className="absolute -bottom-1 -right-1 flex flex-col items-end">
+                <div className="w-12 h-12 border-b-[5px] border-r-[5px] border-white rounded-br-[2rem]" />
+                <div className="absolute -bottom-4 -right-2 w-8 h-[5px] bg-white opacity-80" />
+            </div>
+            
+            {/* The Scanning Line */}
+            <div className="absolute left-[10%] right-[10%] h-[3px] bg-emerald-400/80 shadow-[0_0_15px_rgba(52,199,89,0.8)] animate-scan-y rounded-full" />
           </div>
           
-          <p className="mt-8 text-white font-medium text-lg tracking-tight">
+          <p className="mt-12 text-white/90 font-semibold text-lg tracking-wide bg-black/20 px-6 py-2 rounded-full backdrop-blur-md border border-white/5">
             Scan barcode
           </p>
         </div>
 
-        {/* --- Bottom Action Button (Reference Style) --- */}
-        <div className="absolute bottom-12 left-0 right-0 flex justify-center z-10 px-6">
+        {/* --- Bottom Action Pill --- */}
+        <div className="absolute bottom-16 left-0 right-0 flex justify-center z-30 px-6">
           <Button
             onClick={() => fileInputRef.current?.click()}
-            className="bg-black/60 backdrop-blur-xl border border-white/10 text-white rounded-full px-8 h-14 font-medium text-sm gap-3 active:scale-95 transition-all shadow-2xl"
+            className="bg-zinc-900/80 backdrop-blur-2xl border border-white/10 text-white rounded-full px-8 h-14 font-bold text-sm gap-3 active:scale-95 transition-all shadow-[0_10px_40px_rgba(0,0,0,0.5)]"
           >
-            <ImageIcon className="w-5 h-5" />
+            <ImageIcon className="w-5 h-5 text-emerald-400" />
             Scan from photo
           </Button>
           <input 
@@ -226,6 +219,16 @@ const QrScanner = ({
           />
         </div>
       </div>
+
+      <style jsx global>{`
+        @keyframes scan-y {
+          0%, 100% { top: 15%; opacity: 0.2; }
+          50% { top: 85%; opacity: 1; }
+        }
+        .animate-scan-y {
+          animation: scan-y 2.5s ease-in-out infinite;
+        }
+      `}</style>
     </div>
   );
 };
