@@ -1,9 +1,8 @@
 'use client';
 
-import { useState, useRef, useCallback, useEffect } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { 
-  ScanLine, 
   Loader2, 
   CheckCircle2,
   Camera,
@@ -74,7 +73,6 @@ export default function ScannerPage() {
     setIsAnalyzing(true);
     setAnalysisStep(0);
 
-    // Mock progress steps for UX
     const runSteps = async () => {
       for (let i = 0; i < BARCODE_LOADING_STEPS.length; i++) {
         await new Promise(r => setTimeout(r, 400));
@@ -266,7 +264,6 @@ export default function ScannerPage() {
                         reader.onloadend = () => {
                             const base64 = reader.result as string;
                             if (mode === 'barcode') {
-                                // For uploaded barcode images, we still need a manual trigger or more complex detection
                                 toast({ title: "Image Uploaded", description: "Use camera for auto-detection or snap for AI." });
                             } else {
                                 processPhotoImage(base64);
