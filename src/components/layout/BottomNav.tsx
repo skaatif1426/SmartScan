@@ -26,8 +26,8 @@ export default function BottomNav() {
   if (!isMounted) return null;
 
   return (
-    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card/85 backdrop-blur-xl border border-white/10 rounded-3xl shadow-[0_12px_40px_rgba(0,0,0,0.15)] dark:shadow-[0_12px_40px_rgba(0,0,0,0.6)] animate-in slide-in-from-bottom-8 duration-300 ease-in-out">
-      <div className="flex justify-around items-center h-full max-w-lg mx-auto p-1.5">
+    <nav className="fixed bottom-0 inset-x-0 z-50 h-20 bg-background/80 backdrop-blur-xl border-t border-border/40 pb-safe-area-inset-bottom animate-in slide-in-from-bottom-4 duration-500">
+      <div className="flex justify-around items-center h-full max-w-lg mx-auto px-4">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const label = t(item.labelKey);
@@ -37,14 +37,19 @@ export default function BottomNav() {
               href={item.href}
               aria-label={label}
               className={cn(
-                'flex items-center justify-center p-2 rounded-2xl transition-all duration-200 ease-out h-12 select-none active:scale-90',
-                 isActive 
-                  ? 'bg-primary text-primary-foreground shadow-[0_4px_12px_rgba(22,163,74,0.3)] gap-2 px-5' 
-                  : 'text-muted-foreground w-12 hover:bg-muted/50'
+                'flex flex-col items-center justify-center w-16 gap-1 transition-all duration-200 ios-active',
+                isActive ? 'text-primary' : 'text-muted-foreground'
               )}
             >
-              <item.icon className={cn("shrink-0", isActive ? "h-5 w-5" : "h-6 w-6")} />
-              {isActive && <span className="text-xs font-black uppercase tracking-widest whitespace-nowrap" aria-hidden="true">{label}</span>}
+              <div className={cn(
+                "p-1.5 rounded-full transition-all duration-300",
+                isActive && "bg-primary/10"
+              )}>
+                <item.icon className={cn("h-6 w-6", isActive ? "stroke-[2.5]" : "stroke-[1.5]")} />
+              </div>
+              <span className="text-[10px] font-bold tracking-tight uppercase leading-none">
+                {label}
+              </span>
             </Link>
           );
         })}

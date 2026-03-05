@@ -4,66 +4,66 @@
 
 @layer base {
   :root {
-    /* --- LIGHT MODE: Premium soft off-white & Depth --- */
-    --background: 210 40% 98.5%; /* Soft Off-white */
-    --foreground: 221 39% 11%;
+    /* --- LIGHT MODE: iOS Pure White & Soft Depth --- */
+    --background: 0 0% 98%; /* iOS Soft Background */
+    --foreground: 0 0% 9%;
     
     --card: 0 0% 100%;
-    --card-foreground: 221 39% 11%;
+    --card-foreground: 0 0% 9%;
     
     --popover: 0 0% 100%;
-    --popover-foreground: 221 39% 11%;
+    --popover-foreground: 0 0% 9%;
     
-    --primary: 142 71% 45%; 
+    --primary: 142 71% 45%; /* iOS Green */
     --primary-foreground: 0 0% 100%;
     
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
+    --secondary: 0 0% 96.1%;
+    --secondary-foreground: 0 0% 9%;
     
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
+    --muted: 0 0% 96.1%;
+    --muted-foreground: 0 0% 45%;
     
-    --accent: 142 71% 45% / 0.1;
-    --accent-foreground: 142 71% 35%;
+    --accent: 210 100% 50% / 0.1; /* iOS Blue Accent */
+    --accent-foreground: 210 100% 45%;
     
-    --destructive: 0 72% 51%;
-    --destructive-foreground: 210 40% 98%;
+    --destructive: 0 100% 50%; /* iOS Red */
+    --destructive-foreground: 0 0% 100%;
     
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 142 71% 45%;
-    --radius: 1rem;
+    --border: 0 0% 89.8%;
+    --input: 0 0% 89.8%;
+    --ring: 210 100% 50%;
+    --radius: 1.25rem; /* iOS Signature Large Radius */
   }
 
   .dark {
-    /* --- DARK MODE: Layered Charcoal Blue (No Pure Black) --- */
-    --background: 216 45% 4%; /* Deepest layer */
-    --foreground: 210 40% 98%;
+    /* --- DARK MODE: iOS Midnight (Layered Charcoal) --- */
+    --background: 0 0% 0%; /* Pure iOS Dark Background */
+    --foreground: 0 0% 98%;
     
-    --card: 216 35% 10%; /* Surface layer */
-    --card-foreground: 210 40% 98%;
+    --card: 0 0% 10%; /* iOS Secondary Background in Dark */
+    --card-foreground: 0 0% 98%;
     
-    --popover: 216 45% 4%;
-    --popover-foreground: 210 40% 98%;
+    --popover: 0 0% 10%;
+    --popover-foreground: 0 0% 98%;
     
     --primary: 142 71% 55%; 
-    --primary-foreground: 216 45% 4%;
+    --primary-foreground: 0 0% 0%;
     
-    --secondary: 216 35% 15%;
-    --secondary-foreground: 210 40% 98%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 98%;
     
-    --muted: 216 35% 15%;
-    --muted-foreground: 215 20.2% 65.1%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 63.9%;
     
-    --accent: 142 71% 55% / 0.15;
-    --accent-foreground: 142 71% 75%;
+    --accent: 210 100% 60% / 0.15;
+    --accent-foreground: 210 100% 70%;
     
-    --destructive: 0 91% 71%;
-    --destructive-foreground: 216 45% 4%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
     
-    --border: 216 35% 18%;
-    --input: 216 35% 18%;
-    --ring: 142 71% 55%;
+    --border: 0 0% 18%;
+    --input: 0 0% 18%;
+    --ring: 210 100% 50%;
   }
 }
 
@@ -73,39 +73,45 @@
   }
   body {
     @apply bg-background text-foreground transition-colors duration-300 antialiased;
-    font-size: 15px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 17px; /* iOS Standard Text Size */
   }
 }
 
 @layer components {
-  /* Surface Depth */
-  .depth-surface {
-    @apply shadow-[0_4px_12px_rgba(0,0,0,0.06)] dark:shadow-[0_4px_20px_rgba(0,0,0,0.3)] transition-all duration-200 border-white/5;
+  /* iOS Glassmorphism */
+  .ios-glass {
+    @apply bg-white/70 dark:bg-black/60 backdrop-blur-2xl border-white/20 dark:border-white/10;
   }
 
-  /* Tactile Interactive Depth */
-  .depth-interactive {
-    @apply shadow-[0_8px_16px_-4px_rgba(0,0,0,0.1)] active:shadow-[0_2px_4px_rgba(0,0,0,0.05)] active:translate-y-0.5 transition-all duration-150;
+  /* Squircle-like Depth */
+  .depth-surface {
+    @apply shadow-[0_4px_16px_rgba(0,0,0,0.04)] dark:shadow-[0_4px_24px_rgba(0,0,0,0.4)] transition-all duration-300;
+  }
+
+  /* iOS Active State */
+  .ios-active {
+    @apply active:scale-[0.97] active:opacity-80 transition-all duration-150;
   }
 
   .scanner-line {
-    @apply absolute left-0 w-full h-[3px] bg-primary/80 shadow-[0_0_20px_2px_hsl(var(--primary))];
-    animation: scan-vertical 2.5s infinite ease-in-out;
+    @apply absolute left-0 w-full h-[2px] bg-primary/80 shadow-[0_0_15px_hsl(var(--primary))];
+    animation: scan-vertical 3s infinite ease-in-out;
   }
 }
 
 @keyframes scan-vertical {
   0% { top: 0%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
+  20% { opacity: 1; }
+  80% { opacity: 1; }
   100% { top: 100%; opacity: 0; }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 2.5s infinite ease-in-out;
 }
 
 @keyframes pulse-subtle {
   0%, 100% { transform: scale(1); opacity: 1; }
-  50% { transform: scale(1.05); opacity: 0.9; }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s infinite ease-in-out;
+  50% { transform: scale(1.02); opacity: 0.95; }
 }
