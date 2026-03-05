@@ -5,15 +5,12 @@ import { useRouter } from 'next/navigation';
 import { 
   ScanLine, 
   Loader2, 
-  ChevronLeft, 
   CheckCircle2,
   Camera,
   QrCode,
   Sparkles,
   Image as ImageIcon,
-  ArrowRight,
   Keyboard,
-  ChevronRight,
 } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
@@ -35,6 +32,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import CameraCapture from '@/components/scanner/CameraCapture';
+import QrScanner from '@/components/scanner/QrScanner';
 
 const BARCODE_LOADING_STEPS = [
   'loadingCapture',
@@ -65,42 +63,29 @@ export default function ScannerPage() {
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const galleryInputRef = useRef<HTMLInputElement>(null);
-  const abortControllerRef = useRef<AbortController | null>(null);
   const lastScanTimeRef = useRef<number>(0);
 
-  const handleBarcodeAnalysisFlow = useCallback(async (barcode: string) => {
-    if (!barcode.trim()) return;
-
+  const handleBarcodeDetected = useCallback((barcode: string) => {
     const now = Date.now();
-    if (now - lastScanTimeRef.current < 1000) return;
+    if (now - lastScanTimeRef.current < 2000) return;
     lastScanTimeRef.current = now;
 
-    if (abortControllerRef.current) abortControllerRef.current.abort();
-    abortControllerRef.current = new AbortController();
-
-    setIsManualDialogOpen(false);
+    setIsCameraOpen(false);
     setIsAnalyzing(true);
     setAnalysisStep(0);
 
-    try {
-        for (let i = 0; i < BARCODE_LOADING_STEPS.length; i++) {
-            await new Promise((resolve, reject) => {
-                const timeout = setTimeout(resolve, 400);
-                abortControllerRef.current?.signal.addEventListener('abort', () => {
-                    clearTimeout(timeout);
-                    reject(new Error('Request cancelled'));
-                });
-            });
-            setAnalysisStep(i + 1);
-        }
-        router.push(`/product/${barcode}`);
-    } catch (err: any) {
-        if (err.message !== 'Request cancelled') setIsAnalyzing(false);
-    }
+    // Mock progress steps for UX
+    const runSteps = async () => {
+      for (let i = 0; i < BARCODE_LOADING_STEPS.length; i++) {
+        await new Promise(r => setTimeout(r, 400));
+        setAnalysisStep(i + 1);
+      }
+      router.push(`/product/${barcode}`);
+    };
+    runSteps();
   }, [router]);
 
   const processPhotoImage = async (base64: string) => {
-    if (isAnalyzing) return;
     setSelectedImage(base64);
     setIsAnalyzing(true);
     setAnalysisStep(0);
@@ -139,17 +124,11 @@ export default function ScannerPage() {
     }
   };
 
-  const handlePhotoCaptured = (image: string) => {
-    setIsCameraOpen(false);
-    if (mode === 'barcode') handleBarcodeAnalysisFlow('capture');
-    else processPhotoImage(image);
-  };
-
   const handleUploadImage = () => galleryInputRef.current?.click();
 
   if (isAnalyzing) {
     return (
-      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-background">
+      <div className="fixed inset-0 z-[200] flex flex-col items-center justify-center p-8 bg-white">
         <div className="relative mb-8">
           <div className="w-20 h-20 rounded-full bg-primary/5 flex items-center justify-center">
              <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center">
@@ -176,53 +155,60 @@ export default function ScannerPage() {
   }
 
   return (
-    <div className="flex flex-col h-full bg-background relative overflow-hidden">
+    <div className="flex flex-col h-full bg-white relative overflow-hidden">
       {isCameraOpen && (
-        <CameraCapture 
-            onCapture={handlePhotoCaptured}
+        mode === 'barcode' ? (
+          <QrScanner 
+            onScanSuccess={handleBarcodeDetected}
+            onScanFailure={() => {}}
+            onCameraPermissionError={(e) => toast({ variant: 'destructive', title: 'Camera Error', description: e.message })}
             onClose={() => setIsCameraOpen(false)}
-        />
+          />
+        ) : (
+          <CameraCapture 
+            onCapture={processPhotoImage}
+            onClose={() => setIsCameraOpen(false)}
+          />
+        )
       )}
 
       <div className="pt-6 px-4 flex justify-center z-10">
-        <div className="bg-secondary p-1 rounded-full flex w-full max-w-[220px]">
-          <button onClick={() => setMode('barcode')} className={cn("flex-1 py-2 rounded-full text-[10px] font-black tracking-tight transition-all", mode === 'barcode' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}>{t('barcodeMode')}</button>
-          <button onClick={() => setMode('photo')} className={cn("flex-1 py-2 rounded-full text-[10px] font-black tracking-tight transition-all", mode === 'photo' ? "bg-background shadow-sm text-foreground" : "text-muted-foreground")}>{t('photoMode')}</button>
+        <div className="bg-neutral-100 p-1 rounded-full flex w-full max-w-[240px]">
+          <button onClick={() => setMode('barcode')} className={cn("flex-1 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all", mode === 'barcode' ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}>{t('barcodeMode')}</button>
+          <button onClick={() => setMode('photo')} className={cn("flex-1 py-2.5 rounded-full text-[11px] font-black uppercase tracking-wider transition-all", mode === 'photo' ? "bg-white shadow-sm text-primary" : "text-muted-foreground")}>{t('photoMode')}</button>
         </div>
       </div>
 
       <div className="flex-1 flex flex-col justify-center max-w-sm mx-auto w-full px-6">
           <div className="flex flex-col items-center">
-            <div className="mb-10 relative">
-                <div className="relative w-28 h-28 rounded-full bg-card flex items-center justify-center border-2 border-primary/10 shadow-md overflow-hidden">
-                    <div className="scanner-line" />
+            <div className="mb-12 relative">
+                <div className="relative w-32 h-32 rounded-3xl bg-neutral-50 flex items-center justify-center border shadow-sm overflow-hidden group">
+                    <div className="scanner-line opacity-20" />
                     {mode === 'barcode' ? (
-                        <QrCode className="w-12 h-12 text-primary opacity-80" />
+                        <QrCode className="w-14 h-14 text-primary opacity-80" />
                     ) : (
-                        <ImageIcon className="w-12 h-12 text-primary opacity-80" />
+                        <ImageIcon className="w-14 h-14 text-primary opacity-80" />
                     )}
                 </div>
             </div>
 
-            <div className="text-center space-y-1 mb-10">
-              <h1 className="text-3xl font-black tracking-tighter">{mode === 'barcode' ? t('barcodeEntry') : t('photoAnalysis')}</h1>
-              <p className="text-muted-foreground text-xs max-w-[240px] font-bold">{mode === 'barcode' ? t('barcodeDesc') : t('photoDesc')}</p>
+            <div className="text-center space-y-2 mb-12">
+              <h1 className="text-3xl font-black tracking-tight">{mode === 'barcode' ? "Scan Product" : "Food AI Vision"}</h1>
+              <p className="text-muted-foreground text-sm max-w-[260px] font-bold leading-relaxed">{mode === 'barcode' ? "Point camera at any barcode for instant auto-detection." : "Snap a photo of your meal or fruit for a detailed AI analysis."}</p>
             </div>
 
-            <div className="w-full space-y-3">
+            <div className="w-full space-y-4">
               <Button 
                 size="lg" 
-                disabled={isAnalyzing}
-                className="w-full rounded-2xl h-16 text-lg font-black bg-primary text-primary-foreground shadow-md btn-tactile" 
+                className="w-full rounded-2xl h-18 text-lg font-black bg-primary text-white shadow-lg active:scale-95 transition-all" 
                 onClick={() => setIsCameraOpen(true)}
               >
-                <Camera className="mr-2 h-5 w-5" /> 
-                {t('capturePhoto')}
+                <Camera className="mr-2 h-6 w-6" /> 
+                {mode === 'barcode' ? "Open Auto-Scanner" : "Snap Photo"}
               </Button>
               <Button 
                 variant="outline" 
-                disabled={isAnalyzing}
-                className="w-full h-14 rounded-2xl font-black text-base btn-tactile" 
+                className="w-full h-16 rounded-2xl font-black text-base border-2 hover:bg-neutral-50 active:scale-95" 
                 onClick={handleUploadImage}
               >
                 <ImageIcon className="mr-2 h-5 w-5" /> {t('uploadImage')}
@@ -232,12 +218,12 @@ export default function ScannerPage() {
                 <div className="pt-4 w-full flex justify-center">
                   <Dialog open={isManualDialogOpen} onOpenChange={setIsManualDialogOpen}>
                     <DialogTrigger asChild>
-                      <Button variant="ghost" disabled={isAnalyzing} className="text-primary font-black rounded-full px-4 py-2 h-auto text-xs gap-2">
+                      <Button variant="ghost" className="text-primary font-black rounded-full px-6 py-2 h-auto text-xs gap-2">
                         <Keyboard className="h-4 w-4" />
                         {t('enterManually')}
                       </Button>
                     </DialogTrigger>
-                    <DialogContent className="rounded-3xl p-8 border-none shadow-xl">
+                    <DialogContent className="rounded-3xl p-8 border-none shadow-2xl">
                       <DialogHeader>
                         <DialogTitle className="text-2xl font-black text-center mb-6">{t('manualEntry')}</DialogTitle>
                       </DialogHeader>
@@ -248,16 +234,16 @@ export default function ScannerPage() {
                             value={manualBarcode}
                             onChange={(e) => setManualBarcode(e.target.value)}
                             placeholder={t('barcodePlaceholder')}
-                            className="h-14 rounded-xl border-none font-black px-4 text-lg bg-secondary"
+                            className="h-14 rounded-2xl border-2 font-black px-4 text-lg bg-neutral-50 focus:border-primary transition-colors"
                             type="number"
                             autoFocus
-                            onKeyDown={(e) => { if (e.key === 'Enter') handleBarcodeAnalysisFlow(manualBarcode); }}
+                            onKeyDown={(e) => { if (e.key === 'Enter') handleBarcodeDetected(manualBarcode); }}
                           />
                         </div>
                         <Button 
                           disabled={!manualBarcode || manualBarcode.length < 5 || isAnalyzing}
-                          onClick={() => handleBarcodeAnalysisFlow(manualBarcode)}
-                          className="h-16 w-full rounded-2xl font-black text-lg bg-primary text-primary-foreground shadow-md"
+                          onClick={() => handleBarcodeDetected(manualBarcode)}
+                          className="h-16 w-full rounded-2xl font-black text-lg bg-primary text-white shadow-xl"
                         >
                           {t('analyzeProduct')}
                         </Button>
@@ -279,8 +265,12 @@ export default function ScannerPage() {
                         const reader = new FileReader();
                         reader.onloadend = () => {
                             const base64 = reader.result as string;
-                            if (mode === 'barcode') handleBarcodeAnalysisFlow('upload');
-                            else processPhotoImage(base64);
+                            if (mode === 'barcode') {
+                                // For uploaded barcode images, we still need a manual trigger or more complex detection
+                                toast({ title: "Image Uploaded", description: "Use camera for auto-detection or snap for AI." });
+                            } else {
+                                processPhotoImage(base64);
+                            }
                         };
                         reader.readAsDataURL(file);
                     }
