@@ -26,8 +26,8 @@ export default function BottomNav() {
   if (!isMounted) return null;
 
   return (
-    <nav className="fixed bottom-0 inset-x-0 z-50 h-20 bg-background/80 backdrop-blur-xl border-t border-border/40 pb-safe-area-inset-bottom animate-in slide-in-from-bottom-4 duration-500">
-      <div className="flex justify-around items-center h-full max-w-lg mx-auto px-4">
+    <nav className="fixed bottom-4 inset-x-6 z-50 h-16 bg-card text-card-foreground border shadow-lg rounded-full animate-in slide-in-from-bottom-8 duration-500 ease-out">
+      <div className="flex justify-around items-center h-full px-2">
         {navItems.map((item) => {
           const isActive = pathname === item.href;
           const label = t(item.labelKey);
@@ -37,19 +37,16 @@ export default function BottomNav() {
               href={item.href}
               aria-label={label}
               className={cn(
-                'flex flex-col items-center justify-center w-16 gap-1 transition-all duration-200 ios-active',
-                isActive ? 'text-primary' : 'text-muted-foreground'
+                'flex items-center justify-center p-2 rounded-full transition-all duration-300 active:scale-90',
+                isActive ? 'bg-primary text-primary-foreground shadow-md' : 'text-muted-foreground hover:bg-secondary'
               )}
             >
-              <div className={cn(
-                "p-1.5 rounded-full transition-all duration-300",
-                isActive && "bg-primary/10"
-              )}>
-                <item.icon className={cn("h-6 w-6", isActive ? "stroke-[2.5]" : "stroke-[1.5]")} />
-              </div>
-              <span className="text-[10px] font-bold tracking-tight uppercase leading-none">
-                {label}
-              </span>
+              <item.icon className={cn("h-6 w-6", isActive ? "stroke-[2.5]" : "stroke-[1.5]")} />
+              {isActive && (
+                <span className="ml-2 text-xs font-black uppercase tracking-tight overflow-hidden whitespace-nowrap animate-in slide-in-from-left-2 duration-300">
+                  {label}
+                </span>
+              )}
             </Link>
           );
         })}

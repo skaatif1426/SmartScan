@@ -5,24 +5,24 @@ import { cva, type VariantProps } from "class-variance-authority"
 import { cn } from "@/lib/utils"
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-[1.25rem] text-sm font-bold ring-offset-background transition-all duration-200 ease-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.97] active:opacity-90 select-none",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-2xl text-sm font-black ring-offset-background transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0 active:scale-[0.96] active:brightness-95 select-none btn-tactile shadow-sm",
   {
     variants: {
       variant: {
-        default: "bg-primary text-primary-foreground shadow-sm hover:brightness-105",
+        default: "bg-primary text-primary-foreground hover:shadow-md hover:-translate-y-0.5",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-sm hover:brightness-105",
+          "bg-destructive text-destructive-foreground hover:shadow-md hover:-translate-y-0.5",
         outline:
-          "border-[1.5px] border-border bg-background shadow-sm hover:bg-accent hover:text-accent-foreground",
+          "border-2 border-border bg-background hover:bg-secondary hover:border-primary/20",
         secondary:
-          "bg-secondary text-secondary-foreground shadow-sm hover:brightness-95",
-        ghost: "hover:bg-accent/50 hover:text-accent-foreground",
+          "bg-secondary text-secondary-foreground hover:shadow-sm",
+        ghost: "hover:bg-primary/5 hover:text-primary",
         link: "text-primary underline-offset-4 hover:underline",
       },
       size: {
         default: "h-12 px-6 py-2",
         sm: "h-10 rounded-xl px-4",
-        lg: "h-16 rounded-[1.5rem] px-10 text-base",
+        lg: "h-16 rounded-3xl px-10 text-base",
         icon: "h-12 w-12",
       },
     },
