@@ -1,7 +1,5 @@
-
 /**
- * @fileOverview Service layer for AI insights.
- * Aligned with Backend AI APIs Contract.
+ * @fileOverview Service layer for AI insights with robust error tracing.
  */
 
 import { generateNutritionInsights } from '@/ai/flows/ai-nutrition-insights';
@@ -16,9 +14,12 @@ export const aiService = {
    */
   async getNutritionInsight(input: any) {
     try {
-      return await generateNutritionInsights(input);
-    } catch (error) {
-      console.error('[AI Service] Nutrition Insight Error:', error);
+      console.log('[AI Service] Calling generateNutritionInsights...');
+      const result = await generateNutritionInsights(input);
+      return result;
+    } catch (error: any) {
+      console.error('[AI Service] Nutrition Insight Error Details:', error?.message || error);
+      if (error?.stack) console.error(error.stack);
       return null;
     }
   },
@@ -28,10 +29,11 @@ export const aiService = {
    */
   async getChatResponse(input: any): Promise<string> {
     try {
+      console.log('[AI Service] Calling chatbot flow...');
       const response = await multilingualProductChatbot(input);
       return response.answer;
-    } catch (error) {
-      console.error('[AI Service] Chatbot Error:', error);
+    } catch (error: any) {
+      console.error('[AI Service] Chatbot Error Details:', error?.message || error);
       return 'I am currently unable to process your question. Please check API settings.';
     }
   },
@@ -41,9 +43,10 @@ export const aiService = {
    */
   async getBarcodeEstimate(input: any) {
     try {
+      console.log('[AI Service] Calling barcode estimate flow...');
       return await generateEstimateFromBarcode(input);
-    } catch (error) {
-      console.error('[AI Service] Barcode Estimate Error:', error);
+    } catch (error: any) {
+      console.error('[AI Service] Barcode Estimate Error:', error?.message || error);
       return null;
     }
   },
@@ -53,9 +56,10 @@ export const aiService = {
    */
   async getImageAnalysis(input: any) {
     try {
+      console.log('[AI Service] Calling vision analysis flow...');
       return await analyzeFoodImage(input);
-    } catch (error) {
-      console.error('[AI Service] Image Analysis Error:', error);
+    } catch (error: any) {
+      console.error('[AI Service] Image Analysis Error:', error?.message || error);
       return null;
     }
   },
@@ -67,8 +71,8 @@ export const aiService = {
     try {
       const result = await categorizeProduct(input);
       return result.category;
-    } catch (error) {
-      console.error('[AI Service] Categorization Error:', error);
+    } catch (error: any) {
+      console.error('[AI Service] Categorization Error:', error?.message || error);
       return 'Other';
     }
   }

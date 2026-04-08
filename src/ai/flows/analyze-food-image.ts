@@ -1,6 +1,6 @@
 'use server';
 /**
- * @fileOverview A Genkit flow for analyzing food images to provide nutritional insights.
+ * @fileOverview A Genkit flow for analyzing food images using Gemini 1.5 Flash.
  */
 
 import { ai } from '@/ai/genkit';
@@ -8,30 +8,32 @@ import { z } from 'zod';
 import { ImageAnalysisOutputSchema, UserPreferencesSchema, LanguageSchema } from '@/lib/types';
 
 const ImageAnalysisInputSchema = z.object({
-  imageDataUri: z.string().describe("Photo of food as data URI. Expected format: 'data:<mimetype>;base64,<encoded_data>'."),
+  imageDataUri: z.string().describe("Photo of food as data URI."),
   language: LanguageSchema.describe("Response language."),
   userPreferences: UserPreferencesSchema.optional(),
 });
 export type ImageAnalysisInput = z.infer<typeof ImageAnalysisInputSchema>;
 
 const analyzeFoodImagePrompt = ai.definePrompt({
-  name: 'analyzeFoodImagePrompt_v2',
+  name: 'analyzeFoodImagePrompt_v3',
+  model: 'googleai/gemini-1.5-flash',
   input: { schema: ImageAnalysisInputSchema },
   output: { schema: ImageAnalysisOutputSchema },
-  prompt: `You are an expert AI food analyst. Analyze the provided image of food and provide a detailed nutritional breakdown.
+  config: {
+    safetySettings: [
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+    ],
+  },
+  prompt: `Analyze the provided food image. Identify the meal and estimate its nutritional profile.
 
 User Preferences:
 - Goal: {{{userPreferences.healthGoal}}}
 - Diet: {{{userPreferences.diet}}}
-- Allergies: {{{userPreferences.allergies}}}
-- Focus: {{{userPreferences.healthFocus}}}
 
 Instructions:
-1. Identify the food name.
-2. Estimate nutritional values per a standard serving size.
-3. Provide a healthScore (0-100) based on nutritional quality.
-4. **FUTURE OUTLOOK:** In the 'futureOutlook' field, explain the A to Z long-term health impact of eating this specific meal/food regularly for several years.
-5. Language of response MUST be: {{{language}}}.
+1. Return identifying info, healthScore (0-100), and nutrition estimates.
+2. In 'futureOutlook', explain the long-term health impact of eating this specific meal regularly.
+3. Language of response: {{{language}}}.
 
 Photo: {{media url=imageDataUri}}`,
 });
@@ -44,7 +46,7 @@ const analyzeFoodImageFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await analyzeFoodImagePrompt(input);
-    if (!output) throw new Error('AI failed to analyze the image.');
+    if (!output) throw new Error('AI Vision failed to analyze image.');
     return output;
   }
 );

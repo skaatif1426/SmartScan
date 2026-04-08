@@ -1,15 +1,11 @@
 'use server';
 /**
  * @fileOverview This file implements a Genkit flow for generating AI-powered nutrition insights.
- *
- * - generateNutritionInsights - A function that generates a structured nutrition insight for a given product.
- * - NutritionInsightInput - The input type for the generateNutritionInsights function.
- * - NutritionInsightOutput - The return type for the generateNutritionInsights function.
  */
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { NutritionInsightOutput, NutritionInsightOutputSchema, UserPreferencesSchema, LanguageSchema } from '@/lib/types';
+import { NutritionInsightOutputSchema, UserPreferencesSchema, LanguageSchema } from '@/lib/types';
 
 const NutritionFactsSchema = z.object({
   energy_kcal_100g: z.number().optional().describe('Energy in kcal per 100g.'),
@@ -36,37 +32,38 @@ const NutritionInsightInputSchema = z.object({
 export type NutritionInsightInput = z.infer<typeof NutritionInsightInputSchema>;
 
 const nutritionInsightPrompt = ai.definePrompt({
-  name: 'nutritionInsightPrompt_v6',
+  name: 'nutritionInsightPrompt_v7',
+  model: 'googleai/gemini-1.5-flash',
   input: { schema: NutritionInsightInputSchema },
   output: { schema: NutritionInsightOutputSchema },
-  prompt: `You are an expert AI nutrition analyst. Your task is to explain a pre-calculated health score for a food product, PERSONALIZED for the user and delivered in their chosen language.
+  config: {
+    safetySettings: [
+      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
+      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' },
+    ],
+  },
+  prompt: `You are an expert AI nutrition analyst. Your task is to explain a health score for a food product, personalized for the user.
 
-Your entire response (summary, recommendation, and risk names) MUST be in the language specified here: {{{language}}}. Do not use any other language.
+Response Language: {{{language}}}
 
---- USER PREFERENCES (Use these to tailor your response) ---
-- Primary Health Goal: {{{userPreferences.healthGoal}}}
-- Specific Focus Areas: {{{userPreferences.healthFocus}}}
+User Profile:
+- Goal: {{{userPreferences.healthGoal}}}
 - Diet: {{{userPreferences.diet}}}
-- Known Allergies: {{{userPreferences.allergies}}}
-- Allergy Strict Mode: {{{userPreferences.strictMode}}}
-- Desired AI Style: {{{userPreferences.aiVerbosity}}}
----
+- Allergies: {{{userPreferences.allergies}}}
+- Focus: {{{userPreferences.healthFocus}}}
 
-Based on ALL the provided information, your task is:
-1.  Use the provided 'healthScore' as the final 'healthScore' in your output. DO NOT change it.
-2.  Use the provided 'warnings' list as the primary basis for the 'risks' in your output.
-3.  **LONG-TERM IMPACT (A TO Z):** In the 'longTermImpact' field, provide a detailed prediction of the future health consequences if this product is consumed regularly (daily or weekly) over 5-10 years. Cover everything from organ health, energy levels, to weight management. Be brutally honest but scientific.
-4.  Write a 'summary' that explains IN SIMPLE TERMS why the product received its score.
-5.  Write a 'recommendation' that is PERSONALLY tailored to the user's goals.
+Product: {{{productName}}}
+Health Score: {{{healthScore}}}
+Key Warnings: {{{warnings}}}
+Ingredients: {{{ingredientsText}}}
 
-Product Information:
-- Name: {{{productName}}}
-- Health Score: {{{healthScore}}}
-- Key Warnings: {{{warnings}}}
-- Ingredients: {{{ingredientsText}}}
-- Nutri-score: {{{nutriscoreGrade}}}
-- NOVA Group: {{{novaGroup}}}
-`,
+Instructions:
+1. Provide a concise 'summary' of why the product got this score.
+2. Provide a personalized 'recommendation'.
+3. In 'longTermImpact', predict the future health outlook (A-Z) if eaten regularly for 5+ years.
+4. Use provided 'healthScore' as-is.`,
 });
 
 const generateNutritionInsightsFlow = ai.defineFlow(
@@ -77,9 +74,7 @@ const generateNutritionInsightsFlow = ai.defineFlow(
   },
   async (input) => {
     const { output } = await nutritionInsightPrompt(input);
-    if (!output) {
-        throw new Error('AI failed to generate a structured response.');
-    }
+    if (!output) throw new Error('AI failed to generate a structured response.');
     return {
         ...output,
         healthScore: input.healthScore,
@@ -88,6 +83,6 @@ const generateNutritionInsightsFlow = ai.defineFlow(
   }
 );
 
-export async function generateNutritionInsights(input: NutritionInsightInput): Promise<NutritionInsightOutput> {
+export async function generateNutritionInsights(input: any) {
   return generateNutritionInsightsFlow(input);
 }
