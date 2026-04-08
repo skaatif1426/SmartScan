@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -28,7 +29,7 @@ function getCacheKey(barcode: string, language: string, preferences: UserPrefere
 export default function NutritionInsight({ product, barcode, localAnalysis }: { product: UnifiedProduct, barcode: string, localAnalysis: LocalAnalysis }) {
   const [aiInsight, setAiInsight] = useState<NutritionInsightOutput | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [aiError, setAiError] = useState<string | null>(null);
+  const [aiError, setAiError] = useState<boolean>(false);
   const { language, t } = useLanguage();
   const { preferences } = usePreferences();
   const { incrementAiCallCount } = useAiUsage();
@@ -41,7 +42,7 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
     }
 
     setIsLoading(true);
-    setAiError(null);
+    setAiError(false);
 
     const userPrefs: UserPreferences = {
       diet: preferences.diet,
@@ -107,11 +108,11 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
         }
       } else {
         trackError();
-        setAiError(t('generatingInsightError'));
+        setAiError(true);
       }
     } catch (e) {
         trackError();
-        setAiError(t('generatingInsightError'));
+        setAiError(true);
     } finally {
       setIsLoading(false);
     }
@@ -170,9 +171,9 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
                 />
                 {aiError && (
                     <div className="p-6 rounded-2xl border-2 border-destructive/20 bg-destructive/5 space-y-3">
-                        <p className="text-sm font-bold text-destructive">dek yrr kuch bhi assistance kaam nhi karre</p>
+                        <p className="text-sm font-bold text-destructive">{t('generatingInsightError')}</p>
                         <Button variant="outline" size="sm" onClick={() => fetchInsight(true)} className="rounded-full gap-2 border-2 active:scale-95">
-                           <RefreshCcw size={14} /> Phir se try kar lo
+                           <RefreshCcw size={14} /> {t('retry')}
                         </Button>
                     </div>
                 )}
