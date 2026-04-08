@@ -170,9 +170,9 @@ export default function NutritionInsight({ product, barcode, localAnalysis }: { 
                 />
                 {aiError && (
                     <div className="p-6 rounded-2xl border-2 border-destructive/20 bg-destructive/5 space-y-3">
-                        <p className="text-sm font-bold text-destructive">AI Analysis temporarily unavailable.</p>
+                        <p className="text-sm font-bold text-destructive">dek yrr kuch bhi assistance kaam nhi karre</p>
                         <Button variant="outline" size="sm" onClick={() => fetchInsight(true)} className="rounded-full gap-2 border-2 active:scale-95">
-                           <RefreshCcw size={14} /> Retry Intelligence Flow
+                           <RefreshCcw size={14} /> Phir se try kar lo
                         </Button>
                     </div>
                 )}
