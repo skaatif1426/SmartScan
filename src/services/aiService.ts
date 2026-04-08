@@ -14,13 +14,14 @@ export const aiService = {
    */
   async getNutritionInsight(input: any) {
     try {
-      console.log('[AI Service] Calling generateNutritionInsights...');
+      console.log('[AI Service] Calling generateNutritionInsights for:', input.productName);
       const result = await generateNutritionInsights(input);
+      if (!result) throw new Error('AI returned empty result for nutrition insight');
       return result;
     } catch (error: any) {
-      console.error('[AI Service] Nutrition Insight Error Details:', error?.message || error);
+      console.error('[AI Service] Nutrition Insight Error:', error?.message || error);
       if (error?.stack) console.error(error.stack);
-      return null;
+      throw error; // Throw so server action can catch and log
     }
   },
 
@@ -29,12 +30,12 @@ export const aiService = {
    */
   async getChatResponse(input: any): Promise<string> {
     try {
-      console.log('[AI Service] Calling chatbot flow...');
+      console.log('[AI Service] Calling chatbot flow for question:', input.userQuestion);
       const response = await multilingualProductChatbot(input);
       return response.answer;
     } catch (error: any) {
-      console.error('[AI Service] Chatbot Error Details:', error?.message || error);
-      return 'I am currently unable to process your question. Please check API settings.';
+      console.error('[AI Service] Chatbot Error:', error?.message || error);
+      return 'I am currently unable to process your question. Please try again in a moment.';
     }
   },
 
@@ -43,7 +44,7 @@ export const aiService = {
    */
   async getBarcodeEstimate(input: any) {
     try {
-      console.log('[AI Service] Calling barcode estimate flow...');
+      console.log('[AI Service] Calling barcode estimate flow for:', input.barcode);
       return await generateEstimateFromBarcode(input);
     } catch (error: any) {
       console.error('[AI Service] Barcode Estimate Error:', error?.message || error);

@@ -26,6 +26,7 @@ export async function getAINutritionInsight(productData: NutritionInsightInput):
   try {
     return await aiService.getNutritionInsight(productData);
   } catch (error: any) {
+    console.error('[Server Action] getAINutritionInsight failed:', error);
     return null;
   }
 }
@@ -38,6 +39,7 @@ export async function getAIChatResponse(chatData: MultilingualProductChatbotInpu
     };
     return await aiService.getChatResponse(sanitizedInput);
   } catch (error: any) {
+    console.error('[Server Action] getAIChatResponse failed:', error);
     return 'I am unable to respond at this moment.';
   }
 }
@@ -46,6 +48,7 @@ export async function getAIEstimate(input: EstimateInput): Promise<NutritionInsi
   try {
     return await aiService.getBarcodeEstimate(input);
   } catch (error: any) {
+    console.error('[Server Action] getAIEstimate failed:', error);
     return null;
   }
 }
@@ -62,6 +65,7 @@ export async function getFoodImageAnalysis(input: ImageAnalysisInput): Promise<I
   try {
     return await aiService.getImageAnalysis(input);
   } catch (error: any) {
+    console.error('[Server Action] getFoodImageAnalysis failed:', error);
     return null;
   }
 }
